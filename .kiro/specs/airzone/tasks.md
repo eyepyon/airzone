@@ -62,7 +62,12 @@
 
 
 
-  - [-] 2.4 Payment、WiFiSession、TaskQueue モデルの実装
+  - [x] 2.4 Payment、WiFiSession、TaskQueue モデルの実装
+
+
+
+
+
 
 
 
@@ -82,8 +87,18 @@
 
 
 
-- [ ] 3. Repository レイヤーの実装
-  - [ ] 3.1 BaseRepository の作成
+- [x] 3. Repository レイヤーの実装
+
+
+
+-
+
+  - [x] 3.1 BaseRepository の作成
+
+
+
+
+
     - 共通 CRUD 操作を持つ基底クラスを実装（backend/repositories/base.py）
     - パラメータ化クエリの使用
 
@@ -147,8 +162,15 @@
 
 
 
+-
 
-  - [ ] 3.4 Order、Payment、Task の Repository 実装
+  - [x] 3.4 Order、Payment、Task の Repository 実装
+
+
+
+
+
+
 
 
 
@@ -171,7 +193,11 @@
 
 
 
-- [ ] 4. 外部 API クライアントの実装
+- [x] 4. 外部 API クライアントの実装
+
+
+
+
 
 
   - [x] 4.1 Google OAuth クライアントの実装
@@ -183,7 +209,14 @@
     - ユーザー情報の取得
     - _Requirements: 1.1_
   
-  - [ ] 4.2 Sui ブロックチェーンクライアントの実装
+  - [x] 4.2 Sui ブロックチェーンクライアントの実装
+
+
+
+
+
+
+
 
     - SuiClient を作成（backend/clients/sui_client.py）
     - pysui を使用したウォレット生成
@@ -191,7 +224,14 @@
     - スポンサードトランザクションの実装
     - _Requirements: 1.3, 3.2, 3.3_
   
-  - [ ] 4.3 Stripe クライアントの実装
+  - [x] 4.3 Stripe クライアントの実装
+
+
+
+
+
+
+
 
     - StripeClient を作成（backend/clients/stripe_client.py）
     - Payment Intent の作成

@@ -1,5 +1,5 @@
 """
-Payment model for tracking Stripe payment transactions.
+Payment model for storing payment transaction information.
 """
 from sqlalchemy import Column, String, Integer, ForeignKey, Enum, Index
 from sqlalchemy.orm import relationship
@@ -18,8 +18,8 @@ class PaymentStatus(enum.Enum):
 
 class Payment(BaseModel):
     """
-    Payment model representing a Stripe payment transaction.
-    Links orders to Stripe payment intents and tracks payment status.
+    Payment model representing a payment transaction.
+    Integrates with Stripe for payment processing.
     """
     __tablename__ = 'payments'
     

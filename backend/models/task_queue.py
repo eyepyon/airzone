@@ -1,7 +1,8 @@
 """
-Task Queue model for managing background tasks.
+TaskQueue model for managing background task execution.
 """
-from sqlalchemy import Column, String, Integer, Text, Enum, Index, JSON
+from sqlalchemy import Column, String, Integer, Enum, Text, Index
+from sqlalchemy.dialects.mysql import JSON
 from models.base import BaseModel
 import enum
 
@@ -16,12 +17,12 @@ class TaskStatus(enum.Enum):
 
 class TaskQueue(BaseModel):
     """
-    Task Queue model representing a background task.
-    Tracks asynchronous tasks such as NFT minting operations.
+    TaskQueue model representing a background task.
+    Manages asynchronous task execution with retry logic.
     """
     __tablename__ = 'task_queue'
     
-    # Task Queue fields
+    # TaskQueue fields
     task_type = Column(String(50), nullable=False)
     status = Column(
         Enum(TaskStatus),
@@ -59,4 +60,4 @@ class TaskQueue(BaseModel):
         return result
     
     def __repr__(self):
-        return f"<TaskQueue(id={self.id}, task_type={self.task_type}, status={self.status.value})>"
+        return f"<TaskQueue(id={self.id}, task_type={self.task_type}, status={self.status.value}, retry_count={self.retry_count})>"

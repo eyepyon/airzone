@@ -1,24 +1,24 @@
 """
-Order repository for managing order and order item data access.
-Provides custom queries for order management and status updates.
+OrderRepository for managing order and order item data access.
+Provides methods for order CRUD operations and status management.
 
 Requirements: 5.3, 5.4, 5.6
 """
 from typing import Optional, List
 from sqlalchemy.orm import Session, joinedload
-from models.order import Order, OrderItem, OrderStatus
 from repositories.base import BaseRepository
+from models.order import Order, OrderItem, OrderStatus
 
 
 class OrderRepository(BaseRepository[Order]):
     """
-    Repository for Order model with custom query methods.
-    Handles order creation, retrieval, and status management operations.
+    Repository for Order model.
+    Handles order creation, retrieval, and status updates.
     """
     
     def __init__(self, db_session: Session):
         """
-        Initialize OrderRepository with database session.
+        Initialize OrderRepository.
         
         Args:
             db_session: SQLAlchemy database session
@@ -29,17 +29,14 @@ class OrderRepository(BaseRepository[Order]):
                      offset: Optional[int] = None) -> List[Order]:
         """
         Find all orders for a specific user.
-        Used to retrieve user's order history.
         
         Args:
-            user_id: User's ID
-            limit: Maximum number of orders to return
-            offset: Number of orders to skip
+            user_id: The user ID to filter by
+            limit: Maximum number of records to return
+            offset: Number of records to skip
             
         Returns:
-            List[Order]: List of user's orders
-            
-        Requirements: 5.4 - Order retrieval and management
+            List[Order]: List of orders for the user
         """
         query = self.db_session.query(Order).filter(
             Order.user_id == user_id
@@ -55,15 +52,12 @@ class OrderRepository(BaseRepository[Order]):
     def find_by_id_with_items(self, order_id: str) -> Optional[Order]:
         """
         Find an order by ID with its order items eagerly loaded.
-        Optimizes query by loading related items in a single query.
         
         Args:
-            order_id: Order's ID
+            order_id: The order ID to find
             
         Returns:
-            Optional[Order]: Order instance with items if found, None otherwise
-            
-        Requirements: 5.4 - Order detail retrieval
+            Optional[Order]: Order with items if found, None otherwise
         """
         return self.db_session.query(Order).options(
             joinedload(Order.order_items)
@@ -71,17 +65,14 @@ class OrderRepository(BaseRepository[Order]):
     
     def find_by_status(self, status: OrderStatus, limit: Optional[int] = None) -> List[Order]:
         """
-        Find all orders with a specific status.
-        Used for order processing and management.
+        Find orders by status.
         
         Args:
-            status: Order status to filter by
-            limit: Maximum number of orders to return
+            status: The order status to filter by
+            limit: Maximum number of records to return
             
         Returns:
             List[Order]: List of orders with the specified status
-            
-        Requirements: 5.6 - Order status management
         """
         query = self.db_session.query(Order).filter(
             Order.status == status
@@ -95,34 +86,32 @@ class OrderRepository(BaseRepository[Order]):
     def update_status(self, order_id: str, status: OrderStatus) -> Optional[Order]:
         """
         Update the status of an order.
-        Used during order processing and payment completion.
         
         Args:
-            order_id: Order's ID
-            status: New order status
+            order_id: The order ID to update
+            status: The new status
             
         Returns:
-            Optional[Order]: Updated order instance if found, None otherwise
-            
-        Requirements: 5.6 - Order status updates during payment processing
+            Optional[Order]: Updated order if found, None otherwise
         """
         return self.update(order_id, status=status)
     
-    def create_order_with_items(self, user_id: str, total_amount: int, 
-                                items: List[dict]) -> Order:
+    def create_with_items(self, user_id: str, total_amount: int, 
+                         items: List[dict]) -> Order:
         """
-        Create a new order with order items in a single transaction.
+        Create an order with its order items in a single transaction.
         
         Args:
-            user_id: User's ID
+            user_id: The user ID creating the order
             total_amount: Total order amount
             items: List of order item dictionaries with keys:
                    product_id, quantity, unit_price, subtotal
             
         Returns:
-            Order: Created order instance with items
+            Order: Created order with items
             
-        Requirements: 5.3 - Order creation with items
+        Raises:
+            SQLAlchemyError: If database operation fails
         """
         try:
             # Create order
@@ -151,45 +140,17 @@ class OrderRepository(BaseRepository[Order]):
         except Exception as e:
             self.db_session.rollback()
             raise e
-    
-    def count_by_user(self, user_id: str) -> int:
-        """
-        Count total orders for a specific user.
-        
-        Args:
-            user_id: User's ID
-            
-        Returns:
-            int: Number of orders
-        """
-        return self.db_session.query(Order).filter(
-            Order.user_id == user_id
-        ).count()
-    
-    def count_by_status(self, status: OrderStatus) -> int:
-        """
-        Count orders with a specific status.
-        
-        Args:
-            status: Order status to count
-            
-        Returns:
-            int: Number of orders with the status
-        """
-        return self.db_session.query(Order).filter(
-            Order.status == status
-        ).count()
 
 
 class OrderItemRepository(BaseRepository[OrderItem]):
     """
     Repository for OrderItem model.
-    Handles order item specific operations.
+    Handles order item CRUD operations.
     """
     
     def __init__(self, db_session: Session):
         """
-        Initialize OrderItemRepository with database session.
+        Initialize OrderItemRepository.
         
         Args:
             db_session: SQLAlchemy database session
@@ -201,7 +162,7 @@ class OrderItemRepository(BaseRepository[OrderItem]):
         Find all items for a specific order.
         
         Args:
-            order_id: Order's ID
+            order_id: The order ID to filter by
             
         Returns:
             List[OrderItem]: List of order items
@@ -213,10 +174,9 @@ class OrderItemRepository(BaseRepository[OrderItem]):
     def find_by_product(self, product_id: str) -> List[OrderItem]:
         """
         Find all order items for a specific product.
-        Useful for product sales analytics.
         
         Args:
-            product_id: Product's ID
+            product_id: The product ID to filter by
             
         Returns:
             List[OrderItem]: List of order items

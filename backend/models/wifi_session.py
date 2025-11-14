@@ -1,5 +1,5 @@
 """
-WiFi Session model for tracking captive portal connections.
+WiFiSession model for tracking WiFi captive portal sessions.
 """
 from sqlalchemy import Column, String, ForeignKey, DateTime, Index
 from sqlalchemy.orm import relationship
@@ -8,15 +8,15 @@ from models.base import BaseModel
 
 class WiFiSession(BaseModel):
     """
-    WiFi Session model representing a user's WiFi connection session.
-    Tracks when users connect to the captive portal and their session details.
+    WiFiSession model representing a WiFi connection session.
+    Tracks user connections through the OpenNDS captive portal.
     """
     __tablename__ = 'wifi_sessions'
     
-    # WiFi Session fields
+    # WiFiSession fields
     user_id = Column(String(36), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
-    mac_address = Column(String(17), nullable=True)  # Format: XX:XX:XX:XX:XX:XX
-    ip_address = Column(String(45), nullable=True)  # Supports both IPv4 and IPv6
+    mac_address = Column(String(17), nullable=True)  # MAC address format: XX:XX:XX:XX:XX:XX
+    ip_address = Column(String(45), nullable=True)  # IPv4 (15 chars) or IPv6 (45 chars)
     connected_at = Column(DateTime, nullable=False)
     disconnected_at = Column(DateTime, nullable=True)
     
@@ -30,4 +30,4 @@ class WiFiSession(BaseModel):
     )
     
     def __repr__(self):
-        return f"<WiFiSession(id={self.id}, user_id={self.user_id}, mac_address={self.mac_address})>"
+        return f"<WiFiSession(id={self.id}, user_id={self.user_id}, mac_address={self.mac_address}, connected_at={self.connected_at})>"

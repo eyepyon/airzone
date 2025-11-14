@@ -1,20 +1,19 @@
-// Authentication state management with Zustand
+// Authentication store using Zustand
 
 import { create } from 'zustand';
-import type { User, Wallet } from '@/types';
-import {
-  getAuthToken,
-  setAuthToken,
-  removeAuthToken,
-  getRefreshToken,
-  setRefreshToken,
-  removeRefreshToken,
-} from '@/lib/api-client';
+import type { User, Wallet } from '../types';
 import {
   authenticateWithGoogle,
-  refreshAccessToken,
   getCurrentUser,
-} from '@/lib/api/auth';
+  logout as apiLogout,
+  refreshToken as apiRefreshToken,
+} from '../lib/api/auth';
+import {
+  getAuthToken,
+  getRefreshToken,
+  removeAuthToken,
+  removeRefreshToken,
+} from '../lib/api-client';
 
 interface AuthState {
   user: User | null;
@@ -23,6 +22,8 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+
+  // Actions
   login: (idToken: string) => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<void>;
@@ -42,8 +43,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await authenticateWithGoogle(idToken);
-      setAuthToken(response.access_token);
-      setRefreshToken(response.refresh_token);
       set({
         user: response.user,
         wallet: response.wallet,
@@ -61,8 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
-    removeAuthToken();
-    removeRefreshToken();
+    apiLogout();
     set({
       user: null,
       wallet: null,
@@ -80,9 +78,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     try {
-      const response = await refreshAccessToken(refreshToken);
-      setAuthToken(response.access_token);
-      set({ token: response.access_token });
+      await apiRefreshToken(refreshToken);
+      const token = getAuthToken();
+      set({ token });
     } catch (error) {
       get().logout();
       throw error;
@@ -92,13 +90,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loadUser: async () => {
     const token = getAuthToken();
     if (!token) {
-      set({ isAuthenticated: false, isLoading: false });
+      set({ isAuthenticated: false });
       return;
     }
 
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
-      const user = await getCurrentUser(token);
+      const user = await getCurrentUser();
       set({
         user,
         token,
@@ -106,23 +104,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
       });
     } catch (error) {
-      // Try to refresh token
-      try {
-        await get().refreshToken();
-        const newToken = getAuthToken();
-        if (newToken) {
-          const user = await getCurrentUser(newToken);
-          set({
-            user,
-            token: newToken,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-        }
-      } catch {
-        get().logout();
-        set({ isLoading: false });
-      }
+      removeAuthToken();
+      removeRefreshToken();
+      set({
+        user: null,
+        wallet: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to load user',
+      });
     }
   },
 

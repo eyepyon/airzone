@@ -191,10 +191,9 @@ def api_version():
     }), 200
 
 
-# Blueprint registration will be added here as they are implemented
-# Example:
-# from routes.auth import auth_blueprint
-# app.register_blueprint(auth_blueprint, url_prefix='/api/v1/auth')
+# Blueprint registration
+# Note: auth, nft, and product blueprints are not yet implemented (tasks 8.2, 8.3, 8.4)
+# They will be registered here once implemented
 
 # Register order blueprint
 from routes.order import order_blueprint
@@ -203,6 +202,10 @@ app.register_blueprint(order_blueprint, url_prefix='/api/v1/orders')
 # Register payment blueprint
 from routes.payment import payment_blueprint
 app.register_blueprint(payment_blueprint, url_prefix='/api/v1/payments')
+
+# Register wifi blueprint
+from routes.wifi import wifi_blueprint
+app.register_blueprint(wifi_blueprint, url_prefix='/api/v1/wifi')
 
 
 if __name__ == '__main__':

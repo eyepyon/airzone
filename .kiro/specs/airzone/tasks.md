@@ -444,9 +444,16 @@
     - GET /api/v1/wifi/sessions - WiFi セッション履歴取得
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 8.2, 8.6, 8.7_
 
-- [ ] 9. バックエンド統合
+- [-] 9. バックエンド統合
 
-  - [ ] 9.1 Flask アプリケーションへの Blueprint 登録
+
+  - [x] 9.1 Flask アプリケーションへの Blueprint 登録
+
+
+
+
+
+
 
     - すべての Blueprint を app.py に登録
     - エンドポイントの動作確認
@@ -472,6 +479,7 @@
 
 
 
+
     - Next.js 14 App Router プロジェクトを作成（frontend/）
     - TypeScript、Tailwind CSS の設定
     - ESLint、Prettier の設定
@@ -481,72 +489,145 @@
 
 
 
+
+
+
+
     - 環境変数の設定（.env.local.example）
     - プロジェクト構造の作成（app/, components/, lib/, types/, stores/）
     - 必要なパッケージのインストール（zustand, @mysten/dapp-kit, @stripe/react-stripe-js）
     - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 11. 型定義と API クライアントの実装
+- [x] 11. 型定義と API クライアントの実装
 
-  - [ ] 11.1 TypeScript 型定義の作成
+
+
+
+
+  - [x] 11.1 TypeScript 型定義の作成
+
+
+
+
+
+
 
     - User, NFT, Product, Order, Payment などの型を定義（frontend/types/index.ts）
     - API レスポンス型の定義
     - _Requirements: 7.3_
-  
-  - [ ] 11.2 API クライアントの実装
+  -
+
+  - [x] 11.2 API クライアントの実装
+
+
+
+
+
 
     - API クライアントを作成（frontend/lib/api-client.ts）
     - fetch ラッパー関数とエラーハンドリング
     - JWT トークン管理（localStorage）
     - _Requirements: 7.3, 8.6, 8.7_
   
+-
 
-  - [ ] 11.3 API サービス関数の実装
+  - [x] 11.3 API サービス関数の実装
+
+
+
+
+
     - 認証 API 関数（frontend/lib/api/auth.ts）
     - NFT API 関数（frontend/lib/api/nfts.ts）
     - 商品 API 関数（frontend/lib/api/products.ts）
     - 注文・決済 API 関数（frontend/lib/api/orders.ts, payments.ts）
     - _Requirements: 7.3, 8.2_
+-
 
-- [ ] 12. 状態管理の実装
+- [x] 12. 状態管理の実装
 
-  - [ ] 12.1 Zustand ストアの作成
+
+
+
+
+  - [x] 12.1 Zustand ストアの作成
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     - authStore を作成（frontend/stores/auth-store.ts）
     - cartStore を作成（frontend/stores/cart-store.ts）
     - nftStore を作成（frontend/stores/nft-store.ts）
     - _Requirements: 7.3_
+-
 
-- [ ] 13. 共通 UI コンポーネントの実装
+- [x] 13. 共通 UI コンポーネントの実装
 
 
-  - [ ] 13.1 レイアウトコンポーネントの作成
+
+
+  - [x] 13.1 レイアウトコンポーネントの作成
+
+
+
+
+
     - Header コンポーネント（frontend/components/layout/Header.tsx）
     - Footer コンポーネント（frontend/components/layout/Footer.tsx）
     - Layout コンポーネント（frontend/components/layout/Layout.tsx）
     - _Requirements: 7.1, 7.2_
   
-  - [ ] 13.2 UI ユーティリティコンポーネントの作成
+  - [x] 13.2 UI ユーティリティコンポーネントの作成
+
+
+
+
+
+
 
     - Button コンポーネント（frontend/components/ui/Button.tsx）
     - Card コンポーネント（frontend/components/ui/Card.tsx）
     - Loading コンポーネント（frontend/components/ui/Loading.tsx）
     - Toast 通知コンポーネント（frontend/components/ui/Toast.tsx）
     - _Requirements: 7.1, 7.2, 7.4_
+-
 
 - [ ] 14. 認証コンポーネントの実装
 
+x
 
-  - [ ] 14.1 認証関連コンポーネントの作成
+  - [-] 14.1 認証関連コンポーネントの作成
+
+
+
+
     - LoginButton コンポーネント（frontend/components/auth/LoginButton.tsx）
     - AuthProvider コンポーネント（frontend/components/auth/AuthProvider.tsx）
     - Google OAuth フローの実装
     - JWT トークンの保存とリフレッシュロジック
     - _Requirements: 1.1, 1.4, 1.5, 6.1, 7.1_
+-
 
-- [ ] 15. キャプティブポータルページの実装
-  - [ ] 15.1 キャプティブポータル UI の作成
+- [x] 15. キャプティブポータルページの実装
+
+
+
+
+  - [-] 15.1 キャプティブポータル UI の作成
+
+
+
+
     - キャプティブポータルページ（frontend/app/captive/page.tsx）
     - WelcomeScreen コンポーネント（frontend/components/captive/WelcomeScreen.tsx）
     - WiFi 接続時の認証フロー
@@ -555,6 +636,8 @@
     - _Requirements: 2.1, 2.5, 3.1_
 
 - [ ] 16. NFT 関連コンポーネントの実装
+
+
   - [ ] 16.1 NFT 表示コンポーネントの作成
     - WalletDisplay コンポーネント（frontend/components/nft/WalletDisplay.tsx）
     - NFTCard コンポーネント（frontend/components/nft/NFTCard.tsx）
@@ -563,6 +646,8 @@
     - _Requirements: 1.3, 3.4_
 
 - [ ] 17. EC ショップコンポーネントの実装
+
+
   - [ ] 17.1 商品表示コンポーネントの作成
     - ProductList コンポーネント（frontend/components/shop/ProductList.tsx）
     - ProductCard コンポーネント（frontend/components/shop/ProductCard.tsx）

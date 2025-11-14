@@ -196,6 +196,14 @@ def api_version():
 # from routes.auth import auth_blueprint
 # app.register_blueprint(auth_blueprint, url_prefix='/api/v1/auth')
 
+# Register order blueprint
+from routes.order import order_blueprint
+app.register_blueprint(order_blueprint, url_prefix='/api/v1/orders')
+
+# Register payment blueprint
+from routes.payment import payment_blueprint
+app.register_blueprint(payment_blueprint, url_prefix='/api/v1/payments')
+
 
 if __name__ == '__main__':
     app.run(

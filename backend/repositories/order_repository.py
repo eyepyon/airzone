@@ -96,6 +96,32 @@ class OrderRepository(BaseRepository[Order]):
         """
         return self.update(order_id, status=status)
     
+    def create_order_item(self, order_id: str, product_id: str, 
+                         quantity: int, unit_price: int, subtotal: int) -> OrderItem:
+        """
+        Create an order item.
+        
+        Args:
+            order_id: The order ID
+            product_id: The product ID
+            quantity: Item quantity
+            unit_price: Price per unit
+            subtotal: Total price for this item
+            
+        Returns:
+            OrderItem: Created order item
+        """
+        order_item = OrderItem(
+            order_id=order_id,
+            product_id=product_id,
+            quantity=quantity,
+            unit_price=unit_price,
+            subtotal=subtotal
+        )
+        self.db_session.add(order_item)
+        self.db_session.flush()
+        return order_item
+    
     def create_with_items(self, user_id: str, total_amount: int, 
                          items: List[dict]) -> Order:
         """

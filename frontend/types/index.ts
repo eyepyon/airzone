@@ -55,6 +55,7 @@ export interface Order {
   created_at: string;
   updated_at: string;
   items?: OrderItem[];
+  payment?: Payment;
 }
 
 export interface OrderItem {

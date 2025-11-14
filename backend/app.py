@@ -192,8 +192,19 @@ def api_version():
 
 
 # Blueprint registration
-# Note: auth, nft, and product blueprints are not yet implemented (tasks 8.2, 8.3, 8.4)
-# They will be registered here once implemented
+# All blueprints are now implemented
+
+# Register auth blueprint
+from routes.auth import auth_blueprint
+app.register_blueprint(auth_blueprint, url_prefix='/api/v1/auth')
+
+# Register NFT blueprint
+from routes.nft import nft_blueprint
+app.register_blueprint(nft_blueprint, url_prefix='/api/v1/nfts')
+
+# Register product blueprint
+from routes.product import product_blueprint
+app.register_blueprint(product_blueprint, url_prefix='/api/v1/products')
 
 # Register order blueprint
 from routes.order import order_blueprint

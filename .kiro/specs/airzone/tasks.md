@@ -1,5 +1,26 @@
 # Implementation Plan
 
+## Progress Summary
+
+### Backend (Flask)
+- ✅ Core Infrastructure: Models, Repositories, Services, Clients, Task Manager
+- ✅ Middleware: JWT Authentication, Security, Error Handling
+- ✅ Blueprints: Order (8.5), Payment (8.6), WiFi (8.7)
+- ⏳ Blueprints Pending: Auth (8.2), NFT (8.3), Product (8.4)
+
+### Frontend (Next.js)
+- ✅ Core Setup: Project structure, API client, State management (Zustand)
+- ✅ UI Components: Layout, Button, Card, Loading, Toast
+- ✅ Authentication: LoginButton, AuthProvider, Login page
+- ✅ Pages: Dashboard, Login, Captive Portal with WelcomeScreen
+- ⏳ Pending: NFT components/pages, Shop components/pages, Order pages
+
+### Blockchain
+- ⏳ Sui Move smart contracts not yet implemented
+
+### Infrastructure
+- ⏳ Database setup, Apache configuration, systemd services pending
+
 ## Backend Implementation
 
 - [x] 1. プロジェクト構造とコア設定のセットアップ
@@ -373,40 +394,62 @@
     - XSS 対策の実装
     - _Requirements: 6.4, 6.5, 6.6_
 
-- [ ] 8. API Blueprint とルートの実装
+- [x] 8. API Blueprint とルートの実装
+
+
+
+
   - [x] 8.1 JWT 認証ミドルウェアの実装
-
-
-
-
-
     - JWT トークン検証ミドルウェアを作成（backend/middleware/auth.py）
     - jwt_required デコレータの実装
     - get_current_user ヘルパー関数の実装
     - _Requirements: 6.1, 6.7_
-  
-  - [ ] 8.2 auth_blueprint の実装
+  -
+
+  - [x] 8.2 auth_blueprint の実装
+
+
+
+
+
     - auth_blueprint を作成（backend/routes/auth.py）
     - POST /api/v1/auth/google - Google OAuth 認証
     - POST /api/v1/auth/refresh - トークンリフレッシュ
     - GET /api/v1/auth/me - 現在のユーザー情報
+    - app.py に Blueprint を登録
     - _Requirements: 1.1, 1.4, 1.5, 8.2, 8.6, 8.7_
-  
-  - [ ] 8.3 nft_blueprint の実装
+  -
+
+  - [x] 8.3 nft_blueprint の実装
+
+
+
+
+
+
     - nft_blueprint を作成（backend/routes/nft.py）
     - GET /api/v1/nfts - ユーザーの NFT 一覧
     - POST /api/v1/nfts/mint - NFT 発行リクエスト
     - GET /api/v1/nfts/{id} - NFT 詳細
     - GET /api/v1/nfts/status/{task_id} - 発行状態確認
+    - app.py に Blueprint を登録
     - _Requirements: 3.1, 3.4, 8.2, 8.6, 8.7_
-  
-  - [ ] 8.4 product_blueprint の実装
+  -
+
+  - [x] 8.4 product_blueprint の実装
+
+
+
+
+
+
     - product_blueprint を作成（backend/routes/product.py）
     - GET /api/v1/products - 商品一覧
     - GET /api/v1/products/{id} - 商品詳細
     - POST /api/v1/products - 商品作成（管理者）
     - PUT /api/v1/products/{id} - 商品更新（管理者）
     - DELETE /api/v1/products/{id} - 商品削除（管理者）
+    - app.py に Blueprint を登録
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 8.2, 8.6, 8.7_
   
   - [x] 8.5 order_blueprint の実装
@@ -445,17 +488,8 @@
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 8.2, 8.6, 8.7_
 
 - [-] 9. バックエンド統合
-
-
   - [x] 9.1 Flask アプリケーションへの Blueprint 登録
-
-
-
-
-
-
-
-    - すべての Blueprint を app.py に登録
+    - 実装済みの Blueprint を app.py に登録（order, payment, wifi）
     - エンドポイントの動作確認
     - _Requirements: 8.1, 8.2, 9.1_
   
@@ -602,78 +636,136 @@
     - _Requirements: 7.1, 7.2, 7.4_
 -
 
-- [ ] 14. 認証コンポーネントの実装
-
-x
-
-  - [-] 14.1 認証関連コンポーネントの作成
-
-
-
-
+- [x] 14. 認証コンポーネントの実装
+  - [x] 14.1 認証関連コンポーネントの作成
     - LoginButton コンポーネント（frontend/components/auth/LoginButton.tsx）
     - AuthProvider コンポーネント（frontend/components/auth/AuthProvider.tsx）
     - Google OAuth フローの実装
     - JWT トークンの保存とリフレッシュロジック
+    - Login ページの作成（frontend/app/login/page.tsx）
     - _Requirements: 1.1, 1.4, 1.5, 6.1, 7.1_
 -
 
 - [x] 15. キャプティブポータルページの実装
-
-
-
-
-  - [-] 15.1 キャプティブポータル UI の作成
-
-
-
-
+  - [x] 15.1 キャプティブポータル UI の作成
     - キャプティブポータルページ（frontend/app/captive/page.tsx）
     - WelcomeScreen コンポーネント（frontend/components/captive/WelcomeScreen.tsx）
     - WiFi 接続時の認証フロー
     - 利用規約同意 UI
     - NFT 配布状況の表示
+    - 自動 NFT 発行リクエストとステータスポーリング
     - _Requirements: 2.1, 2.5, 3.1_
 
-- [ ] 16. NFT 関連コンポーネントの実装
+- [x] 16. NFT 関連コンポーネントの実装
 
 
-  - [ ] 16.1 NFT 表示コンポーネントの作成
-    - WalletDisplay コンポーネント（frontend/components/nft/WalletDisplay.tsx）
+
+
+
+-
+
+  - [x] 16.1 NFT 表示コンポーネントの作成
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     - NFTCard コンポーネント（frontend/components/nft/NFTCard.tsx）
     - NFTGallery コンポーネント（frontend/components/nft/NFTGallery.tsx）
+    - NFT 一覧ページ（frontend/app/nfts/page.tsx）
+    - NFT 詳細ページ（frontend/app/nfts/[id]/page.tsx）
     - NFT 発行状態の表示
     - _Requirements: 1.3, 3.4_
+-
 
-- [ ] 17. EC ショップコンポーネントの実装
+- [x] 17. EC ショップコンポーネントの実装
 
 
-  - [ ] 17.1 商品表示コンポーネントの作成
-    - ProductList コンポーネント（frontend/components/shop/ProductList.tsx）
+-
+
+  - [x] 17.1 商品表示コンポーネントの作成
+
+
+
+
+
     - ProductCard コンポーネント（frontend/components/shop/ProductCard.tsx）
+    - ProductList コンポーネント（frontend/components/shop/ProductList.tsx）
+    - ショップページ（frontend/app/shop/page.tsx）
+    - 商品詳細ページ（frontend/app/shop/[id]/page.tsx）
     - NFT 保有状態による表示制御
     - _Requirements: 4.1, 4.2, 5.2_
-  
-  - [ ] 17.2 カートとチェックアウトの実装
+  -
+
+  - [x] 17.2 カートとチェックアウトの実装
+
+
+
+
+
+
     - ShoppingCart コンポーネント（frontend/components/shop/ShoppingCart.tsx）
     - CheckoutForm コンポーネント（frontend/components/shop/CheckoutForm.tsx）
+    - チェックアウトページ（frontend/app/checkout/page.tsx）
     - Stripe Elements の統合
     - 決済処理フロー
     - _Requirements: 5.1, 5.2, 5.5, 5.6_
 
-- [ ] 18. ページとルーティングの実装
-  - [ ] 18.1 主要ページの作成
-    - ホームページ（frontend/app/page.tsx）
-    - ダッシュボードページ（frontend/app/dashboard/page.tsx）
-    - ショップページ（frontend/app/shop/page.tsx）
-    - チェックアウトページ（frontend/app/checkout/page.tsx）
-    - 注文履歴ページ（frontend/app/orders/page.tsx）
+
+- [x] 18. ページとルーティングの実装
+
+
+
+-
+
+  - [x] 18.1 主要ページの作成
+
+
+
+    - [x] ダッシュボードページ（frontend/app/dashboard/page.tsx）
+
+
+    - [x] ログインページ（frontend/app/login/page.tsx）
+
+    - [x] キャプティブポータルページ（frontend/app/captive/page.tsx）
+-
+
+    - [x] ホームページの更新（frontend/app/page.tsx）- 現在はデフォルトの Next.js ページ
+
+
+
+
+
+-
+
+    - [x] 注文履歴ページ（frontend/app/orders/page.tsx）
+
+
+    - [x] 注文詳細ページ（frontend/app/orders/[id]/page.tsx）
+
+
+
+
+
+
+
     - _Requirements: 7.1, 7.6_
   
-  - [ ] 18.2 レスポンシブデザインとエラーハンドリング
+  - [x] 18.2 レスポンシブデザインとエラーハンドリング
+
+
     - レスポンシブデザインの実装（モバイル、タブレット、デスクトップ）
-    - ローディング状態の実装
-    - エラーバウンダリの実装
+    - エラーバウンダリの実装（frontend/app/error.tsx）
+    - 404 ページの実装（frontend/app/not-found.tsx）
     - _Requirements: 7.1, 7.2, 7.4_
 
 - [ ]* 19. フロントエンドテストの実装

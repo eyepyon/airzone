@@ -5,6 +5,7 @@ interface CardProps {
   className?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   hover?: boolean;
+  onClick?: () => void;
 }
 
 export default function Card({
@@ -12,6 +13,7 @@ export default function Card({
   className = '',
   padding = 'md',
   hover = false,
+  onClick,
 }: CardProps) {
   const baseStyles = 'bg-white rounded-lg shadow-md';
   
@@ -27,7 +29,7 @@ export default function Card({
   const combinedClassName = `${baseStyles} ${paddingStyles[padding]} ${hoverStyles} ${className}`;
 
   return (
-    <div className={combinedClassName}>
+    <div className={combinedClassName} onClick={onClick}>
       {children}
     </div>
   );

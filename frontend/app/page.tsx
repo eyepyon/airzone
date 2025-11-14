@@ -1,100 +1,116 @@
-import Image from 'next/image';
+import Link from 'next/link';
+import { Button } from '@/components/ui';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{' '}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
+        <div className="text-center max-w-4xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6">
+            Airzone
+          </h1>
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-6 sm:mb-8 px-4">
+            WiFi接続でNFTを受け取り、限定商品にアクセス
+          </p>
+          <p className="text-base sm:text-lg text-gray-500 mb-8 sm:mb-12 px-4 max-w-2xl mx-auto">
+            店舗のWiFiに接続するだけで、Sui ブロックチェーン上のNFTが自動配布されます。
+            NFTを使って特別な商品を購入できます。
+          </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
+            <Link href="/login" className="w-full sm:w-auto">
+              <Button variant="primary" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3">
+                ログイン
+              </Button>
+            </Link>
+            <Link href="/shop" className="w-full sm:w-auto">
+              <Button variant="secondary" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3">
+                ショップを見る
+              </Button>
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* Features Section */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
+          {/* Feature 1 */}
+          <div className="bg-white p-6 sm:p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="text-4xl sm:text-5xl mb-4">📶</div>
+            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">
+              WiFi接続
+            </h3>
+            <p className="text-sm sm:text-base text-gray-600">
+              店舗のWiFiに接続するだけで、自動的にキャプティブポータルが表示されます。
+            </p>
+          </div>
+
+          {/* Feature 2 */}
+          <div className="bg-white p-6 sm:p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="text-4xl sm:text-5xl mb-4">🎨</div>
+            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">
+              NFT配布
+            </h3>
+            <p className="text-sm sm:text-base text-gray-600">
+              認証後、Sui ブロックチェーン上のNFTが自動的にあなたのウォレットに配布されます。
+            </p>
+          </div>
+
+          {/* Feature 3 */}
+          <div className="bg-white p-6 sm:p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div className="text-4xl sm:text-5xl mb-4">🛍️</div>
+            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900">
+              限定ショップ
+            </h3>
+            <p className="text-sm sm:text-base text-gray-600">
+              NFTを使って、限定商品を購入できます。Stripe決済で安全にお買い物。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div className="bg-blue-600 rounded-2xl p-8 sm:p-12 lg:p-16 text-center text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
+            今すぐ始めましょう
+          </h2>
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+            Googleアカウントでログインして、あなた専用のウォレットを作成しましょう。
+          </p>
+          <Link href="/login">
+            <Button 
+              variant="secondary" 
+              className="bg-white text-blue-600 hover:bg-gray-100 text-base sm:text-lg px-6 sm:px-8 py-3"
+            >
+              無料で始める
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 py-8 sm:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-sm sm:text-base text-gray-600 text-center sm:text-left">
+              © 2024 Airzone. All rights reserved.
+            </p>
+            <div className="flex gap-4 sm:gap-6 flex-wrap justify-center">
+              <Link href="/dashboard" className="text-sm sm:text-base text-gray-600 hover:text-gray-900">
+                ダッシュボード
+              </Link>
+              <Link href="/nfts" className="text-sm sm:text-base text-gray-600 hover:text-gray-900">
+                NFT
+              </Link>
+              <Link href="/shop" className="text-sm sm:text-base text-gray-600 hover:text-gray-900">
+                ショップ
+              </Link>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
   );

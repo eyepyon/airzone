@@ -267,8 +267,18 @@
     - 最大リトライ回数の設定
     - _Requirements: 3.1, 3.2, 3.5, 10.5_
 
-- [ ] 6. Service レイヤーの実装
-  - [ ] 6.1 AuthService の実装
+- [x] 6. Service レイヤーの実装
+
+
+
+
+  - [x] 6.1 AuthService の実装
+
+
+
+
+
+
 
     - AuthService を作成（backend/services/auth_service.py）
     - Google OAuth 認証フロー
@@ -277,22 +287,38 @@
     - _Requirements: 1.1, 1.4, 1.5, 6.1_
 
   
-  - [ ] 6.2 WalletService の実装
+  - [x] 6.2 WalletService の実装
+
+
+
+
+
+
+
     - WalletService を作成（backend/services/wallet_service.py）
     - Sui ウォレットの生成
     - 秘密鍵の暗号化と保存
     - _Requirements: 1.3, 6.2_
 
   
+-
 
-  - [ ] 6.3 NFTService の実装
+  - [x] 6.3 NFTService の実装
+
+
+
+
+
+
     - NFTService を作成（backend/services/nft_service.py）
     - NFT 発行タスクのキューイング
     - NFT 保有確認
     - ユーザーの NFT 一覧取得
     - _Requirements: 3.1, 3.2, 3.4, 3.5_
   
-  - [ ] 6.4 ProductService の実装
+  - [x] 6.4 ProductService の実装
+
+
     - ProductService を作成（backend/services/product_service.py）
     - 商品の CRUD 操作
     - 在庫管理
@@ -302,7 +328,9 @@
 
     - _Requirements: 4.2, 4.3, 4.4, 4.5_
   
-  - [ ] 6.5 OrderService の実装
+  - [x] 6.5 OrderService の実装
+
+
     - OrderService を作成（backend/services/order_service.py）
     - 注文の作成と検証
     - NFT 保有要件のチェック
@@ -310,7 +338,9 @@
     - 注文ステータスの更新
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.6, 5.7_
   
-  - [ ] 6.6 PaymentService の実装
+  - [x] 6.6 PaymentService の実装
+
+
     - PaymentService を作成（backend/services/payment_service.py）
     - Stripe Payment Intent の作成
     - Webhook イベントの処理
@@ -318,16 +348,25 @@
     - 決済失敗時の在庫復元
     - _Requirements: 5.5, 5.6, 5.7_
 
-- [ ] 7. エラーハンドリングとセキュリティの実装
+- [x] 7. エラーハンドリングとセキュリティの実装
 
 
-  - [ ] 7.1 カスタム例外とエラーハンドラーの実装
+
+
+
+
+
+  - [x] 7.1 カスタム例外とエラーハンドラーの実装
+
+
     - カスタム例外クラスを作成（backend/exceptions.py）
     - グローバルエラーハンドラーを実装
     - 構造化ロギングの設定
     - _Requirements: 6.4, 6.5, 6.6, 8.7_
   
-  - [ ] 7.2 セキュリティミドルウェアの実装
+  - [x] 7.2 セキュリティミドルウェアの実装
+
+
 
     - 入力バリデーションとサニタイゼーション
     - CSRF 保護の実装

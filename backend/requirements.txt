@@ -1,0 +1,29 @@
+# Flask and Extensions
+Flask==3.0.0
+Flask-CORS==4.0.0
+Flask-JWT-Extended==4.6.0
+
+# Database
+SQLAlchemy==2.0.23
+PyMySQL==1.1.0
+cryptography==41.0.7
+alembic==1.13.1
+
+# Google OAuth
+google-auth==2.25.2
+google-auth-oauthlib==1.2.0
+
+# Stripe
+stripe==7.8.0
+
+# Sui Blockchain
+pysui==0.50.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Security
+bcrypt==4.1.2
+
+# Utilities
+requests==2.31.0

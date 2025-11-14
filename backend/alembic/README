@@ -1,0 +1,44 @@
+Generic single-database configuration for Alembic.
+
+## Usage
+
+### Create a new migration
+```bash
+cd backend
+alembic revision --autogenerate -m "Description of changes"
+```
+
+### Apply migrations
+```bash
+cd backend
+alembic upgrade head
+```
+
+### Rollback migrations
+```bash
+cd backend
+alembic downgrade -1
+```
+
+### View migration history
+```bash
+cd backend
+alembic history
+```
+
+### View current revision
+```bash
+cd backend
+alembic current
+```
+
+## Initial Setup
+
+For the initial database setup, you can use the init_db.py script:
+
+```bash
+cd backend
+python init_db.py --env development
+```
+
+This will create all tables based on the SQLAlchemy models.

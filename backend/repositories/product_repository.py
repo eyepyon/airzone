@@ -1,109 +1,216 @@
 """
-Product repository for managing product data access.
+Product Repository for managing e-commerce products.
+Provides specialized queries for product operations.
+
+Requirements: 3.4, 4.2, 4.3
 """
-from typing import Optional, List
+from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
 from models.product import Product
 from repositories.base import BaseRepository
 
 
 class ProductRepository(BaseRepository[Product]):
     """
-    Repository for Product model operations.
-    Provides custom queries for product filtering and stock management.
-    
-    Requirements: 3.4, 4.2, 4.3
+    Repository for product operations.
+    Provides methods to query products by various criteria including active status,
+    NFT requirements, and stock availability.
     """
     
     def __init__(self, db_session: Session):
         """
-        Initialize ProductRepository with database session.
+        Initialize Product repository.
         
         Args:
             db_session: SQLAlchemy database session
         """
         super().__init__(Product, db_session)
     
-    def find_active_products(self) -> List[Product]:
+    def find_active_products(self, limit: Optional[int] = None, 
+                            offset: Optional[int] = None) -> List[Product]:
         """
         Find all active products.
         
+        Args:
+            limit: Maximum number of records to return
+            offset: Number of records to skip
+            
         Returns:
-            List[Product]: List of active product instances
+            List[Product]: List of active products
         """
-        return self.db_session.query(Product).filter(
+        query = self.db_session.query(Product).filter(
             Product.is_active == True
-        ).order_by(Product.created_at.desc()).all()
+        ).order_by(Product.created_at.desc())
+        
+        if offset is not None:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+        
+        return query.all()
     
-    def find_by_status(self, is_active: bool) -> List[Product]:
+    def find_by_status(self, is_active: bool, 
+                       limit: Optional[int] = None) -> List[Product]:
         """
         Find products by active status.
         
         Args:
             is_active: Whether to find active or inactive products
+            limit: Maximum number of records to return
             
         Returns:
-            List[Product]: List of product instances
+            List[Product]: List of products matching the status
         """
-        return self.db_session.query(Product).filter(
+        query = self.db_session.query(Product).filter(
             Product.is_active == is_active
-        ).order_by(Product.created_at.desc()).all()
+        ).order_by(Product.created_at.desc())
+        
+        if limit:
+            query = query.limit(limit)
+        
+        return query.all()
     
-    def find_by_required_nft(self, required_nft_id: Optional[str]) -> List[Product]:
+    def find_by_nft_requirement(self, required_nft_id: Optional[str] = None,
+                                only_active: bool = True) -> List[Product]:
         """
-        Find products by required NFT ID.
+        Find products by NFT requirement.
         
         Args:
-            required_nft_id: NFT ID required for purchase, or None for no requirement
+            required_nft_id: The required NFT ID (None for products without NFT requirement)
+            only_active: Whether to only return active products
             
         Returns:
-            List[Product]: List of product instances
+            List[Product]: List of products matching the NFT requirement
         """
-        if required_nft_id is None:
-            return self.db_session.query(Product).filter(
-                Product.required_nft_id.is_(None)
-            ).all()
-        else:
-            return self.db_session.query(Product).filter(
-                Product.required_nft_id == required_nft_id
-            ).all()
-    
-    def find_available_products(self) -> List[Product]:
-        """
-        Find all products that are active and in stock.
+        query = self.db_session.query(Product)
         
-        Returns:
-            List[Product]: List of available product instances
-        """
-        return self.db_session.query(Product).filter(
-            Product.is_active == True,
-            Product.stock_quantity > 0
-        ).order_by(Product.created_at.desc()).all()
+        if required_nft_id is None:
+            query = query.filter(Product.required_nft_id.is_(None))
+        else:
+            query = query.filter(Product.required_nft_id == required_nft_id)
+        
+        if only_active:
+            query = query.filter(Product.is_active == True)
+        
+        return query.order_by(Product.created_at.desc()).all()
     
-    def find_by_price_range(self, min_price: int, max_price: int) -> List[Product]:
+    def find_available_products(self, min_stock: int = 1,
+                               only_active: bool = True,
+                               limit: Optional[int] = None) -> List[Product]:
+        """
+        Find products with available stock.
+        
+        Args:
+            min_stock: Minimum stock quantity required
+            only_active: Whether to only return active products
+            limit: Maximum number of records to return
+            
+        Returns:
+            List[Product]: List of products with available stock
+        """
+        query = self.db_session.query(Product).filter(
+            Product.stock_quantity >= min_stock
+        )
+        
+        if only_active:
+            query = query.filter(Product.is_active == True)
+        
+        query = query.order_by(Product.created_at.desc())
+        
+        if limit:
+            query = query.limit(limit)
+        
+        return query.all()
+    
+    def search_products(self, search_term: str, 
+                       only_active: bool = True,
+                       limit: Optional[int] = None) -> List[Product]:
+        """
+        Search products by name or description.
+        
+        Args:
+            search_term: The term to search for
+            only_active: Whether to only return active products
+            limit: Maximum number of records to return
+            
+        Returns:
+            List[Product]: List of products matching the search term
+        """
+        search_pattern = f"%{search_term}%"
+        query = self.db_session.query(Product).filter(
+            or_(
+                Product.name.ilike(search_pattern),
+                Product.description.ilike(search_pattern)
+            )
+        )
+        
+        if only_active:
+            query = query.filter(Product.is_active == True)
+        
+        query = query.order_by(Product.created_at.desc())
+        
+        if limit:
+            query = query.limit(limit)
+        
+        return query.all()
+    
+    def find_by_price_range(self, min_price: Optional[int] = None,
+                           max_price: Optional[int] = None,
+                           only_active: bool = True) -> List[Product]:
         """
         Find products within a price range.
         
         Args:
             min_price: Minimum price (inclusive)
             max_price: Maximum price (inclusive)
+            only_active: Whether to only return active products
             
         Returns:
-            List[Product]: List of product instances
+            List[Product]: List of products within the price range
         """
-        return self.db_session.query(Product).filter(
-            Product.price >= min_price,
-            Product.price <= max_price,
-            Product.is_active == True
-        ).order_by(Product.price.asc()).all()
+        query = self.db_session.query(Product)
+        
+        if min_price is not None:
+            query = query.filter(Product.price >= min_price)
+        if max_price is not None:
+            query = query.filter(Product.price <= max_price)
+        
+        if only_active:
+            query = query.filter(Product.is_active == True)
+        
+        return query.order_by(Product.price.asc()).all()
     
-    def check_stock_availability(self, product_id: str, quantity: int) -> bool:
+    def update_stock(self, product_id: str, quantity_change: int) -> Optional[Product]:
         """
-        Check if sufficient stock is available for a product.
+        Update product stock quantity by adding or subtracting.
         
         Args:
-            product_id: Product ID
-            quantity: Quantity to check
+            product_id: The product ID
+            quantity_change: The amount to add (positive) or subtract (negative)
+            
+        Returns:
+            Optional[Product]: Updated product if found, None otherwise
+        """
+        product = self.find_by_id(product_id)
+        if not product:
+            return None
+        
+        new_quantity = product.stock_quantity + quantity_change
+        # Prevent negative stock
+        if new_quantity < 0:
+            new_quantity = 0
+        
+        return self.update(product_id, stock_quantity=new_quantity)
+    
+    def check_stock_availability(self, product_id: str, 
+                                 required_quantity: int) -> bool:
+        """
+        Check if a product has sufficient stock.
+        
+        Args:
+            product_id: The product ID
+            required_quantity: The quantity needed
             
         Returns:
             bool: True if sufficient stock available, False otherwise
@@ -111,53 +218,59 @@ class ProductRepository(BaseRepository[Product]):
         product = self.find_by_id(product_id)
         if not product:
             return False
-        return product.stock_quantity >= quantity
+        
+        return product.stock_quantity >= required_quantity
     
-    def decrease_stock(self, product_id: str, quantity: int) -> Optional[Product]:
+    def deactivate_product(self, product_id: str) -> Optional[Product]:
         """
-        Decrease product stock quantity.
+        Deactivate a product (soft delete).
         
         Args:
-            product_id: Product ID
-            quantity: Quantity to decrease
+            product_id: The product ID
             
         Returns:
-            Optional[Product]: Updated product instance if successful, None otherwise
+            Optional[Product]: Updated product if found, None otherwise
         """
-        product = self.find_by_id(product_id)
-        if not product or product.stock_quantity < quantity:
-            return None
-        
-        new_stock = product.stock_quantity - quantity
-        return self.update(product_id, stock_quantity=new_stock)
+        return self.update(product_id, is_active=False)
     
-    def increase_stock(self, product_id: str, quantity: int) -> Optional[Product]:
+    def activate_product(self, product_id: str) -> Optional[Product]:
         """
-        Increase product stock quantity.
+        Activate a product.
         
         Args:
-            product_id: Product ID
-            quantity: Quantity to increase
+            product_id: The product ID
             
         Returns:
-            Optional[Product]: Updated product instance if successful, None otherwise
+            Optional[Product]: Updated product if found, None otherwise
         """
-        product = self.find_by_id(product_id)
-        if not product:
-            return None
-        
-        new_stock = product.stock_quantity + quantity
-        return self.update(product_id, stock_quantity=new_stock)
+        return self.update(product_id, is_active=True)
     
-    def set_active_status(self, product_id: str, is_active: bool) -> Optional[Product]:
+    def count_active_products(self) -> int:
         """
-        Set the active status of a product.
+        Count all active products.
+        
+        Returns:
+            int: Number of active products
+        """
+        return self.db_session.query(Product).filter(
+            Product.is_active == True
+        ).count()
+    
+    def count_out_of_stock(self, only_active: bool = True) -> int:
+        """
+        Count products that are out of stock.
         
         Args:
-            product_id: Product ID
-            is_active: New active status
+            only_active: Whether to only count active products
             
         Returns:
-            Optional[Product]: Updated product instance if found, None otherwise
+            int: Number of out-of-stock products
         """
-        return self.update(product_id, is_active=is_active)
+        query = self.db_session.query(Product).filter(
+            Product.stock_quantity == 0
+        )
+        
+        if only_active:
+            query = query.filter(Product.is_active == True)
+        
+        return query.count()

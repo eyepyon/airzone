@@ -21,6 +21,8 @@
 
 
 
+
+
   - [x] 2.1 Base モデルとユーティリティの作成
 
 
@@ -58,7 +60,15 @@
 
 
 
+
+
   - [-] 2.4 Payment、WiFiSession、TaskQueue モデルの実装
+
+
+
+
+
+
 
 
 
@@ -78,14 +88,23 @@
     - パラメータ化クエリの使用
 
 
+
+
+
     - _Requirements: 6.4, 8.4, 9.2_
   
-  - [ ] 3.2 User と Wallet の Repository 実装
+  - [-] 3.2 User と Wallet の Repository 実装
+
+
+
+
 
     - UserRepository を作成（backend/repositories/user_repository.py）
     - WalletRepository を作成（backend/repositories/wallet_repository.py）
     - find_by_google_id, find_by_email などのカスタムクエリ
     - _Requirements: 1.2, 1.3_
+
+
   
   - [ ] 3.3 NFT と Product の Repository 実装
 
@@ -97,15 +116,24 @@
   - [ ] 3.4 Order、Payment、Task の Repository 実装
 
     - OrderRepository を作成（backend/repositories/order_repository.py）
+
+
+
+
     - PaymentRepository を作成（backend/repositories/payment_repository.py）
     - TaskRepository を作成（backend/repositories/task_repository.py）
     - ステータス更新メソッド
     - _Requirements: 5.3, 5.4, 5.5, 5.6, 10.4_
 
+
+
+
 - [ ] 4. 外部 API クライアントの実装
 
 
-  - [ ] 4.1 Google OAuth クライアントの実装
+  - [x] 4.1 Google OAuth クライアントの実装
+
+
 
     - GoogleAuthClient を作成（backend/clients/google_auth.py）
     - google-auth ライブラリを使用した ID トークン検証
@@ -129,34 +157,45 @@
 
 - [ ] 5. バックグラウンドタスクマネージャーの実装
 
-  - [ ] 5.1 TaskManager クラスの実装
+
+
+  - [x] 5.1 TaskManager クラスの実装
+
 
     - TaskManager を作成（backend/tasks/task_manager.py）
     - ThreadPoolExecutor を使用した非同期タスク実行
     - タスクステータス管理（pending, running, completed, failed）
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
   
-  - [ ] 5.2 NFT 発行タスクの実装
+  - [x] 5.2 NFT 発行タスクの実装
+
 
     - NFT 発行タスク関数を作成（backend/tasks/nft_tasks.py）
     - 指数バックオフを使用したリトライメカニズム
+
+
+
     - 最大リトライ回数の設定
     - _Requirements: 3.1, 3.2, 3.5, 10.5_
 
 - [ ] 6. Service レイヤーの実装
   - [ ] 6.1 AuthService の実装
+
     - AuthService を作成（backend/services/auth_service.py）
     - Google OAuth 認証フロー
     - JWT トークンの生成と検証
     - リフレッシュトークンの処理
     - _Requirements: 1.1, 1.4, 1.5, 6.1_
+
   
   - [ ] 6.2 WalletService の実装
     - WalletService を作成（backend/services/wallet_service.py）
     - Sui ウォレットの生成
     - 秘密鍵の暗号化と保存
     - _Requirements: 1.3, 6.2_
+
   
+
   - [ ] 6.3 NFTService の実装
     - NFTService を作成（backend/services/nft_service.py）
     - NFT 発行タスクのキューイング
@@ -169,6 +208,9 @@
     - 商品の CRUD 操作
     - 在庫管理
     - NFT 要件の検証
+
+
+
     - _Requirements: 4.2, 4.3, 4.4, 4.5_
   
   - [ ] 6.5 OrderService の実装

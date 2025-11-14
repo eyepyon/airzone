@@ -16,8 +16,8 @@ class TaskStatus(enum.Enum):
 
 class TaskQueue(BaseModel):
     """
-    Task Queue model for tracking background task execution.
-    Used for asynchronous operations like NFT minting.
+    Task Queue model representing a background task.
+    Tracks asynchronous tasks such as NFT minting operations.
     """
     __tablename__ = 'task_queue'
     
@@ -28,8 +28,8 @@ class TaskQueue(BaseModel):
         default=TaskStatus.PENDING,
         nullable=False
     )
-    payload = Column(JSON, nullable=True)
-    result = Column(JSON, nullable=True)
+    payload = Column(JSON, nullable=True)  # Task input data
+    result = Column(JSON, nullable=True)  # Task output data
     error_message = Column(Text, nullable=True)
     retry_count = Column(Integer, default=0, nullable=False)
     max_retries = Column(Integer, default=3, nullable=False)

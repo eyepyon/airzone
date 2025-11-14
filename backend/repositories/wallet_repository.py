@@ -1,5 +1,8 @@
 """
-Wallet repository for managing wallet data access.
+Wallet repository for managing Sui blockchain wallet data access.
+Provides custom queries for finding wallets by user and address.
+
+Requirements: 1.3
 """
 from typing import Optional, List
 from sqlalchemy.orm import Session
@@ -9,10 +12,8 @@ from repositories.base import BaseRepository
 
 class WalletRepository(BaseRepository[Wallet]):
     """
-    Repository for Wallet model operations.
-    Provides custom queries for wallet lookup by user and address.
-    
-    Requirements: 1.2, 1.3
+    Repository for Wallet model with custom query methods.
+    Handles wallet creation and lookup operations for Sui blockchain integration.
     """
     
     def __init__(self, db_session: Session):
@@ -24,12 +25,47 @@ class WalletRepository(BaseRepository[Wallet]):
         """
         super().__init__(Wallet, db_session)
     
-    def find_by_user_id(self, user_id: str) -> List[Wallet]:
+    def find_by_user_id(self, user_id: str) -> Optional[Wallet]:
         """
-        Find all wallets belonging to a user.
+        Find a wallet by user ID.
+        Each user should have exactly one wallet.
         
         Args:
-            user_id: User's ID
+            user_id: User's unique identifier
+            
+        Returns:
+            Optional[Wallet]: Wallet instance if found, None otherwise
+            
+        Requirements: 1.3 - Wallet management for users
+        """
+        return self.db_session.query(Wallet).filter(
+            Wallet.user_id == user_id
+        ).first()
+    
+    def find_by_address(self, address: str) -> Optional[Wallet]:
+        """
+        Find a wallet by its blockchain address.
+        Used for wallet lookup and verification.
+        
+        Args:
+            address: Sui blockchain wallet address
+            
+        Returns:
+            Optional[Wallet]: Wallet instance if found, None otherwise
+            
+        Requirements: 1.3 - Wallet address lookup
+        """
+        return self.db_session.query(Wallet).filter(
+            Wallet.address == address
+        ).first()
+    
+    def find_all_by_user_id(self, user_id: str) -> List[Wallet]:
+        """
+        Find all wallets associated with a user.
+        While typically one wallet per user, this supports future multi-wallet scenarios.
+        
+        Args:
+            user_id: User's unique identifier
             
         Returns:
             List[Wallet]: List of wallet instances
@@ -38,40 +74,32 @@ class WalletRepository(BaseRepository[Wallet]):
             Wallet.user_id == user_id
         ).all()
     
-    def find_by_address(self, address: str) -> Optional[Wallet]:
+    def create_wallet(self, user_id: str, address: str, private_key_encrypted: str) -> Wallet:
         """
-        Find a wallet by its blockchain address.
+        Create a new wallet for a user.
         
         Args:
-            address: Wallet's blockchain address
+            user_id: User's unique identifier
+            address: Sui blockchain wallet address
+            private_key_encrypted: Encrypted private key
             
         Returns:
-            Optional[Wallet]: Wallet instance if found, None otherwise
-        """
-        return self.db_session.query(Wallet).filter(
-            Wallet.address == address
-        ).first()
-    
-    def find_primary_wallet(self, user_id: str) -> Optional[Wallet]:
-        """
-        Find the primary (first) wallet for a user.
-        
-        Args:
-            user_id: User's ID
+            Wallet: Created wallet instance
             
-        Returns:
-            Optional[Wallet]: First wallet instance if found, None otherwise
+        Requirements: 1.3 - Create Sui wallet on user registration
         """
-        return self.db_session.query(Wallet).filter(
-            Wallet.user_id == user_id
-        ).order_by(Wallet.created_at.asc()).first()
+        return self.create(
+            user_id=user_id,
+            address=address,
+            private_key_encrypted=private_key_encrypted
+        )
     
     def address_exists(self, address: str) -> bool:
         """
         Check if a wallet address already exists.
         
         Args:
-            address: Wallet address to check
+            address: Sui blockchain wallet address to check
             
         Returns:
             bool: True if address exists, False otherwise
@@ -79,5 +107,21 @@ class WalletRepository(BaseRepository[Wallet]):
         return self.db_session.query(
             self.db_session.query(Wallet).filter(
                 Wallet.address == address
+            ).exists()
+        ).scalar()
+    
+    def user_has_wallet(self, user_id: str) -> bool:
+        """
+        Check if a user already has a wallet.
+        
+        Args:
+            user_id: User's unique identifier
+            
+        Returns:
+            bool: True if user has a wallet, False otherwise
+        """
+        return self.db_session.query(
+            self.db_session.query(Wallet).filter(
+                Wallet.user_id == user_id
             ).exists()
         ).scalar()

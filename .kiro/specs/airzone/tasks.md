@@ -737,6 +737,8 @@
     - _Requirements: 3.2, 3.3_
   
 
+
+
   - [ ] 20.3 スポンサードトランザクションの実装
 
 
@@ -744,12 +746,16 @@
     - ガス代スポンサー機能の実装
     - スポンサーウォレットの設定と管理
 
+
     - backend/clients/sui_client.py でのスポンサードトランザクション統合
     - _Requirements: 3.3_
   
 
   - [ ] 20.4 スマートコントラクトのデプロイ
     - Sui Testnet へのデプロイ
+
+
+
     - デプロイスクリプトの作成（scripts/deploy_contract.sh）
     - コントラクトアドレスを backend/.env に設定
     - デプロイ後の動作確認

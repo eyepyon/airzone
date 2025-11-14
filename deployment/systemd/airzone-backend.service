@@ -1,0 +1,75 @@
+# ============================================================================
+# Airzone Backend Systemd Service
+# ============================================================================
+#
+# Installation Instructions:
+# 1. Copy this file to /etc/systemd/system/airzone-backend.service
+# 2. Reload systemd: sudo systemctl daemon-reload
+# 3. Enable service: sudo systemctl enable airzone-backend
+# 4. Start service: sudo systemctl start airzone-backend
+# 5. Check status: sudo systemctl status airzone-backend
+#
+# ============================================================================
+
+[Unit]
+Description=Airzone Backend Flask Application
+Documentation=https://github.com/yourusername/airzone
+After=network.target mysql.service
+Requires=mysql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+
+# Working directory
+WorkingDirectory=/var/www/airzone/backend
+
+# Environment
+Environment="PATH=/var/www/airzone/backend/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONPATH=/var/www/airzone/backend"
+Environment="FLASK_ENV=production"
+EnvironmentFile=/var/www/airzone/backend/.env
+
+# Start command using Gunicorn
+ExecStart=/var/www/airzone/backend/venv/bin/gunicorn \
+    --workers 4 \
+    --worker-class sync \
+    --threads 2 \
+    --bind 127.0.0.1:5000 \
+    --timeout 120 \
+    --keepalive 5 \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --access-logfile /var/log/airzone/backend-access.log \
+    --error-logfile /var/log/airzone/backend-error.log \
+    --log-level info \
+    --capture-output \
+    --enable-stdio-inheritance \
+    app:app
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/airzone /var/www/airzone/backend/uploads
+
+# Process management
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

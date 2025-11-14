@@ -1,0 +1,68 @@
+# ============================================================================
+# Airzone Frontend Systemd Service
+# ============================================================================
+#
+# Installation Instructions:
+# 1. Copy this file to /etc/systemd/system/airzone-frontend.service
+# 2. Reload systemd: sudo systemctl daemon-reload
+# 3. Enable service: sudo systemctl enable airzone-frontend
+# 4. Start service: sudo systemctl start airzone-frontend
+# 5. Check status: sudo systemctl status airzone-frontend
+#
+# ============================================================================
+
+[Unit]
+Description=Airzone Frontend Next.js Application
+Documentation=https://github.com/yourusername/airzone
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+
+# Working directory
+WorkingDirectory=/var/www/airzone/frontend
+
+# Environment
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="HOSTNAME=0.0.0.0"
+EnvironmentFile=/var/www/airzone/frontend/.env.local
+
+# Start command
+ExecStart=/usr/bin/npm start
+
+# Pre-start checks
+ExecStartPre=/usr/bin/test -f /var/www/airzone/frontend/.next/BUILD_ID
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/airzone
+
+# Process management
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=airzone-frontend
+
+[Install]
+WantedBy=multi-user.target

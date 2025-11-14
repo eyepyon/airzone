@@ -1,113 +1,94 @@
 """
 Database initialization script.
-Creates all tables defined in the models.
+Creates the database and user if they don't exist.
 """
 import os
 import sys
-from sqlalchemy import create_engine
-from config import config
-from models import Base
+import pymysql
+from dotenv import load_dotenv
 
-# Import all models to ensure they are registered with Base
-from models import (
-    User, Wallet, NFTMint, Product, Order, OrderItem,
-    Payment, WiFiSession, TaskQueue
-)
+# Load environment variables
+load_dotenv()
 
 
-def init_database(env='development'):
+def create_database():
     """
-    Initialize the database by creating all tables.
-    
-    Args:
-        env (str): Environment name (development, production, testing)
+    Create the MySQL database and user if they don't exist.
+    This should be run with a MySQL user that has CREATE DATABASE privileges.
     """
-    # Get configuration
-    app_config = config.get(env, config['default'])
+    # Database configuration
+    db_host = os.getenv('DB_HOST', 'localhost')
+    db_port = int(os.getenv('DB_PORT', 3306))
+    db_name = os.getenv('DB_NAME', 'airzone')
+    db_user = os.getenv('DB_USER', 'airzone_user')
+    db_password = os.getenv('DB_PASSWORD', '')
     
-    # Create engine
-    engine = create_engine(
-        app_config.SQLALCHEMY_DATABASE_URI,
-        echo=app_config.SQLALCHEMY_ECHO
-    )
-    
-    print(f"Initializing database for environment: {env}")
-    print(f"Database URI: {app_config.SQLALCHEMY_DATABASE_URI}")
+    # Root credentials for initial setup
+    root_user = os.getenv('DB_ROOT_USER', 'root')
+    root_password = os.getenv('DB_ROOT_PASSWORD', '')
     
     try:
-        # Create all tables
-        Base.metadata.create_all(engine)
-        print("✓ All tables created successfully!")
+        # Connect to MySQL server (without specifying database)
+        print(f"Connecting to MySQL server at {db_host}:{db_port}...")
+        connection = pymysql.connect(
+            host=db_host,
+            port=db_port,
+            user=root_user,
+            password=root_password,
+            charset='utf8mb4',
+            cursorclass=pymysql.cursors.DictCursor
+        )
         
-        # Print created tables
-        print("\nCreated tables:")
-        for table in Base.metadata.sorted_tables:
-            print(f"  - {table.name}")
+        with connection.cursor() as cursor:
+            # Create database if it doesn't exist
+            print(f"Creating database '{db_name}' if it doesn't exist...")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+            print(f"✓ Database '{db_name}' is ready")
             
-    except Exception as e:
-        print(f"✗ Error creating tables: {str(e)}")
-        sys.exit(1)
-    finally:
-        engine.dispose()
-
-
-def drop_database(env='development'):
-    """
-    Drop all tables from the database.
-    WARNING: This will delete all data!
-    
-    Args:
-        env (str): Environment name (development, production, testing)
-    """
-    # Get configuration
-    app_config = config.get(env, config['default'])
-    
-    # Create engine
-    engine = create_engine(
-        app_config.SQLALCHEMY_DATABASE_URI,
-        echo=app_config.SQLALCHEMY_ECHO
-    )
-    
-    print(f"WARNING: Dropping all tables for environment: {env}")
-    print(f"Database URI: {app_config.SQLALCHEMY_DATABASE_URI}")
-    
-    response = input("Are you sure you want to drop all tables? (yes/no): ")
-    if response.lower() != 'yes':
-        print("Operation cancelled.")
-        return
-    
-    try:
-        # Drop all tables
-        Base.metadata.drop_all(engine)
-        print("✓ All tables dropped successfully!")
+            # Create user if it doesn't exist (MySQL 8.0+ syntax)
+            print(f"Creating user '{db_user}' if it doesn't exist...")
+            try:
+                cursor.execute(f"CREATE USER IF NOT EXISTS '{db_user}'@'localhost' IDENTIFIED BY '{db_password}'")
+                cursor.execute(f"CREATE USER IF NOT EXISTS '{db_user}'@'%' IDENTIFIED BY '{db_password}'")
+                print(f"✓ User '{db_user}' is ready")
+            except pymysql.err.OperationalError as e:
+                if "Operation CREATE USER failed" in str(e):
+                    print(f"⚠ User '{db_user}' already exists")
+                else:
+                    raise
+            
+            # Grant privileges
+            print(f"Granting privileges to '{db_user}' on database '{db_name}'...")
+            cursor.execute(f"GRANT ALL PRIVILEGES ON {db_name}.* TO '{db_user}'@'localhost'")
+            cursor.execute(f"GRANT ALL PRIVILEGES ON {db_name}.* TO '{db_user}'@'%'")
+            cursor.execute("FLUSH PRIVILEGES")
+            print(f"✓ Privileges granted to '{db_user}'")
         
+        connection.commit()
+        print("\n✓ Database initialization completed successfully!")
+        print(f"\nDatabase: {db_name}")
+        print(f"User: {db_user}")
+        print(f"Host: {db_host}:{db_port}")
+        
+    except pymysql.err.OperationalError as e:
+        print(f"\n✗ Error connecting to MySQL: {e}")
+        print("\nPlease ensure:")
+        print("1. MySQL server is running")
+        print("2. Root credentials are correct in .env file:")
+        print("   DB_ROOT_USER=root")
+        print("   DB_ROOT_PASSWORD=your_root_password")
+        sys.exit(1)
     except Exception as e:
-        print(f"✗ Error dropping tables: {str(e)}")
+        print(f"\n✗ Error during database initialization: {e}")
         sys.exit(1)
     finally:
-        engine.dispose()
+        if 'connection' in locals():
+            connection.close()
 
 
 if __name__ == '__main__':
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Database initialization script')
-    parser.add_argument(
-        '--env',
-        type=str,
-        default='development',
-        choices=['development', 'production', 'testing'],
-        help='Environment name'
-    )
-    parser.add_argument(
-        '--drop',
-        action='store_true',
-        help='Drop all tables before creating (WARNING: deletes all data)'
-    )
-    
-    args = parser.parse_args()
-    
-    if args.drop:
-        drop_database(args.env)
-    
-    init_database(args.env)
+    print("=" * 60)
+    print("Airzone Database Initialization")
+    print("=" * 60)
+    print()
+    create_database()

@@ -15,8 +15,8 @@ Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続�
 - **EC Shop**: NFT を使用して商品を購入できる電子商取引ショップ
 - **Sponsor Wallet**: NFT 発行時のガス代を負担するシステム側のウォレット
 - **JWT (JSON Web Token)**: ユーザー認証に使用されるトークン
-- **Redis**: キャッシュおよびタスクキュー用のインメモリデータストア
-- **Celery**: 非同期タスク処理用の分散タスクキュー
+- **Task Manager**: Python threading/asyncio を使用した非同期タスク処理システム
+- **Background Task**: ユーザーのリクエストをブロックせずにバックグラウンドで実行される処理
 
 ## Requirements
 
@@ -50,7 +50,7 @@ Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続�
 
 #### Acceptance Criteria
 
-1. WHEN ユーザーが WiFi 認証を完了する, THE Airzone System SHALL Celery タスクキューに NFT 発行タスクを追加する
+1. WHEN ユーザーが WiFi 認証を完了する, THE Airzone System SHALL Task Manager に NFT 発行タスクを追加する
 2. WHEN NFT 発行タスクが実行される, THE Airzone System SHALL Sui ブロックチェーン上で Move スマートコントラクトを呼び出す
 3. WHEN NFT が発行される, THE Airzone System SHALL Sponsor Wallet を使用してガス代を支払う
 4. WHEN NFT 発行が成功する, THE Airzone System SHALL nft_mints テーブルに発行記録を保存する
@@ -144,25 +144,23 @@ Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続�
 
 #### Acceptance Criteria
 
-1. THE Airzone System SHALL Celery を使用してバックグラウンドタスクを処理する
-2. THE Airzone System SHALL Redis をタスクキューのブローカーとして使用する
-3. WHEN NFT 発行リクエストを受信する, THE Airzone System SHALL タスクを Celery キューに追加し、即座にレスポンスを返す
-4. THE Airzone System SHALL タスクの実行状態を Redis に保存する
+1. THE Airzone System SHALL Python threading または asyncio を使用してバックグラウンドタスクを処理する
+2. THE Airzone System SHALL ThreadPoolExecutor を使用して非同期タスクを実行する
+3. WHEN NFT 発行リクエストを受信する, THE Airzone System SHALL タスクを Task Manager に追加し、即座にレスポンスを返す
+4. THE Airzone System SHALL タスクの実行状態を task_queue テーブルに保存する
 5. WHEN タスクが失敗する, THE Airzone System SHALL 指数バックオフを使用して最大 3 回リトライする
 
 ### Requirement 11: インフラストラクチャとデプロイメント
 
-**User Story:** DevOps エンジニアとして、コンテナ化されたアプリケーションを簡単にデプロイし、スケールしたい。これにより、運用コストを削減し、可用性を向上させる。
+**User Story:** DevOps エンジニアとして、アプリケーションを簡単にデプロイし、スケールしたい。これにより、運用コストを削減し、可用性を向上させる。
 
 #### Acceptance Criteria
 
-1. THE Airzone System SHALL Docker を使用してアプリケーションをコンテナ化する
-2. THE Airzone System SHALL Docker Compose を使用してマルチコンテナ環境を定義する
-3. THE Airzone System SHALL Apache 2.4 を Web サーバーとして使用する
-4. THE Airzone System SHALL mod_wsgi を使用して Flask アプリケーションを提供する
-5. THE Airzone System SHALL mod_proxy を使用してリバースプロキシを設定する
-6. THE Airzone System SHALL Let's Encrypt を使用して SSL/TLS 証明書を自動更新する
-7. THE Airzone System SHALL Redis をキャッシュレイヤーとして使用する
+1. THE Airzone System SHALL Apache 2.4 を Web サーバーとして使用する
+2. THE Airzone System SHALL mod_wsgi を使用して Flask アプリケーションを提供する
+3. THE Airzone System SHALL mod_proxy を使用してリバースプロキシを設定する
+4. THE Airzone System SHALL Let's Encrypt を使用して SSL/TLS 証明書を自動更新する
+5. THE Airzone System SHALL MySQL 8.0 をデータベースサーバーとして使用する
 
 ### Requirement 12: テストとコード品質
 

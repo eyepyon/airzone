@@ -56,6 +56,7 @@ class Config:
     # Sui Blockchain Configuration
     SUI_NETWORK = os.getenv('SUI_NETWORK', 'testnet')
     SUI_SPONSOR_PRIVATE_KEY = os.getenv('SUI_SPONSOR_PRIVATE_KEY', '')
+    SUI_PACKAGE_ID = os.getenv('SUI_PACKAGE_ID', '')
     
     # CORS Configuration
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:3000').split(',')

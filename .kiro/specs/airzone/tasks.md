@@ -5,15 +5,16 @@
 ### Backend (Flask)
 - ✅ Core Infrastructure: Models, Repositories, Services, Clients, Task Manager
 - ✅ Middleware: JWT Authentication, Security, Error Handling
-- ✅ Blueprints: Order (8.5), Payment (8.6), WiFi (8.7)
-- ⏳ Blueprints Pending: Auth (8.2), NFT (8.3), Product (8.4)
+- ✅ All Blueprints: Auth (8.2), NFT (8.3), Product (8.4), Order (8.5), Payment (8.6), WiFi (8.7)
+- ✅ Error Handlers and Logging
 
 ### Frontend (Next.js)
 - ✅ Core Setup: Project structure, API client, State management (Zustand)
 - ✅ UI Components: Layout, Button, Card, Loading, Toast
 - ✅ Authentication: LoginButton, AuthProvider, Login page
-- ✅ Pages: Dashboard, Login, Captive Portal with WelcomeScreen
-- ⏳ Pending: NFT components/pages, Shop components/pages, Order pages
+- ✅ Pages: Dashboard, Login, Captive Portal, NFT Gallery, Shop, Checkout, Orders
+- ✅ NFT Components: NFTCard, NFTGallery
+- ✅ Shop Components: ProductCard, ProductList, ShoppingCart, CheckoutForm
 
 ### Blockchain
 - ⏳ Sui Move smart contracts not yet implemented
@@ -407,26 +408,14 @@
   -
 
   - [x] 8.2 auth_blueprint の実装
-
-
-
-
-
     - auth_blueprint を作成（backend/routes/auth.py）
     - POST /api/v1/auth/google - Google OAuth 認証
     - POST /api/v1/auth/refresh - トークンリフレッシュ
     - GET /api/v1/auth/me - 現在のユーザー情報
     - app.py に Blueprint を登録
     - _Requirements: 1.1, 1.4, 1.5, 8.2, 8.6, 8.7_
-  -
 
   - [x] 8.3 nft_blueprint の実装
-
-
-
-
-
-
     - nft_blueprint を作成（backend/routes/nft.py）
     - GET /api/v1/nfts - ユーザーの NFT 一覧
     - POST /api/v1/nfts/mint - NFT 発行リクエスト
@@ -434,15 +423,8 @@
     - GET /api/v1/nfts/status/{task_id} - 発行状態確認
     - app.py に Blueprint を登録
     - _Requirements: 3.1, 3.4, 8.2, 8.6, 8.7_
-  -
 
   - [x] 8.4 product_blueprint の実装
-
-
-
-
-
-
     - product_blueprint を作成（backend/routes/product.py）
     - GET /api/v1/products - 商品一覧
     - GET /api/v1/products/{id} - 商品詳細
@@ -487,9 +469,9 @@
     - GET /api/v1/wifi/sessions - WiFi セッション履歴取得
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 8.2, 8.6, 8.7_
 
-- [-] 9. バックエンド統合
+- [x] 9. バックエンド統合
   - [x] 9.1 Flask アプリケーションへの Blueprint 登録
-    - 実装済みの Blueprint を app.py に登録（order, payment, wifi）
+    - すべての Blueprint を app.py に登録（auth, nft, product, order, payment, wifi）
     - エンドポイントの動作確認
     - _Requirements: 8.1, 8.2, 9.1_
   
@@ -657,112 +639,43 @@
     - _Requirements: 2.1, 2.5, 3.1_
 
 - [x] 16. NFT 関連コンポーネントの実装
-
-
-
-
-
--
-
   - [x] 16.1 NFT 表示コンポーネントの作成
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     - NFTCard コンポーネント（frontend/components/nft/NFTCard.tsx）
     - NFTGallery コンポーネント（frontend/components/nft/NFTGallery.tsx）
     - NFT 一覧ページ（frontend/app/nfts/page.tsx）
     - NFT 詳細ページ（frontend/app/nfts/[id]/page.tsx）
     - NFT 発行状態の表示
     - _Requirements: 1.3, 3.4_
--
 
 - [x] 17. EC ショップコンポーネントの実装
-
-
--
-
   - [x] 17.1 商品表示コンポーネントの作成
-
-
-
-
-
     - ProductCard コンポーネント（frontend/components/shop/ProductCard.tsx）
     - ProductList コンポーネント（frontend/components/shop/ProductList.tsx）
     - ショップページ（frontend/app/shop/page.tsx）
     - 商品詳細ページ（frontend/app/shop/[id]/page.tsx）
     - NFT 保有状態による表示制御
     - _Requirements: 4.1, 4.2, 5.2_
-  -
-
+  
   - [x] 17.2 カートとチェックアウトの実装
-
-
-
-
-
-
     - ShoppingCart コンポーネント（frontend/components/shop/ShoppingCart.tsx）
     - CheckoutForm コンポーネント（frontend/components/shop/CheckoutForm.tsx）
     - チェックアウトページ（frontend/app/checkout/page.tsx）
+    - カートページ（frontend/app/cart/page.tsx）
     - Stripe Elements の統合
     - 決済処理フロー
     - _Requirements: 5.1, 5.2, 5.5, 5.6_
 
-
 - [x] 18. ページとルーティングの実装
-
-
-
--
-
   - [x] 18.1 主要ページの作成
-
-
-
-    - [x] ダッシュボードページ（frontend/app/dashboard/page.tsx）
-
-
-    - [x] ログインページ（frontend/app/login/page.tsx）
-
-    - [x] キャプティブポータルページ（frontend/app/captive/page.tsx）
--
-
-    - [x] ホームページの更新（frontend/app/page.tsx）- 現在はデフォルトの Next.js ページ
-
-
-
-
-
--
-
-    - [x] 注文履歴ページ（frontend/app/orders/page.tsx）
-
-
-    - [x] 注文詳細ページ（frontend/app/orders/[id]/page.tsx）
-
-
-
-
-
-
-
+    - ダッシュボードページ（frontend/app/dashboard/page.tsx）
+    - ログインページ（frontend/app/login/page.tsx）
+    - キャプティブポータルページ（frontend/app/captive/page.tsx）
+    - ホームページの更新（frontend/app/page.tsx）
+    - 注文履歴ページ（frontend/app/orders/page.tsx）
+    - 注文詳細ページ（frontend/app/orders/[id]/page.tsx）
     - _Requirements: 7.1, 7.6_
   
   - [x] 18.2 レスポンシブデザインとエラーハンドリング
-
-
     - レスポンシブデザインの実装（モバイル、タブレット、デスクトップ）
     - エラーバウンダリの実装（frontend/app/error.tsx）
     - 404 ページの実装（frontend/app/not-found.tsx）
@@ -776,75 +689,129 @@
 
 ## Blockchain Integration
 
-- [ ] 20. Sui Move スマートコントラクトの実装
-  - [ ] 20.1 Move プロジェクトのセットアップ
-    - Move プロジェクトの初期化（contracts/）
-    - Move.toml の設定
+- [x] 20. Sui Move スマートコントラクトの実装
+
+
+
+
+
+
+
+
+  - [x] 20.1 Move プロジェクトのセットアップ
+
+
+
+
+
+    - contracts/ ディレクトリを作成
+    - Move プロジェクトの初期化（sui move new）
+    - Move.toml の設定（依存関係、アドレス設定）
+
+
+
+
+
     - _Requirements: 3.2_
   
-  - [ ] 20.2 NFT モジュールの作成
+  - [x] 20.2 NFT モジュールの作成
+
+
+
+
+
     - NFT 構造体の定義（contracts/sources/airzone_nft.move）
-    - mint 関数の実装
-    - transfer 関数の実装
-    - メタデータ管理機能
+    - mint 関数の実装（NFT 発行ロジック）
+
+
+    - transfer 関数の実装（NFT 転送ロジック）
+
+
+
+
+
+
+
+    - メタデータ管理機能（名前、説明、画像URL）
     - _Requirements: 3.2, 3.3_
   
   - [ ] 20.3 スポンサードトランザクションの実装
+
+
+
     - ガス代スポンサー機能の実装
-    - スポンサーウォレットの設定
+    - スポンサーウォレットの設定と管理
+    - backend/clients/sui_client.py でのスポンサードトランザクション統合
     - _Requirements: 3.3_
   
+
   - [ ] 20.4 スマートコントラクトのデプロイ
-    - Testnet へのデプロイ
-    - デプロイスクリプトの作成
-    - コントラクトアドレスの環境変数設定
+    - Sui Testnet へのデプロイ
+    - デプロイスクリプトの作成（scripts/deploy_contract.sh）
+    - コントラクトアドレスを backend/.env に設定
+    - デプロイ後の動作確認
     - _Requirements: 3.2_
 
 ## Infrastructure and Deployment
 
 - [ ] 21. データベースセットアップ
+
   - [ ] 21.1 データベース初期化
-    - MySQL データベースの作成
-    - Alembic マイグレーションの実行
-    - 初期データの投入スクリプト作成
+
+    - MySQL 8.0 データベースの作成（CREATE DATABASE airzone）
+    - データベースユーザーの作成と権限設定
+    - Alembic マイグレーションファイルの作成（backend/alembic/versions/）
+    - Alembic マイグレーションの実行（alembic upgrade head）
+    - 初期データの投入スクリプト作成（scripts/seed_data.py）
+    - テスト用商品データの投入
     - _Requirements: 9.1_
 
-- [ ] 22. デプロイメント設定
-  - [ ] 22.1 環境変数とシークレット管理
-    - 本番環境用の .env ファイル設定
-    - シークレットの安全な管理方法の実装
+
+- [ ] 22. デプロイメント設定管理
+    - 本番環境用の backend/.env ファイル設定
+    - 本番環境用の frontend/.env.local ファイル設定
+    - シークレットキーの生成（JWT_SECRET_KEY, STRIPE_SECRET_KEY など）
+    - ウォレット秘密鍵の暗号化設定
     - _Requirements: 6.2, 6.3_
   
   - [ ] 22.2 Apache Web サーバー設定
-    - Apache 設定ファイルの作成
-    - mod_wsgi 設定（Flask 用）
-    - mod_proxy 設定（Next.js 用）
-    - SSL/TLS 設定（Let's Encrypt）
+    - Apache 設定ファイルの作成（/etc/apache2/sites-available/airzone.conf）
+    - mod_wsgi 設定（Flask アプリケーション用）
+    - mod_proxy 設定（Next.js アプリケーション用リバースプロキシ）
+    - SSL/TLS 設定（Let's Encrypt certbot）
+    - HSTS ヘッダーの設定
     - _Requirements: 11.1, 11.3, 11.4, 11.5, 11.6, 6.3, 6.8_
   
   - [ ] 22.3 systemd サービスの設定
-    - Flask アプリケーション用 systemd サービスファイル作成
-    - Next.js アプリケーション用 systemd サービスファイル作成
-    - サービスの自動起動設定
+    - Flask アプリケーション用 systemd サービスファイル作成（/etc/systemd/system/airzone-backend.service）
+    - Next.js アプリケーション用 systemd サービスファイル作成（/etc/systemd/system/airzone-frontend.service）
+    - サービスの有効化と自動起動設定（systemctl enable）
+    - サービスの起動と動作確認
+    - _Requirements: 11.1_
     - _Requirements: 11.1_
 
 - [ ]* 23. モニタリングとロギング
-  - アプリケーションログの設定
-  - エラートラッキング
-  - パフォーマンスモニタリング
+  - アプリケーションログの設定（ログローテーション）
+  - エラートラッキングツールの統合（Sentry など）
+  - パフォーマンスモニタリングの設定
+  - ログ集約とアラート設定
   - _Requirements: 12.6, 12.7_
 
 ## Final Integration and Testing
 
 - [ ] 24. OpenNDS キャプティブポータル統合
   - [ ] 24.1 OpenNDS 設定
-    - OpenNDS の設定ファイル作成
-    - キャプティブポータル URL の設定
+    - OpenNDS のインストールと設定ファイル作成（/etc/opennds/opennds.conf）
+    - キャプティブポータル URL の設定（https://airz.one/captive）
     - 認証成功後のリダイレクト設定
+    - WiFi セッション情報の backend への送信設定
     - _Requirements: 2.1, 2.2_
   
   - [ ] 24.2 WiFi → 認証 → NFT 発行フローのテスト
     - OpenNDS との統合テスト
+    - WiFi 接続時のキャプティブポータル表示確認
+    - Google 認証フローの動作確認
+    - NFT 自動発行の動作確認
     - 完全なフローの動作確認
     - _Requirements: 2.1, 2.2, 2.5, 3.1_
 
@@ -853,21 +820,27 @@
     - WiFi 接続から NFT 受け取りまでのフロー
     - NFT 保有確認から商品購入までのフロー
     - 決済完了から注文確認までのフロー
+    - エラーケースのテスト（決済失敗、在庫切れなど）
     - _Requirements: 2.1, 3.1, 5.2, 5.5, 5.6, 5.7_
   
   - [ ]* 25.2 パフォーマンス最適化
-    - データベースクエリの最適化
+    - データベースクエリの最適化（インデックス追加）
     - フロントエンドバンドルサイズの最適化
-    - 画像最適化
+    - 画像最適化（Next.js Image コンポーネント）
+    - API レスポンスタイムの測定と改善
     - _Requirements: 7.4_
   
   - [ ]* 25.3 セキュリティ監査
     - セキュリティベストプラクティスの確認
-    - 脆弱性スキャン
+    - 脆弱性スキャン（OWASP ZAP など）
+    - SQL インジェクション対策の確認
+    - XSS 対策の確認
+    - CSRF 対策の確認
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8_
 
 - [ ]* 26. ドキュメント作成
-  - API ドキュメント
-  - デプロイメントガイド
-  - 運用マニュアル
+  - API ドキュメント（OpenAPI/Swagger 形式）
+  - デプロイメントガイド（README_DEPLOYMENT.md）
+  - 運用マニュアル（README_OPERATIONS.md）
+  - トラブルシューティングガイド
   - _Requirements: 8.2_

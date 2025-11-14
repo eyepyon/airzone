@@ -38,18 +38,25 @@ class SuiClient:
     Handles wallet generation, NFT minting, and sponsored transactions.
     """
     
-    def __init__(self, network: str = 'testnet', sponsor_private_key: Optional[str] = None):
+    def __init__(
+        self,
+        network: str = 'testnet',
+        sponsor_private_key: Optional[str] = None,
+        package_id: Optional[str] = None
+    ):
         """
         Initialize SuiClient with network configuration.
         
         Args:
             network: Sui network to connect to ('testnet', 'devnet', 'mainnet')
             sponsor_private_key: Private key for sponsoring transactions (gas fee payment)
+            package_id: Deployed Move package ID for NFT contract
             
         Requirements: 1.3, 3.2, 3.3
         """
         self.network = network
         self.sponsor_private_key = sponsor_private_key
+        self.package_id = package_id
         
         # Initialize Sui configuration
         if network == 'testnet':
@@ -75,6 +82,12 @@ class SuiClient:
                 raise ValueError(f"Invalid sponsor private key: {str(e)}")
         else:
             logger.info(f"Initialized Sui client on {network} without sponsor wallet")
+        
+        # Validate package ID if provided
+        if package_id:
+            logger.info(f"Using NFT package ID: {package_id}")
+        else:
+            logger.warning("No package ID provided. NFT minting will not be available until contract is deployed.")
     
     def generate_wallet(self) -> Tuple[str, str]:
         """
@@ -163,7 +176,7 @@ class SuiClient:
         use_sponsor: bool = True
     ) -> Dict:
         """
-        Mint an NFT on the Sui blockchain.
+        Mint an NFT on the Sui blockchain using the deployed Move contract.
         
         Args:
             recipient_address: Address to receive the NFT
@@ -181,6 +194,18 @@ class SuiClient:
             - 3.3: Sponsored transactions (sponsor pays gas fees)
         """
         try:
+            # Validate package ID is configured
+            if not self.package_id:
+                raise ValueError(
+                    "Package ID not configured. Please deploy the Move contract and set SUI_PACKAGE_ID in .env"
+                )
+            
+            # Validate sponsor is configured for sponsored transactions
+            if use_sponsor and not self.sponsor_keypair:
+                raise ValueError(
+                    "Sponsor keypair not configured. Please set SUI_SPONSOR_PRIVATE_KEY in .env"
+                )
+            
             # Validate recipient address
             recipient = SuiAddress(recipient_address)
             
@@ -200,26 +225,36 @@ class SuiClient:
             # Create transaction
             txn = SyncTransaction(client=self.client)
             
-            # Note: This is a placeholder for the actual Move contract call
-            # In production, you would call your deployed Move module's mint function
-            # Example: txn.move_call(
-            #     target=f"{package_id}::nft::mint",
-            #     arguments=[name, description, image_url],
-            #     type_arguments=[]
-            # )
+            # Call the Move contract's mint function
+            # Target format: {package_id}::{module}::{function}
+            target = f"{self.package_id}::nft::mint"
             
-            # For now, we'll create a basic transfer transaction as a placeholder
-            # This should be replaced with actual NFT minting logic once the Move contract is deployed
+            # Prepare arguments for the mint function
+            # Arguments: name, description, image_url, recipient
+            arguments = [
+                nft_name.encode('utf-8'),
+                nft_description.encode('utf-8'),
+                nft_image_url.encode('utf-8'),
+                str(recipient)
+            ]
+            
+            logger.info(f"Calling Move function: {target}")
             
             if use_sponsor and self.sponsor_keypair:
                 # Sponsored transaction: sponsor pays gas fees
                 logger.info("Using sponsored transaction")
-                result = self._execute_sponsored_transaction(txn, recipient, nft_metadata)
+                result = self._execute_sponsored_transaction(
+                    txn,
+                    target,
+                    arguments,
+                    recipient_address,
+                    nft_metadata
+                )
             else:
                 # Regular transaction: recipient pays gas fees
-                logger.warning("Sponsored transaction not available, this would require recipient to pay gas")
+                logger.warning("Non-sponsored transaction not recommended for this use case")
                 raise NotImplementedError(
-                    "Non-sponsored NFT minting requires the Move contract to be deployed. "
+                    "Non-sponsored NFT minting is not supported. "
                     "Please ensure sponsor wallet is configured."
                 )
             
@@ -229,22 +264,102 @@ class SuiClient:
             logger.error(f"Failed to mint NFT: {str(e)}")
             raise Exception(f"NFT minting failed: {str(e)}")
     
+    def get_sponsor_balance(self) -> int:
+        """
+        Get the current balance of the sponsor wallet.
+        
+        Returns:
+            int: Balance in MIST (1 SUI = 1,000,000,000 MIST)
+            
+        Requirements: 3.3 - Sponsor wallet management
+        """
+        if not self.sponsor_keypair:
+            logger.warning("Sponsor keypair not configured")
+            return 0
+        
+        try:
+            sponsor_address = str(self.sponsor_keypair.to_address())
+            balance = self.get_wallet_balance(sponsor_address)
+            logger.info(f"Sponsor wallet balance: {balance} MIST ({balance / 1_000_000_000:.4f} SUI)")
+            return balance
+        except Exception as e:
+            logger.error(f"Failed to get sponsor balance: {str(e)}")
+            return 0
+    
+    def validate_sponsor_balance(self, required_balance: int = 100_000_000) -> bool:
+        """
+        Validate that the sponsor wallet has sufficient balance for transactions.
+        
+        Args:
+            required_balance: Minimum required balance in MIST (default: 0.1 SUI)
+            
+        Returns:
+            bool: True if balance is sufficient, False otherwise
+            
+        Requirements: 3.3 - Sponsor wallet management
+        """
+        if not self.sponsor_keypair:
+            logger.error("Sponsor keypair not configured")
+            return False
+        
+        try:
+            current_balance = self.get_sponsor_balance()
+            
+            if current_balance < required_balance:
+                logger.warning(
+                    f"Sponsor wallet balance too low: {current_balance} MIST "
+                    f"(required: {required_balance} MIST)"
+                )
+                return False
+            
+            logger.info(f"Sponsor wallet balance sufficient: {current_balance} MIST")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to validate sponsor balance: {str(e)}")
+            return False
+    
+    def estimate_gas_cost(self) -> int:
+        """
+        Estimate the gas cost for an NFT minting transaction.
+        
+        Returns:
+            int: Estimated gas cost in MIST
+            
+        Note: This is a conservative estimate. Actual costs may vary.
+        """
+        # Conservative estimate for NFT minting on Sui
+        # Typical NFT mint costs ~0.01-0.05 SUI
+        # We use 0.1 SUI as a safe buffer
+        return 100_000_000  # 0.1 SUI in MIST
+    
     def _execute_sponsored_transaction(
         self,
         transaction: SyncTransaction,
-        recipient: SuiAddress,
+        target: str,
+        arguments: list,
+        recipient_address: str,
         nft_metadata: Dict
     ) -> Dict:
         """
         Execute a sponsored transaction where the sponsor pays gas fees.
         
+        This implements the sponsored transaction pattern where:
+        1. The sponsor wallet pays for gas fees
+        2. The NFT is minted and transferred to the recipient
+        3. The recipient doesn't need any SUI tokens
+        4. Sponsor balance is validated before execution
+        5. Transaction status is tracked and logged
+        
         Args:
             transaction: Transaction to execute
-            recipient: Recipient address
+            target: Move function target (package::module::function)
+            arguments: Function arguments
+            recipient_address: Recipient address
             nft_metadata: NFT metadata
             
         Returns:
-            Dict: Transaction result
+            Dict: Transaction result with nft_object_id and transaction_digest
             
         Requirements: 3.3 - Sponsored transactions
         """
@@ -252,32 +367,87 @@ class SuiClient:
             if not self.sponsor_keypair:
                 raise ValueError("Sponsor keypair not configured")
             
-            # Note: This is a simplified implementation
-            # In production, you would:
-            # 1. Build the transaction with the Move contract call
-            # 2. Set the sponsor as the gas payer
-            # 3. Sign with sponsor's keypair
-            # 4. Execute the transaction
+            sponsor_address = str(self.sponsor_keypair.to_address())
             
-            # Placeholder for actual implementation
-            # The actual implementation depends on the deployed Move contract
-            logger.info(f"Executing sponsored transaction for recipient: {recipient}")
+            logger.info(f"Executing sponsored transaction for recipient: {recipient_address}")
+            logger.info(f"Sponsor address: {sponsor_address}")
+            logger.info(f"Move call target: {target}")
             
-            # This is where you would execute the actual transaction
-            # result = transaction.execute(signer=self.sponsor_keypair)
+            # Validate sponsor balance before executing transaction
+            gas_budget = self.estimate_gas_cost()
             
-            # For now, return a mock result structure
-            # This should be replaced with actual transaction execution
-            result = {
-                'success': True,
-                'nft_object_id': None,  # Will be populated by actual transaction
-                'transaction_digest': None,  # Will be populated by actual transaction
-                'metadata': nft_metadata,
-                'message': 'NFT minting transaction prepared (awaiting Move contract deployment)'
-            }
+            if not self.validate_sponsor_balance(required_balance=gas_budget):
+                raise ValueError(
+                    f"Insufficient sponsor wallet balance. "
+                    f"Required: {gas_budget} MIST ({gas_budget / 1_000_000_000:.4f} SUI). "
+                    f"Please fund the sponsor wallet."
+                )
             
-            logger.info(f"Sponsored transaction prepared successfully")
-            return result
+            # Build the transaction with the Move contract call
+            # The sponsor will pay for gas fees
+            logger.info(f"Building Move call transaction...")
+            transaction.move_call(
+                target=target,
+                arguments=arguments,
+                type_arguments=[]
+            )
+            
+            # Execute the transaction with sponsor as signer
+            # The sponsor pays gas fees, but NFT goes to recipient
+            logger.info(f"Executing transaction with gas budget: {gas_budget} MIST ({gas_budget / 1_000_000_000:.4f} SUI)")
+            
+            result = transaction.execute(
+                gas_budget=gas_budget,
+                signer=self.sponsor_keypair
+            )
+            
+            # Check if transaction was successful
+            if result.is_ok():
+                tx_result = result.result_data
+                transaction_digest = tx_result.digest if hasattr(tx_result, 'digest') else None
+                
+                # Extract created objects (the minted NFT)
+                created_objects = []
+                if hasattr(tx_result, 'effects') and hasattr(tx_result.effects, 'created'):
+                    created_objects = tx_result.effects.created
+                
+                # Get the NFT object ID (first created object)
+                nft_object_id = None
+                if created_objects and len(created_objects) > 0:
+                    nft_object_id = str(created_objects[0].reference.object_id)
+                
+                # Calculate gas used
+                gas_used = 0
+                if hasattr(tx_result, 'effects') and hasattr(tx_result.effects, 'gas_used'):
+                    gas_used = tx_result.effects.gas_used.computation_cost + \
+                              tx_result.effects.gas_used.storage_cost
+                
+                logger.info(f"✓ NFT minted successfully")
+                logger.info(f"  NFT Object ID: {nft_object_id}")
+                logger.info(f"  Transaction Digest: {transaction_digest}")
+                logger.info(f"  Gas Used: {gas_used} MIST ({gas_used / 1_000_000_000:.6f} SUI)")
+                logger.info(f"  Recipient: {recipient_address}")
+                logger.info(f"  Sponsor: {sponsor_address}")
+                
+                # Get updated sponsor balance
+                remaining_balance = self.get_sponsor_balance()
+                logger.info(f"  Sponsor Balance After: {remaining_balance} MIST ({remaining_balance / 1_000_000_000:.4f} SUI)")
+                
+                return {
+                    'success': True,
+                    'nft_object_id': nft_object_id,
+                    'transaction_digest': transaction_digest,
+                    'gas_used': gas_used,
+                    'metadata': nft_metadata,
+                    'recipient': recipient_address,
+                    'sponsor': sponsor_address,
+                    'sponsor_balance_after': remaining_balance,
+                    'message': 'NFT minted successfully with sponsored transaction'
+                }
+            else:
+                error_msg = result.result_string if hasattr(result, 'result_string') else 'Unknown error'
+                logger.error(f"Transaction failed: {error_msg}")
+                raise Exception(f"Transaction execution failed: {error_msg}")
             
         except Exception as e:
             logger.error(f"Failed to execute sponsored transaction: {str(e)}")
@@ -344,6 +514,97 @@ class SuiClient:
         except Exception as e:
             logger.error(f"Error getting NFT metadata: {str(e)}")
             return None
+    
+    def check_sponsor_health(self) -> Dict:
+        """
+        Check the health status of the sponsor wallet.
+        
+        Returns:
+            Dict: Health status with balance, warnings, and recommendations
+            
+        Requirements: 3.3 - Sponsor wallet management
+        """
+        try:
+            if not self.sponsor_keypair:
+                return {
+                    'healthy': False,
+                    'error': 'Sponsor keypair not configured',
+                    'recommendation': 'Configure SUI_SPONSOR_PRIVATE_KEY in .env file'
+                }
+            
+            sponsor_address = str(self.sponsor_keypair.to_address())
+            balance = self.get_sponsor_balance()
+            
+            # Define balance thresholds
+            CRITICAL_THRESHOLD = 50_000_000  # 0.05 SUI
+            WARNING_THRESHOLD = 500_000_000  # 0.5 SUI
+            HEALTHY_THRESHOLD = 1_000_000_000  # 1 SUI
+            
+            status = {
+                'healthy': True,
+                'sponsor_address': sponsor_address,
+                'balance_mist': balance,
+                'balance_sui': balance / 1_000_000_000,
+                'network': self.network,
+                'warnings': [],
+                'recommendations': []
+            }
+            
+            # Check balance levels
+            if balance < CRITICAL_THRESHOLD:
+                status['healthy'] = False
+                status['warnings'].append(
+                    f"CRITICAL: Balance extremely low ({balance / 1_000_000_000:.6f} SUI)"
+                )
+                status['recommendations'].append(
+                    "Immediately fund sponsor wallet to continue NFT minting"
+                )
+            elif balance < WARNING_THRESHOLD:
+                status['warnings'].append(
+                    f"WARNING: Balance low ({balance / 1_000_000_000:.4f} SUI)"
+                )
+                status['recommendations'].append(
+                    "Consider funding sponsor wallet soon"
+                )
+            elif balance < HEALTHY_THRESHOLD:
+                status['warnings'].append(
+                    f"INFO: Balance moderate ({balance / 1_000_000_000:.4f} SUI)"
+                )
+            
+            # Estimate remaining transactions
+            estimated_gas_per_tx = self.estimate_gas_cost()
+            estimated_remaining_txs = balance // estimated_gas_per_tx if balance > 0 else 0
+            
+            status['estimated_remaining_transactions'] = estimated_remaining_txs
+            
+            if estimated_remaining_txs < 10:
+                status['warnings'].append(
+                    f"Only ~{estimated_remaining_txs} transactions remaining"
+                )
+            
+            # Add funding instructions
+            if balance < WARNING_THRESHOLD:
+                if self.network in ['testnet', 'devnet']:
+                    status['recommendations'].append(
+                        f"Get test tokens: curl --location --request POST "
+                        f"'https://faucet.{self.network}.sui.io/gas' "
+                        f"--header 'Content-Type: application/json' "
+                        f"--data-raw '{{\"FixedAmountRequest\":{{\"recipient\":\"{sponsor_address}\"}}}}''"
+                    )
+                else:
+                    status['recommendations'].append(
+                        f"Transfer SUI tokens to sponsor address: {sponsor_address}"
+                    )
+            
+            return status
+            
+        except Exception as e:
+            logger.error(f"Failed to check sponsor health: {str(e)}")
+            return {
+                'healthy': False,
+                'error': str(e),
+                'recommendation': 'Check sponsor wallet configuration and network connectivity'
+            }
     
     def transfer_nft(
         self,

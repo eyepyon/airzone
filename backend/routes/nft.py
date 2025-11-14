@@ -27,11 +27,11 @@ def get_nft_service() -> NFTService:
     """
     db_session = g.db
     
-    # Initialize Sui client
+    # Initialize Sui client with network, sponsor key, and package ID
     sui_client = SuiClient(
-        rpc_url=current_app.config['SUI_RPC_URL'],
-        sponsor_private_key=current_app.config['SUI_SPONSOR_PRIVATE_KEY'],
-        nft_package_id=current_app.config.get('SUI_NFT_PACKAGE_ID')
+        network=current_app.config.get('SUI_NETWORK', 'testnet'),
+        sponsor_private_key=current_app.config.get('SUI_SPONSOR_PRIVATE_KEY'),
+        package_id=current_app.config.get('SUI_PACKAGE_ID')
     )
     
     # Initialize task manager

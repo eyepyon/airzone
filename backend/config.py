@@ -65,8 +65,8 @@ class Config:
     
     # Rate Limiting
     RATELIMIT_ENABLED = True
-    RATELIMIT_DEFAULT = "100 per hour"
-    RATELIMIT_STORAGE_URL = "memory://"
+    RATELIMIT_DEFAULT_LIMIT = 1000  # requests
+    RATELIMIT_DEFAULT_WINDOW = 3600  # seconds (1 hour)
 
 
 class DevelopmentConfig(Config):

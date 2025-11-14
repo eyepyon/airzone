@@ -1,18 +1,19 @@
 """
 Payment repository for managing payment transaction data access.
+Provides custom queries for payment tracking and status updates.
+
+Requirements: 5.5, 5.6
 """
 from typing import Optional, List
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 from models.payment import Payment, PaymentStatus
 from repositories.base import BaseRepository
 
 
 class PaymentRepository(BaseRepository[Payment]):
     """
-    Repository for Payment model operations.
-    Provides custom queries for payment filtering and status management.
-    
-    Requirements: 5.5, 5.6
+    Repository for Payment model with custom query methods.
+    Handles payment creation, retrieval, and status management operations.
     """
     
     def __init__(self, db_session: Session):
@@ -27,12 +28,15 @@ class PaymentRepository(BaseRepository[Payment]):
     def find_by_order(self, order_id: str) -> List[Payment]:
         """
         Find all payments for a specific order.
+        An order may have multiple payment attempts.
         
         Args:
-            order_id: Order ID
+            order_id: Order's ID
             
         Returns:
-            List[Payment]: List of payment instances
+            List[Payment]: List of payments for the order
+            
+        Requirements: 5.5 - Payment tracking for orders
         """
         return self.db_session.query(Payment).filter(
             Payment.order_id == order_id
@@ -41,65 +45,64 @@ class PaymentRepository(BaseRepository[Payment]):
     def find_by_stripe_payment_intent_id(self, stripe_payment_intent_id: str) -> Optional[Payment]:
         """
         Find a payment by Stripe Payment Intent ID.
+        Used during webhook processing to locate the payment record.
         
         Args:
             stripe_payment_intent_id: Stripe Payment Intent ID
             
         Returns:
             Optional[Payment]: Payment instance if found, None otherwise
+            
+        Requirements: 5.5 - Stripe webhook payment lookup
         """
         return self.db_session.query(Payment).filter(
             Payment.stripe_payment_intent_id == stripe_payment_intent_id
         ).first()
     
-    def find_by_status(self, status: PaymentStatus) -> List[Payment]:
+    def find_by_status(self, status: PaymentStatus, limit: Optional[int] = None) -> List[Payment]:
         """
         Find all payments with a specific status.
+        Used for payment monitoring and reconciliation.
         
         Args:
             status: Payment status to filter by
+            limit: Maximum number of payments to return
             
         Returns:
-            List[Payment]: List of payment instances
+            List[Payment]: List of payments with the specified status
+            
+        Requirements: 5.6 - Payment status tracking
         """
-        return self.db_session.query(Payment).filter(
+        query = self.db_session.query(Payment).filter(
             Payment.status == status
-        ).order_by(Payment.created_at.desc()).all()
-    
-    def find_with_order(self, payment_id: str) -> Optional[Payment]:
-        """
-        Find a payment by ID with its order eagerly loaded.
+        ).order_by(Payment.created_at.desc())
         
-        Args:
-            payment_id: Payment ID
-            
-        Returns:
-            Optional[Payment]: Payment instance with order if found, None otherwise
-        """
-        return self.db_session.query(Payment).options(
-            joinedload(Payment.order)
-        ).filter(Payment.id == payment_id).first()
+        if limit is not None:
+            query = query.limit(limit)
+        
+        return query.all()
     
     def update_status(self, payment_id: str, status: PaymentStatus) -> Optional[Payment]:
         """
         Update the status of a payment.
+        Used during payment processing and webhook handling.
         
         Args:
-            payment_id: Payment ID
+            payment_id: Payment's ID
             status: New payment status
             
         Returns:
             Optional[Payment]: Updated payment instance if found, None otherwise
+            
+        Requirements: 5.6 - Payment status updates during processing
         """
         return self.update(payment_id, status=status)
     
-    def update_status_by_stripe_intent(
-        self, 
-        stripe_payment_intent_id: str, 
-        status: PaymentStatus
-    ) -> Optional[Payment]:
+    def update_status_by_stripe_intent(self, stripe_payment_intent_id: str, 
+                                       status: PaymentStatus) -> Optional[Payment]:
         """
         Update payment status by Stripe Payment Intent ID.
+        Convenience method for webhook processing.
         
         Args:
             stripe_payment_intent_id: Stripe Payment Intent ID
@@ -107,75 +110,71 @@ class PaymentRepository(BaseRepository[Payment]):
             
         Returns:
             Optional[Payment]: Updated payment instance if found, None otherwise
+            
+        Requirements: 5.6 - Webhook-triggered payment status updates
         """
         payment = self.find_by_stripe_payment_intent_id(stripe_payment_intent_id)
-        if not payment:
-            return None
-        
-        return self.update(payment.id, status=status)
+        if payment:
+            return self.update(payment.id, status=status)
+        return None
     
-    def get_total_amount_by_status(self, status: PaymentStatus) -> int:
+    def create_payment(self, order_id: str, stripe_payment_intent_id: str, 
+                      amount: int, currency: str = 'jpy') -> Payment:
         """
-        Calculate total amount of payments with a specific status.
+        Create a new payment record.
         
         Args:
-            status: Payment status to filter by
+            order_id: Order's ID
+            stripe_payment_intent_id: Stripe Payment Intent ID
+            amount: Payment amount in smallest currency unit
+            currency: Currency code (default: 'jpy')
             
         Returns:
-            int: Total amount in smallest currency unit
+            Payment: Created payment instance
+            
+        Requirements: 5.5 - Payment record creation
         """
-        payments = self.find_by_status(status)
-        return sum(payment.amount for payment in payments)
+        return self.create(
+            order_id=order_id,
+            stripe_payment_intent_id=stripe_payment_intent_id,
+            amount=amount,
+            currency=currency,
+            status=PaymentStatus.PENDING
+        )
     
     def count_by_status(self, status: PaymentStatus) -> int:
         """
         Count payments with a specific status.
         
         Args:
-            status: Payment status to filter by
+            status: Payment status to count
             
         Returns:
-            int: Number of payments
+            int: Number of payments with the status
         """
         return self.db_session.query(Payment).filter(
             Payment.status == status
         ).count()
     
-    def find_successful_payments_by_order(self, order_id: str) -> List[Payment]:
+    def get_successful_payments_by_order(self, order_id: str) -> List[Payment]:
         """
-        Find all successful payments for a specific order.
+        Get all successful payments for an order.
         
         Args:
-            order_id: Order ID
+            order_id: Order's ID
             
         Returns:
-            List[Payment]: List of successful payment instances
+            List[Payment]: List of successful payments
         """
         return self.db_session.query(Payment).filter(
             Payment.order_id == order_id,
             Payment.status == PaymentStatus.SUCCEEDED
-        ).order_by(Payment.created_at.desc()).all()
+        ).all()
     
-    def has_successful_payment(self, order_id: str) -> bool:
-        """
-        Check if an order has at least one successful payment.
-        
-        Args:
-            order_id: Order ID
-            
-        Returns:
-            bool: True if order has successful payment, False otherwise
-        """
-        return self.db_session.query(
-            self.db_session.query(Payment).filter(
-                Payment.order_id == order_id,
-                Payment.status == PaymentStatus.SUCCEEDED
-            ).exists()
-        ).scalar()
-    
-    def stripe_payment_intent_exists(self, stripe_payment_intent_id: str) -> bool:
+    def stripe_intent_exists(self, stripe_payment_intent_id: str) -> bool:
         """
         Check if a Stripe Payment Intent ID already exists.
+        Prevents duplicate payment records.
         
         Args:
             stripe_payment_intent_id: Stripe Payment Intent ID to check

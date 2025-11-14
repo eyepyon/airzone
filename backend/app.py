@@ -5,6 +5,10 @@ from flask_jwt_extended import JWTManager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from config import config
+from logging_config import setup_logging
+from error_handlers import register_error_handlers
+from middleware.security import setup_security_headers
+from middleware.rate_limit import setup_rate_limiting
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -13,15 +17,28 @@ app = Flask(__name__)
 env = os.getenv('FLASK_ENV', 'development')
 app.config.from_object(config[env])
 
+# Setup structured logging
+setup_logging(app)
+
 # Initialize CORS
 CORS(app, 
      origins=app.config['CORS_ORIGINS'],
      supports_credentials=True,
-     allow_headers=['Content-Type', 'Authorization'],
+     allow_headers=['Content-Type', 'Authorization', 'X-CSRF-Token'],
      methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
 
 # Initialize JWT
 jwt = JWTManager(app)
+
+# Setup security headers
+setup_security_headers(app)
+
+# Setup rate limiting
+if app.config.get('RATELIMIT_ENABLED', True):
+    setup_rate_limiting(app)
+
+# Register error handlers
+register_error_handlers(app)
 
 # Initialize Database
 engine = create_engine(
@@ -40,6 +57,37 @@ SessionLocal = scoped_session(sessionmaker(
 ))
 
 
+# Request logging middleware
+@app.before_request
+def log_request():
+    """Log incoming requests"""
+    from flask import request
+    app.logger.info(
+        f"Incoming request: {request.method} {request.path}",
+        extra={
+            'request_method': request.method,
+            'request_path': request.path,
+            'ip_address': request.remote_addr,
+            'user_agent': request.headers.get('User-Agent')
+        }
+    )
+
+
+@app.after_request
+def log_response(response):
+    """Log outgoing responses"""
+    from flask import request
+    app.logger.info(
+        f"Response: {response.status_code}",
+        extra={
+            'request_method': request.method,
+            'request_path': request.path,
+            'status_code': response.status_code
+        }
+    )
+    return response
+
+
 # Database session management
 @app.before_request
 def create_session():
@@ -56,6 +104,10 @@ def remove_session(exception=None):
     if db is not None:
         if exception:
             db.rollback()
+            app.logger.error(
+                "Database session rolled back due to exception",
+                extra={'exception': str(exception)}
+            )
         db.close()
 
 
@@ -63,6 +115,13 @@ def remove_session(exception=None):
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
     """Handle expired JWT tokens"""
+    app.logger.warning(
+        "Expired JWT token",
+        extra={
+            'jwt_payload': jwt_payload,
+            'request_path': None  # Will be added by request context if available
+        }
+    )
     return jsonify({
         'status': 'error',
         'error': 'Token has expired',
@@ -73,6 +132,10 @@ def expired_token_callback(jwt_header, jwt_payload):
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
     """Handle invalid JWT tokens"""
+    app.logger.warning(
+        f"Invalid JWT token: {error}",
+        extra={'error': str(error)}
+    )
     return jsonify({
         'status': 'error',
         'error': 'Invalid token',
@@ -83,103 +146,15 @@ def invalid_token_callback(error):
 @jwt.unauthorized_loader
 def missing_token_callback(error):
     """Handle missing JWT tokens"""
+    app.logger.info(
+        f"Missing JWT token: {error}",
+        extra={'error': str(error)}
+    )
     return jsonify({
         'status': 'error',
         'error': 'Authorization token is missing',
         'code': 401
     }), 401
-
-
-# Global Error Handlers
-@app.errorhandler(400)
-def bad_request(error):
-    """Handle 400 Bad Request errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Bad request',
-        'code': 400
-    }), 400
-
-
-@app.errorhandler(401)
-def unauthorized(error):
-    """Handle 401 Unauthorized errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Unauthorized',
-        'code': 401
-    }), 401
-
-
-@app.errorhandler(403)
-def forbidden(error):
-    """Handle 403 Forbidden errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Forbidden',
-        'code': 403
-    }), 403
-
-
-@app.errorhandler(404)
-def not_found(error):
-    """Handle 404 Not Found errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Resource not found',
-        'code': 404
-    }), 404
-
-
-@app.errorhandler(409)
-def conflict(error):
-    """Handle 409 Conflict errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Resource conflict',
-        'code': 409
-    }), 409
-
-
-@app.errorhandler(429)
-def rate_limit_exceeded(error):
-    """Handle 429 Too Many Requests errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Rate limit exceeded',
-        'code': 429
-    }), 429
-
-
-@app.errorhandler(500)
-def internal_server_error(error):
-    """Handle 500 Internal Server Error"""
-    app.logger.error(f'Internal server error: {str(error)}', exc_info=True)
-    return jsonify({
-        'status': 'error',
-        'error': 'Internal server error',
-        'code': 500
-    }), 500
-
-
-@app.errorhandler(502)
-def bad_gateway(error):
-    """Handle 502 Bad Gateway errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Bad gateway - external service error',
-        'code': 502
-    }), 502
-
-
-@app.errorhandler(503)
-def service_unavailable(error):
-    """Handle 503 Service Unavailable errors"""
-    return jsonify({
-        'status': 'error',
-        'error': 'Service temporarily unavailable',
-        'code': 503
-    }), 503
 
 
 # Health check endpoint

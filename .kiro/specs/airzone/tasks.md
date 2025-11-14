@@ -93,27 +93,68 @@
 
     - _Requirements: 6.4, 8.4, 9.2_
   
-  - [-] 3.2 User と Wallet の Repository 実装
+  - [x] 3.2 User と Wallet の Repository 実装
+
 
 
 
 
 
     - UserRepository を作成（backend/repositories/user_repository.py）
+
+
+
+
     - WalletRepository を作成（backend/repositories/wallet_repository.py）
     - find_by_google_id, find_by_email などのカスタムクエリ
     - _Requirements: 1.2, 1.3_
 
 
   
-  - [ ] 3.3 NFT と Product の Repository 実装
+  - [x] 3.3 NFT と Product の Repository 実装
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     - NFTRepository を作成（backend/repositories/nft_repository.py）
     - ProductRepository を作成（backend/repositories/product_repository.py）
+
+
+
+
+
+
+
     - find_by_wallet, find_by_status などのフィルタリング
+
+
+
+
+
     - _Requirements: 3.4, 4.2, 4.3_
   
+
+
+
+
   - [ ] 3.4 Order、Payment、Task の Repository 実装
+
+
+
+
+
+
 
     - OrderRepository を作成（backend/repositories/order_repository.py）
 
@@ -121,6 +162,8 @@
 
 
     - PaymentRepository を作成（backend/repositories/payment_repository.py）
+
+
     - TaskRepository を作成（backend/repositories/task_repository.py）
     - ステータス更新メソッド
     - _Requirements: 5.3, 5.4, 5.5, 5.6, 10.4_
@@ -155,11 +198,17 @@
     - Webhook 署名検証
     - _Requirements: 5.5_
 
-- [ ] 5. バックグラウンドタスクマネージャーの実装
+
+
+- [x] 5. バックグラウンドタスクマネージャーの実装
+
+
 
 
 
   - [x] 5.1 TaskManager クラスの実装
+
+
 
 
     - TaskManager を作成（backend/tasks/task_manager.py）

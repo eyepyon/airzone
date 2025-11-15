@@ -18,7 +18,7 @@ class Config:
     DB_HOST = os.getenv('DB_HOST', 'localhost')
     DB_PORT = int(os.getenv('DB_PORT', 3306))
     DB_NAME = os.getenv('DB_NAME', 'airzone')
-    DB_USER = os.getenv('DB_USER', 'root')
+    DB_USER = os.getenv('DB_USER', 'airzone_user')
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
     
     # SQLAlchemy Configuration
@@ -65,9 +65,9 @@ class Config:
     ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')
     
     # Rate Limiting
-    RATELIMIT_ENABLED = True
-    RATELIMIT_DEFAULT_LIMIT = 1000  # requests
-    RATELIMIT_DEFAULT_WINDOW = 3600  # seconds (1 hour)
+    RATELIMIT_ENABLED = os.getenv('RATELIMIT_ENABLED', 'true').lower() == 'true'
+    RATELIMIT_DEFAULT_LIMIT = int(os.getenv('RATELIMIT_DEFAULT_LIMIT', 10000))  # requests
+    RATELIMIT_DEFAULT_WINDOW = int(os.getenv('RATELIMIT_DEFAULT_WINDOW', 3600))  # seconds (1 hour)
 
 
 class DevelopmentConfig(Config):

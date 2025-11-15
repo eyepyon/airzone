@@ -18,7 +18,10 @@ airzone/
   
 メンバー開発リポジトリ  
 https://github.com/Jun0908/sui-airzone  
-  
+
+ミントテストページ  
+https://nft-mint-sample.vercel.app/  
+
 
 ## Quick Links
 

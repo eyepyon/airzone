@@ -218,6 +218,10 @@ app.register_blueprint(payment_blueprint, url_prefix='/api/v1/payments')
 from routes.wifi import wifi_blueprint
 app.register_blueprint(wifi_blueprint, url_prefix='/api/v1/wifi')
 
+# Register download blueprint
+from routes.download import download_blueprint
+app.register_blueprint(download_blueprint, url_prefix='/api/v1/downloads')
+
 
 if __name__ == '__main__':
     app.run(

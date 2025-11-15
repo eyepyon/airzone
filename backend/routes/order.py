@@ -9,6 +9,7 @@ from flask import Blueprint, request, jsonify, g
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from middleware.security import validate_json_request, sanitize_query_params, InputValidator
 from services.order_service import OrderService
+from utils.activity_logger import activity_logger
 from exceptions import (
     ValidationError,
     ResourceNotFoundError,
@@ -102,6 +103,20 @@ def create_order():
         # Create order using service
         order_service = OrderService(g.db)
         order = order_service.create_order(user_id, validated_items)
+        
+        # Log purchase activity for tracking
+        try:
+            ip_address = request.remote_addr
+            user_agent = request.headers.get('User-Agent')
+            activity_logger.log_purchase(
+                user_id,
+                order['id'],
+                order['total_amount'],
+                ip_address,
+                user_agent
+            )
+        except Exception as e:
+            logger.warning(f"Failed to log purchase activity: {e}")
         
         logger.info(
             f"Order created successfully",

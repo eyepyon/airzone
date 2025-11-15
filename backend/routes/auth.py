@@ -8,6 +8,7 @@ from flask import Blueprint, request, jsonify, g, current_app
 from middleware.auth import jwt_required, get_current_user
 from services.auth_service import AuthService
 from clients.google_auth import GoogleAuthClient
+from utils.activity_logger import activity_logger
 import logging
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,14 @@ def google_auth():
         # Authenticate with Google
         auth_service = get_auth_service()
         user_dict, access_token, refresh_token = auth_service.authenticate_google(id_token)
+        
+        # Log login activity for DAU/MAU tracking
+        try:
+            ip_address = request.remote_addr
+            user_agent = request.headers.get('User-Agent')
+            activity_logger.log_login(user_dict['id'], ip_address, user_agent)
+        except Exception as e:
+            logger.warning(f"Failed to log login activity: {e}")
         
         logger.info(
             f"User authenticated successfully: {user_dict['id']}",

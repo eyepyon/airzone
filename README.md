@@ -15,6 +15,10 @@ airzone/
 ├── contracts/        # Sui Move smart contracts
 └── scripts/          # Deployment and utility scripts
 ```
+  
+メンバー開発リポジトリ  
+https://github.com/Jun0908/sui-airzone  
+  
 
 ## Quick Links
 

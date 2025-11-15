@@ -29,12 +29,22 @@ def get_auth_service() -> AuthService:
     )
     jwt_secret = current_app.config['JWT_SECRET_KEY']
     
+    # Get JWT expiration times (convert timedelta to seconds if needed)
+    jwt_access_expires = current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES', 3600)
+    jwt_refresh_expires = current_app.config.get('JWT_REFRESH_TOKEN_EXPIRES', 2592000)
+    
+    # Convert timedelta to seconds if necessary
+    if hasattr(jwt_access_expires, 'total_seconds'):
+        jwt_access_expires = int(jwt_access_expires.total_seconds())
+    if hasattr(jwt_refresh_expires, 'total_seconds'):
+        jwt_refresh_expires = int(jwt_refresh_expires.total_seconds())
+    
     return AuthService(
         db_session=db_session,
         google_client=google_client,
         jwt_secret=jwt_secret,
-        jwt_access_expires=current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES', 3600),
-        jwt_refresh_expires=current_app.config.get('JWT_REFRESH_TOKEN_EXPIRES', 2592000)
+        jwt_access_expires=jwt_access_expires,
+        jwt_refresh_expires=jwt_refresh_expires
     )
 
 

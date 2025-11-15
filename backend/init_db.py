@@ -1,6 +1,10 @@
 """
 Database initialization script.
 Creates the database and user if they don't exist.
+
+NOTE: This script requires a MySQL user with CREATE DATABASE privileges.
+For a root-free setup, use the SQL script instead:
+  mysql -u your_admin_user -p < backend/setup_database.sql
 """
 import os
 import sys
@@ -15,6 +19,10 @@ def create_database():
     """
     Create the MySQL database and user if they don't exist.
     This should be run with a MySQL user that has CREATE DATABASE privileges.
+    
+    You can specify the admin user via environment variables:
+    - DB_ADMIN_USER (defaults to 'root')
+    - DB_ADMIN_PASSWORD
     """
     # Database configuration
     db_host = os.getenv('DB_HOST', 'localhost')
@@ -23,18 +31,19 @@ def create_database():
     db_user = os.getenv('DB_USER', 'airzone_user')
     db_password = os.getenv('DB_PASSWORD', '')
     
-    # Root credentials for initial setup
-    root_user = os.getenv('DB_ROOT_USER', 'root')
-    root_password = os.getenv('DB_ROOT_PASSWORD', '')
+    # Admin credentials for initial setup (can be any user with CREATE DATABASE privileges)
+    admin_user = os.getenv('DB_ADMIN_USER', os.getenv('DB_ROOT_USER', 'root'))
+    admin_password = os.getenv('DB_ADMIN_PASSWORD', os.getenv('DB_ROOT_PASSWORD', ''))
     
     try:
         # Connect to MySQL server (without specifying database)
         print(f"Connecting to MySQL server at {db_host}:{db_port}...")
+        print(f"Using admin user: {admin_user}")
         connection = pymysql.connect(
             host=db_host,
             port=db_port,
-            user=root_user,
-            password=root_password,
+            user=admin_user,
+            password=admin_password,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
@@ -74,9 +83,11 @@ def create_database():
         print(f"\n✗ Error connecting to MySQL: {e}")
         print("\nPlease ensure:")
         print("1. MySQL server is running")
-        print("2. Root credentials are correct in .env file:")
-        print("   DB_ROOT_USER=root")
-        print("   DB_ROOT_PASSWORD=your_root_password")
+        print("2. Admin credentials are correct in .env file:")
+        print("   DB_ADMIN_USER=your_admin_user")
+        print("   DB_ADMIN_PASSWORD=your_admin_password")
+        print("\nAlternatively, use the SQL script for root-free setup:")
+        print("   mysql -u your_admin_user -p < backend/setup_database.sql")
         sys.exit(1)
     except Exception as e:
         print(f"\n✗ Error during database initialization: {e}")

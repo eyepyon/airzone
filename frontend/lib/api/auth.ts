@@ -17,7 +17,7 @@ import type {
 export async function authenticateWithGoogle(
   idToken: string
 ): Promise<AuthResponse> {
-  const response = await apiRequest<AuthResponse>('/auth/google', {
+  const response = await apiRequest<AuthResponse>('/api/v1/auth/google', {
     method: 'POST',
     body: JSON.stringify({ id_token: idToken } as GoogleAuthRequest),
   });
@@ -41,7 +41,7 @@ export async function authenticateWithGoogle(
 export async function refreshToken(
   refreshToken: string
 ): Promise<RefreshTokenResponse> {
-  const response = await apiRequest<RefreshTokenResponse>('/auth/refresh', {
+  const response = await apiRequest<RefreshTokenResponse>('/api/v1/auth/refresh', {
     method: 'POST',
     body: JSON.stringify({ refresh_token: refreshToken } as RefreshTokenRequest),
   });
@@ -59,7 +59,7 @@ export async function refreshToken(
  * @returns Current user data
  */
 export async function getCurrentUser(): Promise<User> {
-  return apiRequest<User>('/auth/me', {
+  return apiRequest<User>('/api/v1/auth/me', {
     method: 'GET',
   });
 }

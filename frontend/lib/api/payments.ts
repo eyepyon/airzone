@@ -15,7 +15,7 @@ import type {
 export async function createPaymentIntent(
   orderId: string
 ): Promise<PaymentIntentResponse> {
-  return apiRequest<PaymentIntentResponse>('/payments/intent', {
+  return apiRequest<PaymentIntentResponse>('/api/v1/payments/intent', {
     method: 'POST',
     body: JSON.stringify({ order_id: orderId } as CreatePaymentIntentRequest),
   });
@@ -27,7 +27,7 @@ export async function createPaymentIntent(
  * @returns Payment details
  */
 export async function getPaymentById(paymentId: string): Promise<Payment> {
-  return apiRequest<Payment>(`/payments/${paymentId}`, {
+  return apiRequest<Payment>(`/api/v1/payments/${paymentId}`, {
     method: 'GET',
   });
 }
@@ -40,7 +40,7 @@ export async function getPaymentById(paymentId: string): Promise<Payment> {
 export async function getPaymentByOrderId(orderId: string): Promise<Payment> {
   // Note: This assumes the backend supports querying by order_id
   // If not, you may need to get the order first and then get the payment
-  return apiRequest<Payment>(`/payments?order_id=${orderId}`, {
+  return apiRequest<Payment>(`/api/v1/payments?order_id=${orderId}`, {
     method: 'GET',
   });
 }

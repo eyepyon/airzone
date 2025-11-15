@@ -16,7 +16,7 @@ import type {
  */
 export async function getProducts(params?: QueryParams): Promise<ProductListResponse> {
   const queryString = params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : '';
-  return apiRequest<ProductListResponse>(`/products${queryString}`, {
+  return apiRequest<ProductListResponse>(`/api/v1/products${queryString}`, {
     method: 'GET',
   });
 }
@@ -27,7 +27,7 @@ export async function getProducts(params?: QueryParams): Promise<ProductListResp
  * @returns Product details
  */
 export async function getProductById(productId: string): Promise<Product> {
-  return apiRequest<Product>(`/products/${productId}`, {
+  return apiRequest<Product>(`/api/v1/products/${productId}`, {
     method: 'GET',
   });
 }
@@ -38,7 +38,7 @@ export async function getProductById(productId: string): Promise<Product> {
  * @returns Created product
  */
 export async function createProduct(productData: CreateProductRequest): Promise<Product> {
-  return apiRequest<Product>('/products', {
+  return apiRequest<Product>('/api/v1/products', {
     method: 'POST',
     body: JSON.stringify(productData),
   });
@@ -54,7 +54,7 @@ export async function updateProduct(
   productId: string,
   productData: UpdateProductRequest
 ): Promise<Product> {
-  return apiRequest<Product>(`/products/${productId}`, {
+  return apiRequest<Product>(`/api/v1/products/${productId}`, {
     method: 'PUT',
     body: JSON.stringify(productData),
   });
@@ -66,7 +66,7 @@ export async function updateProduct(
  * @returns Success status
  */
 export async function deleteProduct(productId: string): Promise<void> {
-  return apiRequest<void>(`/products/${productId}`, {
+  return apiRequest<void>(`/api/v1/products/${productId}`, {
     method: 'DELETE',
   });
 }

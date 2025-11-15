@@ -17,7 +17,7 @@ import type {
  */
 export async function getNFTs(params?: QueryParams): Promise<NFTListResponse> {
   const queryString = params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : '';
-  return apiRequest<NFTListResponse>(`/nfts${queryString}`, {
+  return apiRequest<NFTListResponse>(`/api/v1/nfts${queryString}`, {
     method: 'GET',
   });
 }
@@ -28,7 +28,7 @@ export async function getNFTs(params?: QueryParams): Promise<NFTListResponse> {
  * @returns NFT details
  */
 export async function getNFTById(nftId: string): Promise<NFT> {
-  return apiRequest<NFT>(`/nfts/${nftId}`, {
+  return apiRequest<NFT>(`/api/v1/nfts/${nftId}`, {
     method: 'GET',
   });
 }
@@ -39,7 +39,7 @@ export async function getNFTById(nftId: string): Promise<NFT> {
  * @returns Mint response with task ID
  */
 export async function mintNFT(walletAddress: string): Promise<MintNFTResponse> {
-  return apiRequest<MintNFTResponse>('/nfts/mint', {
+  return apiRequest<MintNFTResponse>('/api/v1/nfts/mint', {
     method: 'POST',
     body: JSON.stringify({ wallet_address: walletAddress } as MintNFTRequest),
   });
@@ -51,7 +51,7 @@ export async function mintNFT(walletAddress: string): Promise<MintNFTResponse> {
  * @returns Task status and NFT data if completed
  */
 export async function getNFTMintStatus(taskId: string): Promise<NFTStatusResponse> {
-  return apiRequest<NFTStatusResponse>(`/nfts/status/${taskId}`, {
+  return apiRequest<NFTStatusResponse>(`/api/v1/nfts/status/${taskId}`, {
     method: 'GET',
   });
 }

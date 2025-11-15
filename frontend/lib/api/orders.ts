@@ -14,7 +14,7 @@ import type {
  * @returns Created order
  */
 export async function createOrder(orderData: CreateOrderRequest): Promise<Order> {
-  return apiRequest<Order>('/orders', {
+  return apiRequest<Order>('/api/v1/orders', {
     method: 'POST',
     body: JSON.stringify(orderData),
   });
@@ -27,7 +27,7 @@ export async function createOrder(orderData: CreateOrderRequest): Promise<Order>
  */
 export async function getOrders(params?: QueryParams): Promise<OrderListResponse> {
   const queryString = params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : '';
-  return apiRequest<OrderListResponse>(`/orders${queryString}`, {
+  return apiRequest<OrderListResponse>(`/api/v1/orders${queryString}`, {
     method: 'GET',
   });
 }
@@ -38,7 +38,7 @@ export async function getOrders(params?: QueryParams): Promise<OrderListResponse
  * @returns Order details with items
  */
 export async function getOrderById(orderId: string): Promise<Order> {
-  return apiRequest<Order>(`/orders/${orderId}`, {
+  return apiRequest<Order>(`/api/v1/orders/${orderId}`, {
     method: 'GET',
   });
 }

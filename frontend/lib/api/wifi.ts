@@ -16,7 +16,7 @@ import type {
 export async function createWiFiSession(
   sessionData?: CreateWiFiSessionRequest
 ): Promise<WiFiSessionResponse> {
-  return apiRequest<WiFiSessionResponse>('/wifi/connect', {
+  return apiRequest<WiFiSessionResponse>('/api/v1/wifi/connect', {
     method: 'POST',
     body: JSON.stringify(sessionData || {}),
   });
@@ -31,7 +31,7 @@ export async function getWiFiSessions(
   params?: QueryParams
 ): Promise<WiFiSessionListResponse> {
   const queryString = params ? `?${new URLSearchParams(params as Record<string, string>).toString()}` : '';
-  return apiRequest<WiFiSessionListResponse>(`/wifi/sessions${queryString}`, {
+  return apiRequest<WiFiSessionListResponse>(`/api/v1/wifi/sessions${queryString}`, {
     method: 'GET',
   });
 }

@@ -1,7 +1,7 @@
 // API client for making requests to the backend
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  process.env.NEXT_PUBLIC_API_URL || 'https://api.airz.one';
 
 export class APIError extends Error {
   constructor(

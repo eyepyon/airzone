@@ -7,8 +7,8 @@ Airzone バックエンド API の完全なリファレンスドキュメント�
 ## ベース URL
 
 ```
-開発環境: http://localhost:5000/api/v1
-本番環境: https://airz.one/api/v1
+開発環境: http://localhost:5000
+本番環境: https://api.airz.one
 ```
 
 ## 認証

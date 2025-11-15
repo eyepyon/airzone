@@ -22,7 +22,8 @@ export default function NFTsPage() {
     if (user && wallet) {
       fetchNFTs();
     }
-  }, [user, wallet, authLoading, fetchNFTs, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, wallet, authLoading]);
 
   const handleMintNFT = async () => {
     if (!wallet) return;

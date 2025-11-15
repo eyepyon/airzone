@@ -29,14 +29,16 @@ export default function CheckoutPage() {
     if (!isAuthenticated) {
       router.push('/login?redirect=/checkout');
     }
-  }, [isAuthenticated, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0 && !order) {
       router.push('/shop');
     }
-  }, [items, order, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, order]);
 
   // Check NFT requirements
   useEffect(() => {

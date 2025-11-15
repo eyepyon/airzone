@@ -34,7 +34,8 @@ export default function OrdersPage() {
     };
 
     fetchOrders();
-  }, [isAuthenticated, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

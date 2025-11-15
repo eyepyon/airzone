@@ -15,7 +15,8 @@ export default function LoginPage() {
     if (isAuthenticated) {
       router.push('/dashboard');
     }
-  }, [isAuthenticated, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   const handleLoginSuccess = () => {
     router.push('/dashboard');

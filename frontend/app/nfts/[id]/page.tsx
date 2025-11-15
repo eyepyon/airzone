@@ -28,7 +28,8 @@ export default function NFTDetailPage() {
     if (user && nftId) {
       loadNFT();
     }
-  }, [user, authLoading, nftId, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading, nftId]);
 
   const loadNFT = async () => {
     try {

@@ -43,7 +43,6 @@ def upgrade() -> None:
         sa.Column('private_key_encrypted', sa.Text(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     )
     op.create_index('idx_user_id', 'wallets', ['user_id'])
     op.create_index('idx_address', 'wallets', ['address'])
@@ -61,7 +60,6 @@ def upgrade() -> None:
         sa.Column('error_message', sa.Text(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     )
     op.create_index('idx_nft_user_id', 'nft_mints', ['user_id'])
     op.create_index('idx_wallet_address', 'nft_mints', ['wallet_address'])
@@ -93,7 +91,6 @@ def upgrade() -> None:
         sa.Column('status', sa.Enum('pending', 'processing', 'completed', 'failed', 'cancelled', name='orderstatus'), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     )
     op.create_index('idx_order_user_id', 'orders', ['user_id'])
     op.create_index('idx_order_status', 'orders', ['status'])
@@ -108,8 +105,6 @@ def upgrade() -> None:
         sa.Column('unit_price', sa.Integer(), nullable=False),
         sa.Column('subtotal', sa.Integer(), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['product_id'], ['products.id']),
     )
     op.create_index('idx_order_id', 'order_items', ['order_id'])
     
@@ -124,7 +119,6 @@ def upgrade() -> None:
         sa.Column('status', sa.Enum('pending', 'processing', 'succeeded', 'failed', 'cancelled', name='paymentstatus'), nullable=False),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ondelete='CASCADE'),
     )
     op.create_index('idx_payment_order_id', 'payments', ['order_id'])
     op.create_index('idx_stripe_payment_intent_id', 'payments', ['stripe_payment_intent_id'])
@@ -139,7 +133,6 @@ def upgrade() -> None:
         sa.Column('connected_at', sa.DateTime(), nullable=False),
         sa.Column('disconnected_at', sa.DateTime(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='SET NULL'),
     )
     op.create_index('idx_wifi_user_id', 'wifi_sessions', ['user_id'])
     op.create_index('idx_mac_address', 'wifi_sessions', ['mac_address'])

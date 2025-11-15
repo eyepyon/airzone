@@ -13,9 +13,14 @@ Apache Configuration:
 import sys
 import os
 import logging
+from dotenv import load_dotenv
 
 # Add the application directory to the Python path
 sys.path.insert(0, os.path.dirname(__file__))
+
+# Load environment variables from .env file
+env_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(env_path)
 
 # Set up logging for WSGI errors
 logging.basicConfig(

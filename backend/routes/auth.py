@@ -112,6 +112,11 @@ def google_auth():
             }
         )
         
+        # Get expires_in and convert to seconds if needed
+        expires_in = current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES', 3600)
+        if hasattr(expires_in, 'total_seconds'):
+            expires_in = int(expires_in.total_seconds())
+        
         # Return success response
         return jsonify({
             'status': 'success',
@@ -120,7 +125,7 @@ def google_auth():
                 'access_token': access_token,
                 'refresh_token': refresh_token,
                 'token_type': 'Bearer',
-                'expires_in': current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES', 3600)
+                'expires_in': expires_in
             }
         }), 200
         
@@ -195,13 +200,18 @@ def refresh_token():
         
         logger.info("Access token refreshed successfully")
         
+        # Get expires_in and convert to seconds if needed
+        expires_in = current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES', 3600)
+        if hasattr(expires_in, 'total_seconds'):
+            expires_in = int(expires_in.total_seconds())
+        
         # Return success response
         return jsonify({
             'status': 'success',
             'data': {
                 'access_token': new_access_token,
                 'token_type': 'Bearer',
-                'expires_in': current_app.config.get('JWT_ACCESS_TOKEN_EXPIRES', 3600)
+                'expires_in': expires_in
             }
         }), 200
         

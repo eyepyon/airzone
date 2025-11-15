@@ -27,6 +27,7 @@ from pysui.sui.sui_txn import SyncTransaction
 from pysui.sui.sui_builders.get_builders import GetObjectsOwnedByAddress
 import logging
 import json
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -59,18 +60,38 @@ class SuiClient:
         self.package_id = package_id
         
         # Initialize Sui configuration
-        # Use the default configuration for the specified network
-        if network == 'testnet':
-            self.config = SuiConfig.default_config()
-            self.config.rpc_url = "https://fullnode.testnet.sui.io:443"
-        elif network == 'devnet':
-            self.config = SuiConfig.default_config()
-            self.config.rpc_url = "https://fullnode.devnet.sui.io:443"
-        elif network == 'mainnet':
-            self.config = SuiConfig.default_config()
-            self.config.rpc_url = "https://fullnode.mainnet.sui.io:443"
-        else:
-            raise ValueError(f"Invalid network: {network}. Must be 'testnet', 'devnet', or 'mainnet'")
+        # Create a minimal config without requiring Sui CLI
+        try:
+            # Try to use user config if it exists
+            if network == 'testnet':
+                self.config = SuiConfig.user_config(rpc_url="https://fullnode.testnet.sui.io:443")
+            elif network == 'devnet':
+                self.config = SuiConfig.user_config(rpc_url="https://fullnode.devnet.sui.io:443")
+            elif network == 'mainnet':
+                self.config = SuiConfig.user_config(rpc_url="https://fullnode.mainnet.sui.io:443")
+            else:
+                raise ValueError(f"Invalid network: {network}. Must be 'testnet', 'devnet', or 'mainnet'")
+        except Exception as e:
+            # If user config fails, create a minimal config
+            logger.warning(f"Could not load user config: {e}. Creating minimal config.")
+            
+            # Create Sui config directory if it doesn't exist
+            sui_config_dir = os.path.expanduser("~/.sui/sui_config")
+            os.makedirs(sui_config_dir, exist_ok=True)
+            
+            # Create empty keystore file if it doesn't exist
+            keystore_path = os.path.join(sui_config_dir, "sui.keystore")
+            if not os.path.exists(keystore_path):
+                with open(keystore_path, 'w') as f:
+                    json.dump([], f)
+            
+            # Try again with user config
+            if network == 'testnet':
+                self.config = SuiConfig.user_config(rpc_url="https://fullnode.testnet.sui.io:443")
+            elif network == 'devnet':
+                self.config = SuiConfig.user_config(rpc_url="https://fullnode.devnet.sui.io:443")
+            elif network == 'mainnet':
+                self.config = SuiConfig.user_config(rpc_url="https://fullnode.mainnet.sui.io:443")
         
         # Initialize sync client
         self.client = SyncClient(self.config)

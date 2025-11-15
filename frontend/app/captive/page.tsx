@@ -1,17 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { createWiFiSession } from '@/lib/api/wifi';
 import Card, { CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
 import LoginButton from '@/components/auth/LoginButton';
 import WelcomeScreen from '@/components/captive/WelcomeScreen';
 import Loading from '@/components/ui/Loading';
 
 export default function CaptivePortalPage() {
-  const router = useRouter();
   const { isAuthenticated, user, isLoading: authLoading } = useAuthStore();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isCreatingSession, setIsCreatingSession] = useState(false);

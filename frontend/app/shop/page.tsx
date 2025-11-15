@@ -17,7 +17,7 @@ export default function ShopPage() {
   const [error, setError] = useState<string | null>(null);
 
   const { user } = useAuthStore();
-  const { nfts, fetchNFTs } = useNFTStore();
+  const { fetchNFTs } = useNFTStore();
   const { addItem, getItemCount } = useCartStore();
 
   useEffect(() => {

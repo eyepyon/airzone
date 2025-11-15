@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useAuthStore } from '../../../stores/auth-store';
-import { getNFTById } from '../../../lib/api/nfts';
-import { NFT } from '../../../types';
-import Card, { CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
-import Button from '../../../components/ui/Button';
-import Loading from '../../../components/ui/Loading';
+import { useAuthStore } from '@/stores/auth-store';
+import { getNFTById } from '@/lib/api/nfts';
+import { NFT } from '@/types';
+import Card, { CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Loading from '@/components/ui/Loading';
 
 export default function NFTDetailPage() {
   const router = useRouter();

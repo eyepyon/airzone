@@ -34,7 +34,7 @@ export default function NFTsPage() {
     }
   };
 
-  const handleNFTClick = (nft: any) => {
+  const handleNFTClick = (nft: { id: string }) => {
     router.push(`/nfts/${nft.id}`);
   };
 

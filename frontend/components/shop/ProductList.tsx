@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ProductCard from './ProductCard';
 import Loading from '../ui/Loading';
 import { useCartStore } from '../../stores/cart-store';

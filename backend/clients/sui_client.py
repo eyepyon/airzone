@@ -59,12 +59,16 @@ class SuiClient:
         self.package_id = package_id
         
         # Initialize Sui configuration
+        # Use the default configuration for the specified network
         if network == 'testnet':
-            self.config = SuiConfig.testnet_config()
+            self.config = SuiConfig.default_config()
+            self.config.rpc_url = "https://fullnode.testnet.sui.io:443"
         elif network == 'devnet':
-            self.config = SuiConfig.devnet_config()
+            self.config = SuiConfig.default_config()
+            self.config.rpc_url = "https://fullnode.devnet.sui.io:443"
         elif network == 'mainnet':
-            self.config = SuiConfig.mainnet_config()
+            self.config = SuiConfig.default_config()
+            self.config.rpc_url = "https://fullnode.mainnet.sui.io:443"
         else:
             raise ValueError(f"Invalid network: {network}. Must be 'testnet', 'devnet', or 'mainnet'")
         

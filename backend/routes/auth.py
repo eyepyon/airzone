@@ -281,7 +281,11 @@ def get_current_user_info():
         # Get full user information from database
         auth_service = get_auth_service()
         from repositories.user_repository import UserRepository
+        from repositories.wallet_repository import WalletRepository
+        
         user_repo = UserRepository(g.db)
+        wallet_repo = WalletRepository(g.db)
+        
         user = user_repo.find_by_id(user_id)
         
         if not user:
@@ -295,16 +299,20 @@ def get_current_user_info():
                 'code': 404
             }), 404
         
+        # Get user's wallet
+        wallet = wallet_repo.find_by_user_id(user_id)
+        
         logger.info(
             f"Retrieved user information: {user_id}",
             extra={'user_id': user_id}
         )
         
-        # Return user information
+        # Return user and wallet information
         return jsonify({
             'status': 'success',
             'data': {
-                'user': user.to_dict()
+                'user': user.to_dict(),
+                'wallet': wallet.to_dict() if wallet else None
             }
         }), 200
         

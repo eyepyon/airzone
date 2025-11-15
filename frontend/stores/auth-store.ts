@@ -90,20 +90,41 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loadUser: async () => {
     const token = getAuthToken();
     if (!token) {
-      set({ isAuthenticated: false });
+      set({ isAuthenticated: false, isLoading: false });
       return;
     }
 
     set({ isLoading: true, error: null });
     try {
-      const user = await getCurrentUser();
+      const response = await getCurrentUser();
       set({
-        user,
+        user: response.user || response,
+        wallet: response.wallet || null,
         token,
         isAuthenticated: true,
         isLoading: false,
       });
     } catch (error) {
+      // Token might be expired, try to refresh
+      const refreshToken = getRefreshToken();
+      if (refreshToken) {
+        try {
+          await apiRefreshToken(refreshToken);
+          const newToken = getAuthToken();
+          const response = await getCurrentUser();
+          set({
+            user: response.user || response,
+            wallet: response.wallet || null,
+            token: newToken,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+          return;
+        } catch (refreshError) {
+          // Refresh failed, logout
+        }
+      }
+      
       removeAuthToken();
       removeRefreshToken();
       set({

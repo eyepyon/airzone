@@ -17,8 +17,8 @@ google-auth-oauthlib==1.2.0
 # Stripe
 stripe==7.8.0
 
-# Sui Blockchain
-pysui==0.50.0
+# XRPL Blockchain
+xrpl-py==2.5.0
 
 # Environment Variables
 python-dotenv==1.0.0

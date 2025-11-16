@@ -53,10 +53,9 @@ class Config:
     STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
     STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
     
-    # Sui Blockchain Configuration
-    SUI_NETWORK = os.getenv('SUI_NETWORK', 'testnet')
-    SUI_SPONSOR_PRIVATE_KEY = os.getenv('SUI_SPONSOR_PRIVATE_KEY', '')
-    SUI_PACKAGE_ID = os.getenv('SUI_PACKAGE_ID', '')
+    # XRPL Blockchain Configuration
+    XRPL_NETWORK = os.getenv('XRPL_NETWORK', 'testnet')
+    XRPL_SPONSOR_SEED = os.getenv('XRPL_SPONSOR_SEED', '')
     
     # CORS Configuration
     CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:3000').split(',')

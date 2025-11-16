@@ -7,7 +7,7 @@ Requirements: 3.1, 3.4, 8.2, 8.6, 8.7
 from flask import Blueprint, request, jsonify, g, current_app
 from middleware.auth import jwt_required, get_current_user
 from services.nft_service import NFTService
-from clients.sui_client import SuiClient
+from clients.xrpl_client import XRPLClient
 from tasks.task_manager import TaskManager
 from models.nft_mint import NFTMintStatus
 import logging
@@ -27,11 +27,10 @@ def get_nft_service() -> NFTService:
     """
     db_session = g.db
     
-    # Initialize Sui client with network, sponsor key, and package ID
-    sui_client = SuiClient(
-        network=current_app.config.get('SUI_NETWORK', 'testnet'),
-        sponsor_private_key=current_app.config.get('SUI_SPONSOR_PRIVATE_KEY'),
-        package_id=current_app.config.get('SUI_PACKAGE_ID')
+    # Initialize XRPL client with network and sponsor seed
+    xrpl_client = XRPLClient(
+        network=current_app.config.get('XRPL_NETWORK', 'testnet'),
+        sponsor_seed=current_app.config.get('XRPL_SPONSOR_SEED')
     )
     
     # Initialize task manager
@@ -39,7 +38,7 @@ def get_nft_service() -> NFTService:
     
     return NFTService(
         db_session=db_session,
-        sui_client=sui_client,
+        xrpl_client=xrpl_client,
         task_manager=task_manager
     )
 

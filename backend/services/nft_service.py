@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from repositories.nft_repository import NFTRepository
 from repositories.wallet_repository import WalletRepository
 from repositories.user_repository import UserRepository
-from clients.sui_client import SuiClient
+from clients.xrpl_client import XRPLClient
 from tasks.task_manager import TaskManager
 from models.nft_mint import NFTMintStatus
 
@@ -27,7 +27,7 @@ class NFTService:
     def __init__(
         self,
         db_session: Session,
-        sui_client: SuiClient,
+        xrpl_client: XRPLClient,
         task_manager: TaskManager
     ):
         """
@@ -35,14 +35,14 @@ class NFTService:
         
         Args:
             db_session: SQLAlchemy database session
-            sui_client: Sui blockchain client
+            xrpl_client: XRPL blockchain client
             task_manager: Task manager for async operations
         """
         self.db_session = db_session
         self.nft_repo = NFTRepository(db_session)
         self.wallet_repo = WalletRepository(db_session)
         self.user_repo = UserRepository(db_session)
-        self.sui_client = sui_client
+        self.xrpl_client = xrpl_client
         self.task_manager = task_manager
     
     def mint_nft(
@@ -169,22 +169,23 @@ class NFTService:
             
             logger.info(f"Starting NFT mint for record: {nft_mint_id}")
             
-            # Call Sui client to mint NFT
-            result = self.sui_client.mint_nft(
+            # Prepare NFT URI (metadata URL)
+            nft_uri = nft_image_url  # In production, this should point to a metadata JSON file
+            
+            # Call XRPL client to mint NFT
+            result = self.xrpl_client.mint_nft(
                 recipient_address=wallet_address,
-                nft_name=nft_name,
-                nft_description=nft_description,
-                nft_image_url=nft_image_url,
-                metadata=metadata,
-                use_sponsor=True
+                nft_uri=nft_uri,
+                transfer_fee=0,
+                flags=8  # tfTransferable
             )
             
             # Update NFT mint record with result
             self.nft_repo.update_status(
                 nft_mint_id,
                 NFTMintStatus.COMPLETED,
-                nft_object_id=result.get('nft_object_id'),
-                transaction_digest=result.get('transaction_digest')
+                nft_object_id=result.get('nft_token_id'),
+                transaction_digest=result.get('transaction_hash')
             )
             self.db_session.commit()
             
@@ -288,7 +289,7 @@ class NFTService:
                 return False
             
             # Check blockchain for ownership
-            owns_nft = self.sui_client.verify_nft_ownership(
+            owns_nft = self.xrpl_client.verify_nft_ownership(
                 wallet.address,
                 nft_object_id
             )

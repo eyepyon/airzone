@@ -1,5 +1,5 @@
 """
-Wallet Service for managing Sui blockchain wallets.
+Wallet Service for managing XRPL blockchain wallets.
 Handles wallet creation, encryption, and retrieval.
 
 Requirements: 1.3, 6.2
@@ -10,7 +10,7 @@ from cryptography.fernet import Fernet
 from sqlalchemy.orm import Session
 from repositories.wallet_repository import WalletRepository
 from repositories.user_repository import UserRepository
-from clients.sui_client import SuiClient
+from clients.xrpl_client import XRPLClient
 
 
 logger = logging.getLogger(__name__)
@@ -19,13 +19,13 @@ logger = logging.getLogger(__name__)
 class WalletService:
     """
     Service for wallet operations.
-    Handles Sui wallet generation, private key encryption, and wallet management.
+    Handles XRPL wallet generation, seed encryption, and wallet management.
     """
     
     def __init__(
         self,
         db_session: Session,
-        sui_client: SuiClient,
+        xrpl_client: XRPLClient,
         encryption_key: str
     ):
         """
@@ -33,35 +33,35 @@ class WalletService:
         
         Args:
             db_session: SQLAlchemy database session
-            sui_client: Sui blockchain client
-            encryption_key: Encryption key for private key storage
+            xrpl_client: XRPL blockchain client
+            encryption_key: Encryption key for seed storage
         """
         self.db_session = db_session
         self.wallet_repo = WalletRepository(db_session)
         self.user_repo = UserRepository(db_session)
-        self.sui_client = sui_client
+        self.xrpl_client = xrpl_client
         
         # Initialize Fernet cipher for encryption
         self.cipher = Fernet(encryption_key.encode() if isinstance(encryption_key, str) else encryption_key)
     
     def create_wallet(self, user_id: str) -> Dict:
         """
-        Create a new Sui wallet for a user.
-        Generates wallet address and private key, encrypts private key, and stores in database.
+        Create a new XRPL wallet for a user.
+        Generates wallet address and seed, encrypts seed, and stores in database.
         
         Args:
             user_id: User's unique identifier
             
         Returns:
-            Dict: Wallet information (without private key)
+            Dict: Wallet information (without seed)
             
         Raises:
             ValueError: If user not found or already has wallet
             Exception: If wallet creation fails
             
         Requirements:
-            - 1.3: Automatic Sui wallet creation for new users
-            - 6.2: Private key encryption and secure storage
+            - 1.3: Automatic XRPL wallet creation for new users
+            - 6.2: Seed encryption and secure storage
         """
         try:
             # Verify user exists
@@ -75,18 +75,18 @@ class WalletService:
                 logger.warning(f"User {user_id} already has a wallet")
                 return existing_wallet.to_dict()
             
-            # Generate new Sui wallet
-            logger.info(f"Generating new Sui wallet for user: {user_id}")
-            address, private_key = self.sui_client.generate_wallet()
+            # Generate new XRPL wallet
+            logger.info(f"Generating new XRPL wallet for user: {user_id}")
+            address, seed = self.xrpl_client.generate_wallet()
             
-            # Encrypt private key
-            encrypted_private_key = self._encrypt_private_key(private_key)
+            # Encrypt seed
+            encrypted_seed = self._encrypt_private_key(seed)
             
             # Create wallet record
             wallet = self.wallet_repo.create_wallet(
                 user_id=user_id,
                 address=address,
-                private_key_encrypted=encrypted_private_key
+                private_key_encrypted=encrypted_seed
             )
             
             self.db_session.commit()
@@ -124,7 +124,7 @@ class WalletService:
         Get wallet by blockchain address.
         
         Args:
-            address: Sui blockchain wallet address
+            address: XRPL blockchain wallet address
             
         Returns:
             Optional[Dict]: Wallet information or None if not found
@@ -138,13 +138,13 @@ class WalletService:
     
     def get_wallet_balance(self, user_id: str) -> int:
         """
-        Get SUI token balance for user's wallet.
+        Get XRP balance for user's wallet.
         
         Args:
             user_id: User's unique identifier
             
         Returns:
-            int: Balance in MIST (1 SUI = 1,000,000,000 MIST)
+            int: Balance in drops (1 XRP = 1,000,000 drops)
             
         Raises:
             ValueError: If user has no wallet
@@ -153,62 +153,62 @@ class WalletService:
         if not wallet:
             raise ValueError(f"User {user_id} has no wallet")
         
-        balance = self.sui_client.get_wallet_balance(wallet.address)
-        logger.info(f"Retrieved balance for user {user_id}: {balance} MIST")
+        balance = self.xrpl_client.get_wallet_balance(wallet.address)
+        logger.info(f"Retrieved balance for user {user_id}: {balance} drops")
         
         return balance
     
-    def get_decrypted_private_key(self, user_id: str) -> str:
+    def get_decrypted_seed(self, user_id: str) -> str:
         """
-        Get decrypted private key for a user's wallet.
+        Get decrypted seed for a user's wallet.
         WARNING: This should only be used for internal operations like signing transactions.
         
         Args:
             user_id: User's unique identifier
             
         Returns:
-            str: Decrypted private key
+            str: Decrypted seed
             
         Raises:
             ValueError: If user has no wallet
             
-        Requirements: 6.2 - Private key decryption for transaction signing
+        Requirements: 6.2 - Seed decryption for transaction signing
         """
         wallet = self.wallet_repo.find_by_user_id(user_id)
         if not wallet:
             raise ValueError(f"User {user_id} has no wallet")
         
-        private_key = self._decrypt_private_key(wallet.private_key_encrypted)
-        logger.info(f"Decrypted private key for user: {user_id}")
+        seed = self._decrypt_private_key(wallet.private_key_encrypted)
+        logger.info(f"Decrypted seed for user: {user_id}")
         
-        return private_key
+        return seed
     
     def _encrypt_private_key(self, private_key: str) -> str:
         """
-        Encrypt a private key using Fernet symmetric encryption.
+        Encrypt a seed/private key using Fernet symmetric encryption.
         
         Args:
-            private_key: Plain text private key
+            private_key: Plain text seed/private key
             
         Returns:
-            str: Encrypted private key
+            str: Encrypted seed/private key
             
-        Requirements: 6.2 - Private key encryption
+        Requirements: 6.2 - Seed encryption
         """
         encrypted = self.cipher.encrypt(private_key.encode())
         return encrypted.decode()
     
     def _decrypt_private_key(self, encrypted_private_key: str) -> str:
         """
-        Decrypt an encrypted private key.
+        Decrypt an encrypted seed/private key.
         
         Args:
-            encrypted_private_key: Encrypted private key
+            encrypted_private_key: Encrypted seed/private key
             
         Returns:
-            str: Decrypted private key
+            str: Decrypted seed/private key
             
-        Requirements: 6.2 - Private key decryption
+        Requirements: 6.2 - Seed decryption
         """
         decrypted = self.cipher.decrypt(encrypted_private_key.encode())
         return decrypted.decode()

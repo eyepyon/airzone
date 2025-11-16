@@ -1,6 +1,6 @@
 # Airzone
 
-WiFi-triggered NFT distribution and EC shop platform powered by Sui blockchain.
+WiFi-triggered NFT distribution and EC shop platform powered by XRPL (XRP Ledger) blockchain.
 
 ## Overview
 
@@ -12,7 +12,6 @@ Airzone is a platform that automatically distributes NFTs to users when they con
 airzone/
 ├── backend/          # Flask API server
 ├── frontend/         # Next.js web application
-├── contracts/        # Sui Move smart contracts
 └── scripts/          # Deployment and utility scripts
 ```
   
@@ -34,7 +33,7 @@ https://nft-mint-sample.vercel.app/
 
 - **Backend:** Flask 3.0 + Python 3.11+ + SQLAlchemy
 - **Frontend:** Next.js 14 + TypeScript + Tailwind CSS
-- **Blockchain:** Sui (Move)
+- **Blockchain:** XRPL (XRP Ledger)
 - **Database:** MySQL 8.0
 - **Payment:** Stripe
 - **Infrastructure:** Apache 2.4
@@ -104,7 +103,7 @@ npm run dev
 ### ✅ Completed
 - Backend API (Flask)
 - Frontend UI (Next.js)
-- Smart Contract (Sui Move)
+- XRPL Integration
 - Database Setup & Migrations
 - Deployment Infrastructure
 
@@ -126,7 +125,6 @@ npm run dev
 - Node.js 18+
 - Python 3.11+
 - MySQL 8.0
-- Sui CLI (for contract deployment)
 - Apache 2.4 (for production)
 
 ## License

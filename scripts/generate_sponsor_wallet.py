@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Generate a Sui sponsor wallet for the Airzone NFT system.
+Generate an XRPL sponsor wallet for the Airzone NFT system.
 
-This script generates a new Sui wallet that will be used as the sponsor
-wallet to pay gas fees for NFT minting transactions.
+This script generates a new XRPL wallet that will be used as the sponsor
+wallet for NFT minting transactions.
 
 Requirements: 3.3 - Sponsored transactions
 """
@@ -13,17 +13,17 @@ import os
 # Add backend to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
 
-from clients.sui_client import SuiClient
+from clients.xrpl_client import XRPLClient
 
 
 def generate_sponsor_wallet():
     """Generate a new sponsor wallet and display instructions."""
     print("=" * 70)
-    print("Airzone NFT Sponsor Wallet Generator")
+    print("Airzone NFT Sponsor Wallet Generator (XRPL)")
     print("=" * 70)
     print()
-    print("This script generates a new Sui wallet to be used as the sponsor")
-    print("wallet for NFT minting. The sponsor wallet pays gas fees for users.")
+    print("This script generates a new XRPL wallet to be used as the sponsor")
+    print("wallet for NFT minting.")
     print()
     
     # Get network choice
@@ -48,11 +48,11 @@ def generate_sponsor_wallet():
     print()
     
     try:
-        # Initialize Sui client
-        client = SuiClient(network=network)
+        # Initialize XRPL client
+        client = XRPLClient(network=network)
         
         # Generate wallet
-        address, private_key = client.generate_wallet()
+        address, seed = client.generate_wallet()
         
         print("=" * 70)
         print("Wallet Generated Successfully!")
@@ -60,16 +60,16 @@ def generate_sponsor_wallet():
         print()
         print(f"Network:      {network}")
         print(f"Address:      {address}")
-        print(f"Private Key:  {private_key}")
+        print(f"Seed:         {seed}")
         print()
-        print("⚠️  IMPORTANT: Keep the private key secure and never share it!")
+        print("⚠️  IMPORTANT: Keep the seed secure and never share it!")
         print()
         
         # Check balance
         balance = client.get_wallet_balance(address)
-        sui_balance = balance / 1_000_000_000  # Convert MIST to SUI
+        xrp_balance = balance / 1_000_000  # Convert drops to XRP
         
-        print(f"Current Balance: {balance} MIST ({sui_balance:.4f} SUI)")
+        print(f"Current Balance: {balance} drops ({xrp_balance:.6f} XRP)")
         print()
         
         if balance == 0:
@@ -79,18 +79,14 @@ def generate_sponsor_wallet():
             print()
             
             if network in ["testnet", "devnet"]:
-                print("Get test tokens from the faucet:")
+                print("Get test XRP from the faucet:")
                 print()
-                print(f"  curl --location --request POST 'https://faucet.{network}.sui.io/gas' \\")
-                print(f"    --header 'Content-Type: application/json' \\")
-                print(f"    --data-raw '{{\"FixedAmountRequest\":{{\"recipient\":\"{address}\"}}}}'")
-                print()
-                print("Or use the Sui CLI:")
-                print(f"  sui client faucet --address {address}")
+                print(f"  Visit: https://xrpl.org/xrp-testnet-faucet.html")
+                print(f"  Address: {address}")
                 print()
             else:
-                print("Transfer SUI tokens to this address to fund the sponsor wallet.")
-                print("Recommended: At least 10 SUI for production use.")
+                print("Transfer XRP to this address to fund the sponsor wallet.")
+                print("Recommended: At least 100 XRP for production use.")
                 print()
         
         print("=" * 70)
@@ -99,8 +95,8 @@ def generate_sponsor_wallet():
         print()
         print("Add the following to your backend/.env file:")
         print()
-        print(f"SUI_NETWORK={network}")
-        print(f"SUI_SPONSOR_PRIVATE_KEY={private_key}")
+        print(f"XRPL_NETWORK={network}")
+        print(f"XRPL_SPONSOR_SEED={seed}")
         print()
         print("=" * 70)
         print("Next Steps")
@@ -108,10 +104,8 @@ def generate_sponsor_wallet():
         print()
         print("1. Fund the sponsor wallet (see instructions above)")
         print("2. Add the configuration to backend/.env")
-        print("3. Deploy the NFT smart contract:")
-        print(f"   bash scripts/deploy_contract.sh {network}")
-        print("4. Test NFT minting:")
-        print("   python backend/verify_sui_client.py")
+        print("3. Test NFT minting:")
+        print("   python backend/verify_xrpl_client.py")
         print()
         
         # Save to file option
@@ -119,18 +113,18 @@ def generate_sponsor_wallet():
         if save == 'y':
             filename = f"sponsor_wallet_{network}.txt"
             with open(filename, 'w') as f:
-                f.write(f"Airzone NFT Sponsor Wallet\n")
+                f.write(f"Airzone NFT Sponsor Wallet (XRPL)\n")
                 f.write(f"=" * 70 + "\n")
                 f.write(f"\n")
                 f.write(f"Network:      {network}\n")
                 f.write(f"Address:      {address}\n")
-                f.write(f"Private Key:  {private_key}\n")
+                f.write(f"Seed:         {seed}\n")
                 f.write(f"\n")
                 f.write(f"⚠️  KEEP THIS FILE SECURE AND NEVER COMMIT TO VERSION CONTROL!\n")
                 f.write(f"\n")
                 f.write(f"Configuration for backend/.env:\n")
-                f.write(f"SUI_NETWORK={network}\n")
-                f.write(f"SUI_SPONSOR_PRIVATE_KEY={private_key}\n")
+                f.write(f"XRPL_NETWORK={network}\n")
+                f.write(f"XRPL_SPONSOR_SEED={seed}\n")
             
             print(f"\n✓ Wallet details saved to {filename}")
             print(f"⚠️  Remember to keep this file secure!")

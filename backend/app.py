@@ -234,6 +234,10 @@ app.register_blueprint(referral_blueprint, url_prefix='/api/v1/referral')
 from routes.escrow import escrow_blueprint
 app.register_blueprint(escrow_blueprint, url_prefix='/api/v1/escrow')
 
+# Register batch transfer blueprint
+from routes.batch_transfer import batch_transfer_bp
+app.register_blueprint(batch_transfer_bp, url_prefix='/api/v1')
+
 
 if __name__ == '__main__':
     app.run(

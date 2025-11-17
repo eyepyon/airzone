@@ -398,6 +398,227 @@ class XRPLClient:
             logger.error(f"Failed to finish escrow: {str(e)}")
             raise Exception(f"Escrow finish failed: {str(e)}")
     
+    def send_xrp(
+        self,
+        sender_wallet_seed: str,
+        recipient_address: str,
+        amount_xrp: float,
+        memo: Optional[str] = None
+    ) -> Dict:
+        """
+        XRPを送信
+        
+        Args:
+            sender_wallet_seed: 送信者のウォレットシード
+            recipient_address: 受取人アドレス
+            amount_xrp: 送信するXRP量
+            memo: メモ（オプション）
+            
+        Returns:
+            Dict: トランザクション結果
+        """
+        try:
+            from xrpl.wallet import Wallet
+            from xrpl.models.transactions import Payment, Memo
+            from xrpl.utils import str_to_hex
+            
+            sender_wallet = Wallet.from_seed(sender_wallet_seed)
+            amount_drops = int(amount_xrp * 1_000_000)
+            
+            logger.info(f"Sending {amount_xrp} XRP from {sender_wallet.classic_address} to {recipient_address}")
+            
+            # Payment トランザクション作成
+            payment_tx = Payment(
+                account=sender_wallet.classic_address,
+                destination=recipient_address,
+                amount=str(amount_drops)
+            )
+            
+            # メモを追加
+            if memo:
+                payment_tx.memos = [Memo(
+                    memo_data=str_to_hex(memo)
+                )]
+            
+            # トランザクション送信
+            response = submit_and_wait(payment_tx, self.client, sender_wallet)
+            
+            if response.is_successful():
+                tx_hash = response.result['hash']
+                
+                logger.info(f"✓ XRP sent successfully")
+                logger.info(f"  Transaction Hash: {tx_hash}")
+                logger.info(f"  Amount: {amount_xrp} XRP")
+                
+                return {
+                    'success': True,
+                    'transaction_hash': tx_hash,
+                    'amount_xrp': amount_xrp,
+                    'amount_drops': amount_drops,
+                    'sender': sender_wallet.classic_address,
+                    'recipient': recipient_address,
+                }
+            else:
+                error_msg = response.result.get('error', 'Unknown error')
+                logger.error(f"Payment failed: {error_msg}")
+                raise Exception(f"Payment failed: {error_msg}")
+                
+        except Exception as e:
+            logger.error(f"Failed to send XRP: {str(e)}")
+            raise Exception(f"XRP transfer failed: {str(e)}")
+    
+    def batch_send_xrp(
+        self,
+        sender_wallet_seed: str,
+        recipients: list,
+        memo: Optional[str] = None
+    ) -> Dict:
+        """
+        XRPLのBatch Transactions機能を使って複数のユーザーに一括でXRPを送信
+        
+        Batch Transactionsは、TicketSequenceを使用して複数のトランザクションを
+        並列に送信できる機能です。通常のSequenceベースの送信より効率的です。
+        
+        参考: https://xrpl.org/docs/concepts/transactions/batch-transactions
+        
+        Args:
+            sender_wallet_seed: 送信者のウォレットシード
+            recipients: 受取人リスト [{'address': str, 'amount_xrp': float}, ...]
+            memo: 全トランザクション共通のメモ（オプション）
+            
+        Returns:
+            Dict: バッチ送信結果
+        """
+        try:
+            from xrpl.wallet import Wallet
+            from xrpl.models.transactions import Payment, TicketCreate, Memo
+            from xrpl.transaction import submit_and_wait, autofill_and_sign, send_reliable_submission
+            from xrpl.utils import str_to_hex
+            
+            sender_wallet = Wallet.from_seed(sender_wallet_seed)
+            num_recipients = len(recipients)
+            
+            logger.info(f"Starting XRPL Batch Transaction to {num_recipients} recipients")
+            logger.info(f"Sender: {sender_wallet.classic_address}")
+            
+            # 送信前に残高確認
+            sender_balance = self.get_wallet_balance(sender_wallet.classic_address)
+            total_amount_drops = sum([int(r['amount_xrp'] * 1_000_000) for r in recipients])
+            estimated_fees = (num_recipients + 1) * 12  # Ticket作成 + Payment × N
+            
+            if sender_balance < (total_amount_drops + estimated_fees):
+                raise Exception(
+                    f"Insufficient balance. Required: {(total_amount_drops + estimated_fees) / 1_000_000} XRP, "
+                    f"Available: {sender_balance / 1_000_000} XRP"
+                )
+            
+            # Step 1: Ticketを作成（受取人数分）
+            logger.info(f"Step 1: Creating {num_recipients} tickets...")
+            
+            ticket_create_tx = TicketCreate(
+                account=sender_wallet.classic_address,
+                ticket_count=num_recipients
+            )
+            
+            ticket_response = submit_and_wait(ticket_create_tx, self.client, sender_wallet)
+            
+            if not ticket_response.is_successful():
+                error_msg = ticket_response.result.get('error', 'Unknown error')
+                raise Exception(f"Ticket creation failed: {error_msg}")
+            
+            # Ticketシーケンス番号を取得
+            ticket_sequence_start = ticket_response.result.get('Sequence', 0)
+            ticket_sequences = list(range(ticket_sequence_start, ticket_sequence_start + num_recipients))
+            
+            logger.info(f"✓ Created tickets: {ticket_sequences[0]} to {ticket_sequences[-1]}")
+            
+            # Step 2: 各受取人へのPaymentトランザクションを並列送信
+            logger.info(f"Step 2: Sending {num_recipients} payments using tickets...")
+            
+            results = {
+                'total': num_recipients,
+                'successful': 0,
+                'failed': 0,
+                'transactions': [],
+                'errors': [],
+                'ticket_sequence_start': ticket_sequence_start
+            }
+            
+            # 各受取人に対してTicketを使ったPaymentを送信
+            for idx, (recipient, ticket_seq) in enumerate(zip(recipients, ticket_sequences), 1):
+                try:
+                    address = recipient['address']
+                    amount_xrp = recipient['amount_xrp']
+                    amount_drops = int(amount_xrp * 1_000_000)
+                    
+                    logger.info(f"[{idx}/{num_recipients}] Sending {amount_xrp} XRP to {address} (Ticket: {ticket_seq})")
+                    
+                    # TicketSequenceを使ったPayment作成
+                    payment_tx = Payment(
+                        account=sender_wallet.classic_address,
+                        destination=address,
+                        amount=str(amount_drops),
+                        ticket_sequence=ticket_seq,
+                        sequence=0  # Ticket使用時はSequenceを0に設定
+                    )
+                    
+                    # メモを追加
+                    if memo:
+                        payment_tx.memos = [Memo(memo_data=str_to_hex(memo))]
+                    
+                    # トランザクションに署名して送信
+                    signed_tx = autofill_and_sign(payment_tx, self.client, sender_wallet)
+                    tx_response = send_reliable_submission(signed_tx, self.client)
+                    
+                    if tx_response.is_successful():
+                        tx_hash = tx_response.result['hash']
+                        
+                        results['successful'] += 1
+                        results['transactions'].append({
+                            'recipient': address,
+                            'amount_xrp': amount_xrp,
+                            'transaction_hash': tx_hash,
+                            'ticket_sequence': ticket_seq,
+                            'status': 'success'
+                        })
+                        
+                        logger.info(f"✓ [{idx}/{num_recipients}] Success: {tx_hash}")
+                    else:
+                        error_msg = tx_response.result.get('error', 'Unknown error')
+                        raise Exception(error_msg)
+                    
+                except Exception as e:
+                    error_msg = str(e)
+                    logger.error(f"✗ [{idx}/{num_recipients}] Failed: {error_msg}")
+                    
+                    results['failed'] += 1
+                    results['errors'].append({
+                        'recipient': recipient.get('address', 'unknown'),
+                        'amount_xrp': recipient.get('amount_xrp', 0),
+                        'ticket_sequence': ticket_seq,
+                        'error': error_msg
+                    })
+            
+            # 最終結果
+            logger.info(f"Batch transfer completed: {results['successful']} successful, {results['failed']} failed")
+            
+            return {
+                'success': results['failed'] == 0,
+                'summary': {
+                    'total': results['total'],
+                    'successful': results['successful'],
+                    'failed': results['failed'],
+                    'total_amount_xrp': sum([t['amount_xrp'] for t in results['transactions']]),
+                    'ticket_sequence_range': f"{ticket_sequence_start} - {ticket_sequence_start + num_recipients - 1}"
+                },
+                'transactions': results['transactions'],
+                'errors': results['errors']
+            }
+            
+        except Exception as e:
+            logger.error(f"Batch transfer failed: {str(e)}")
+            raise Exception(f"Batch transfer failed: {str(e)}")
+    
     def check_sponsor_health(self) -> Dict:
         """
         Check the health status of the sponsor wallet.

@@ -19,6 +19,7 @@ stripe==7.8.0
 
 # XRPL Blockchain
 xrpl-py==2.5.0
+websockets>=12.0
 
 # Environment Variables
 python-dotenv==1.0.0

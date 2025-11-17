@@ -172,12 +172,12 @@ export default function DashboardPage() {
         <div className="mt-8">
           <Card>
             <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               <Button
                 onClick={() => router.push('/shop')}
                 className="w-full"
               >
-                🛍️ Browse Shop
+                🛍️ Shop
               </Button>
               <Button
                 onClick={() => router.push('/staking')}
@@ -186,18 +186,24 @@ export default function DashboardPage() {
                 💎 Staking
               </Button>
               <Button
+                onClick={() => router.push('/referral')}
+                className="w-full bg-pink-600 hover:bg-pink-700"
+              >
+                🎁 Referral
+              </Button>
+              <Button
                 onClick={() => router.push('/orders')}
                 variant="secondary"
                 className="w-full"
               >
-                📦 My Orders
+                📦 Orders
               </Button>
               <Button
                 onClick={() => router.push('/nfts')}
                 variant="secondary"
                 className="w-full"
               >
-                🎨 My NFTs
+                🎨 NFTs
               </Button>
             </div>
           </Card>

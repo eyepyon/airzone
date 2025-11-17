@@ -17,6 +17,7 @@ from xrpl.transaction import submit_and_wait
 from xrpl.models.requests import AccountNFTs, AccountInfo
 from xrpl.utils import xrp_to_drops
 import xrpl
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -270,6 +271,132 @@ class XRPLClient:
         except Exception as e:
             logger.error(f"Failed to get sponsor balance: {str(e)}")
             return 0
+    
+    def create_escrow(
+        self,
+        sender_wallet_seed: str,
+        recipient_address: str,
+        amount_drops: int,
+        finish_after: int,
+        cancel_after: Optional[int] = None
+    ) -> Dict:
+        """
+        Escrowを作成（XRPをロック）
+        
+        Args:
+            sender_wallet_seed: 送信者のウォレットシード
+            recipient_address: 受取人アドレス（通常は自分自身）
+            amount_drops: ロックするXRP量（drops）
+            finish_after: ロック解除可能時刻（Unixタイムスタンプ）
+            cancel_after: キャンセル可能時刻（オプション）
+            
+        Returns:
+            Dict: トランザクション結果
+        """
+        try:
+            from xrpl.models.transactions import EscrowCreate
+            from xrpl.wallet import Wallet
+            
+            sender_wallet = Wallet.from_seed(sender_wallet_seed)
+            
+            logger.info(f"Creating escrow: {amount_drops} drops for {finish_after - int(time.time())} seconds")
+            
+            # Escrow作成トランザクション
+            escrow_tx = EscrowCreate(
+                account=sender_wallet.classic_address,
+                destination=recipient_address,
+                amount=str(amount_drops),
+                finish_after=finish_after,
+                cancel_after=cancel_after if cancel_after else finish_after + (365 * 24 * 60 * 60)  # 1年後
+            )
+            
+            # トランザクション送信
+            response = submit_and_wait(escrow_tx, self.client, sender_wallet)
+            
+            if response.is_successful():
+                tx_hash = response.result['hash']
+                
+                # Escrow Sequence番号を取得
+                escrow_sequence = response.result.get('Sequence', 0)
+                
+                logger.info(f"✓ Escrow created successfully")
+                logger.info(f"  Transaction Hash: {tx_hash}")
+                logger.info(f"  Escrow Sequence: {escrow_sequence}")
+                logger.info(f"  Amount: {amount_drops} drops ({amount_drops / 1_000_000} XRP)")
+                logger.info(f"  Unlock Time: {finish_after}")
+                
+                return {
+                    'success': True,
+                    'transaction_hash': tx_hash,
+                    'escrow_sequence': escrow_sequence,
+                    'amount_drops': amount_drops,
+                    'finish_after': finish_after,
+                    'sender': sender_wallet.classic_address,
+                    'recipient': recipient_address,
+                }
+            else:
+                error_msg = response.result.get('error', 'Unknown error')
+                logger.error(f"Escrow creation failed: {error_msg}")
+                raise Exception(f"Escrow creation failed: {error_msg}")
+                
+        except Exception as e:
+            logger.error(f"Failed to create escrow: {str(e)}")
+            raise Exception(f"Escrow creation failed: {str(e)}")
+    
+    def finish_escrow(
+        self,
+        finisher_wallet_seed: str,
+        owner_address: str,
+        escrow_sequence: int
+    ) -> Dict:
+        """
+        Escrowを完了（XRPをリリース）
+        
+        Args:
+            finisher_wallet_seed: 完了実行者のウォレットシード
+            owner_address: Escrowオーナーのアドレス
+            escrow_sequence: Escrowシーケンス番号
+            
+        Returns:
+            Dict: トランザクション結果
+        """
+        try:
+            from xrpl.models.transactions import EscrowFinish
+            from xrpl.wallet import Wallet
+            
+            finisher_wallet = Wallet.from_seed(finisher_wallet_seed)
+            
+            logger.info(f"Finishing escrow: sequence {escrow_sequence}")
+            
+            # Escrow完了トランザクション
+            finish_tx = EscrowFinish(
+                account=finisher_wallet.classic_address,
+                owner=owner_address,
+                offer_sequence=escrow_sequence
+            )
+            
+            # トランザクション送信
+            response = submit_and_wait(finish_tx, self.client, finisher_wallet)
+            
+            if response.is_successful():
+                tx_hash = response.result['hash']
+                
+                logger.info(f"✓ Escrow finished successfully")
+                logger.info(f"  Transaction Hash: {tx_hash}")
+                
+                return {
+                    'success': True,
+                    'transaction_hash': tx_hash,
+                    'escrow_sequence': escrow_sequence,
+                }
+            else:
+                error_msg = response.result.get('error', 'Unknown error')
+                logger.error(f"Escrow finish failed: {error_msg}")
+                raise Exception(f"Escrow finish failed: {error_msg}")
+                
+        except Exception as e:
+            logger.error(f"Failed to finish escrow: {str(e)}")
+            raise Exception(f"Escrow finish failed: {str(e)}")
     
     def check_sponsor_health(self) -> Dict:
         """

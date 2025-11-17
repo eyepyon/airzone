@@ -230,6 +230,10 @@ app.register_blueprint(wallet_blueprint, url_prefix='/api/v1/wallet')
 from routes.referral import referral_blueprint
 app.register_blueprint(referral_blueprint, url_prefix='/api/v1/referral')
 
+# Register escrow blueprint
+from routes.escrow import escrow_blueprint
+app.register_blueprint(escrow_blueprint, url_prefix='/api/v1/escrow')
+
 
 if __name__ == '__main__':
     app.run(

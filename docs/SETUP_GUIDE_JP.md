@@ -408,10 +408,17 @@ pip install -r requirements.txt
 
 ## 次のステップ
 
-1. **本番環境デプロイ**: [DEPLOYMENT_CHECKLIST.md](../DEPLOYMENT_CHECKLIST.md)を参照
-2. **XRPL統合**: [xrpl-integration.md](xrpl-integration.md)を参照
-3. **効果測定**: [analytics-dashboard.md](analytics-dashboard.md)を参照
-4. **API リファレンス**: [backend/API_REFERENCE.md](../backend/API_REFERENCE.md)を参照
+### ブロックチェーン統合
+1. **XRPL基本**: [xrpl-integration.md](xrpl-integration.md)を参照
+2. **Xaman Wallet**: [xaman-wallet-integration.md](xaman-wallet-integration.md)を参照
+
+### 本番環境
+1. **デプロイ**: [DEPLOYMENT_CHECKLIST.md](../DEPLOYMENT_CHECKLIST.md)を参照
+2. **運用**: [OPERATIONS.md](../OPERATIONS.md)を参照
+
+### 機能拡張
+1. **効果測定**: [analytics-dashboard.md](analytics-dashboard.md)を参照
+2. **API リファレンス**: [backend/API_REFERENCE.md](../backend/API_REFERENCE.md)を参照
 
 ## サポート
 

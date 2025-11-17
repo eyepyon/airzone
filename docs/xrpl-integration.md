@@ -160,9 +160,35 @@ if not health['healthy']:
 tail -f backend/logs/app.log
 ```
 
+## Xaman Wallet統合
+
+ユーザーは自分のXaman Wallet（旧Xumm）を接続してNFTを受け取ることができます。
+
+### ドキュメント
+
+- **ユーザー向け**: [ウォレット管理ガイド](WALLET_GUIDE_JP.md)
+- **開発者向け**: [Xaman Wallet統合ガイド](xaman-wallet-integration.md)
+
+### 自動ウォレット vs Xaman Wallet
+
+| 機能 | 自動ウォレット | Xaman Wallet |
+|------|--------------|--------------|
+| 生成 | 自動 | ユーザーが接続 |
+| 秘密鍵管理 | バックエンド | ユーザー |
+| セキュリティ | 標準 | 高 |
+| 使いやすさ | 簡単 | 要アプリ |
+
+## 関連ドキュメント
+
+- [ウォレット管理ガイド](WALLET_GUIDE_JP.md) - ユーザー向け
+- [Xaman Wallet統合ガイド](xaman-wallet-integration.md) - 開発者向け
+- [セットアップガイド](SETUP_GUIDE_JP.md) - 初期設定
+
 ## 参考リンク
 
 - [XRPL公式ドキュメント](https://xrpl.org/)
 - [NFT機能ガイド](https://xrpl.org/nft-conceptual-overview.html)
 - [xrpl-py ライブラリ](https://xrpl-py.readthedocs.io/)
 - [テストネットフォーセット](https://xrpl.org/xrp-testnet-faucet.html)
+- [Xaman Wallet](https://xaman.app/)
+- [Xaman SDK](https://xumm.readme.io/)

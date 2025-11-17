@@ -11,6 +11,7 @@ Airzoneは、WiFi接続をトリガーとしてNFTを自動配布し、NFT保有
 - **WiFiトリガーNFT配布**: 特定のWiFiに接続すると自動的にNFTを発行
 - **Google OAuth認証**: 簡単なユーザー登録・ログイン
 - **自動ウォレット生成**: ユーザー登録時にXRPLウォレットを自動作成
+- **Xaman Wallet対応**: ユーザーが自分のXaman Walletを接続可能
 - **NFT保有者限定商品**: NFT保有者のみが購入できる商品設定
 - **Stripe決済**: クレジットカード決済に対応
 - **管理パネル**: ユーザー、商品、注文、NFTの管理
@@ -126,12 +127,21 @@ php artisan serve
 
 ## ドキュメント
 
+### セットアップ
 - [完全セットアップガイド](docs/SETUP_GUIDE_JP.md)
+- [クイックスタート](GETTING_STARTED_JP.md)
+
+### ブロックチェーン
 - [XRPL統合ガイド](docs/xrpl-integration.md)
-- [効果測定ダッシュボード](docs/analytics-dashboard.md)
+- [Xaman Wallet統合ガイド](docs/xaman-wallet-integration.md)
+- [ブロックチェーン移行](BLOCKCHAIN_MIGRATION.md)
+
+### 管理
 - [管理パネルガイド](admin/README.md)
 - [管理パネルインストール](admin/INSTALL.md)
-- [ブロックチェーン移行](BLOCKCHAIN_MIGRATION.md)
+- [効果測定ダッシュボード](docs/analytics-dashboard.md)
+
+### API
 - [API リファレンス](backend/API_REFERENCE.md)
 
 ## システム要件
@@ -172,9 +182,19 @@ php artisan serve
 - ログファイル: `backend/logs/app.log`
 - Laravelログ: `admin/storage/logs/laravel.log`
 
+## Xaman Wallet対応
+
+ユーザーは自分のXaman Wallet（旧Xumm）を接続してNFTを受け取ることができます。
+
+### ドキュメント
+
+- **ユーザー向け**: [ウォレット管理ガイド](docs/WALLET_GUIDE_JP.md)
+- **開発者向け**: [Xaman Wallet統合ガイド](docs/xaman-wallet-integration.md)
+
 ## 参考リンク
 
 - [XRPL公式ドキュメント](https://xrpl.org/)
 - [Flask公式ドキュメント](https://flask.palletsprojects.com/)
 - [Next.js公式ドキュメント](https://nextjs.org/docs)
 - [Laravel公式ドキュメント](https://laravel.com/docs/10.x)
+- [Xaman Wallet](https://xaman.app/)

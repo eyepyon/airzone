@@ -231,9 +231,20 @@ taskkill /PID <PID> /F  # Windows
 2. **Stripe設定**: [Stripe Dashboard](https://dashboard.stripe.com/)でAPIキーを取得
 3. **本番環境デプロイ**: [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)を参照
 
-## 参考資料
+## 関連ドキュメント
 
-- [XRPL統合ガイド](docs/xrpl-integration.md)
-- [効果測定ダッシュボード](docs/analytics-dashboard.md)
+### セットアップ
+- [完全セットアップガイド](docs/SETUP_GUIDE_JP.md)
 - [管理パネルインストール](admin/INSTALL.md)
+
+### ブロックチェーン
+- [XRPL統合ガイド](docs/xrpl-integration.md)
+- [Xaman Wallet統合](docs/xaman-wallet-integration.md)
+- [ブロックチェーン移行](BLOCKCHAIN_MIGRATION.md)
+
+### 機能
+- [効果測定ダッシュボード](docs/analytics-dashboard.md)
+- [管理パネルガイド](admin/README.md)
+
+### API
 - [API リファレンス](backend/API_REFERENCE.md)

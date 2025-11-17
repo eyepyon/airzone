@@ -233,8 +233,30 @@ DB_USERNAME=airzone_user
 DB_PASSWORD=your_password
 ```
 
-## 参考資料
+## ウォレット管理
 
+### ウォレットタイプ
+
+ユーザーは2種類のウォレットを使用できます：
+
+1. **自動生成ウォレット**: ユーザー登録時に自動作成
+2. **Xaman Wallet**: ユーザーが自分のXaman Walletを接続
+
+管理パネルでは両方のウォレットタイプを確認できます。
+
+## 関連ドキュメント
+
+### セットアップ
 - [インストールガイド](INSTALL.md)
+- [完全セットアップガイド](../docs/SETUP_GUIDE_JP.md)
+
+### 機能
 - [効果測定ダッシュボード](../docs/analytics-dashboard.md)
+- [ウォレット管理](../docs/xaman-wallet-integration.md)
+
+### ブロックチェーン
+- [XRPL統合](../docs/xrpl-integration.md)
+- [Xaman Wallet統合](../docs/xaman-wallet-integration.md)
+
+### 参考
 - [Laravel 10 ドキュメント](https://laravel.com/docs/10.x)

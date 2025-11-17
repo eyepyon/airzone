@@ -222,6 +222,10 @@ app.register_blueprint(wifi_blueprint, url_prefix='/api/v1/wifi')
 from routes.download import download_blueprint
 app.register_blueprint(download_blueprint, url_prefix='/api/v1/downloads')
 
+# Register wallet blueprint
+from routes.wallet import wallet_blueprint
+app.register_blueprint(wallet_blueprint, url_prefix='/api/v1/wallet')
+
 
 if __name__ == '__main__':
     app.run(

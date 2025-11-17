@@ -90,7 +90,8 @@ export default function CheckoutPage() {
     if (user && items.length > 0) {
       checkNFTRequirements();
     }
-  }, [user, items, nfts, fetchNFTs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, items.length]);
 
   // Create order
   const handleCreateOrder = async () => {

@@ -2,6 +2,9 @@
 
 WiFiトリガー型NFT配布とECショッププラットフォーム（XRPL ブロックチェーン搭載）
 
+PV  
+https://youtu.be/atGWUDFrQtA  
+
 Pitch資料  
 https://www.canva.com/design/DAG4wX75q2Q/8x4YbLt6gLt0rS4JGVMSMA/view?utm_content=DAG4wX75q2Q&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h44c606fe9d
 

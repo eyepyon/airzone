@@ -489,8 +489,9 @@ If you encounter issues, please check:
 - [Laravel Official Documentation](https://laravel.com/docs/10.x)
 - [Xaman Wallet](https://xaman.app/)
 
-## Pitch & Website
+## PV & Pitch & Website
 
+- **PV**: https://youtu.be/atGWUDFrQtA  
 - **Pitch Deck**: https://www.canva.com/design/DAG4wX75q2Q/8x4YbLt6gLt0rS4JGVMSMA/view
 - **Website**: https://airz.one/
 

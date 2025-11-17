@@ -1,5 +1,9 @@
 # Airzone
 
+Japanese README:  
+https://github.com/eyepyon/airzone/blob/main/README_JP.md  
+ 
+
 WiFi-triggered NFT distribution and e-commerce shop platform powered by XRPL (XRP Ledger) blockchain.
 
 ## Overview

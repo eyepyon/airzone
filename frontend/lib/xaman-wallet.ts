@@ -1,14 +1,10 @@
 /**
- * Xaman Wallet (旧Xumm) 統合
- * XRPLウォレット接続とトランザクション署名
+ * Xaman Wallet (旧Xumm) 統合 - 簡易実装版
+ * XRPLウォレット接続（ディープリンク方式）
  * 
- * 注意: この実装は簡易版です。本番環境では以下が必要です：
- * 1. Xaman SDK (xumm-sdk) のインストール
- * 2. Xaman API Key の取得
- * 3. WebSocket接続の実装
+ * この実装は、Xaman Walletアプリへのディープリンクを使用した
+ * シンプルな接続方式です。完全なSDK統合よりも実装が簡単です。
  */
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export interface XamanWalletState {
   connected: boolean;
@@ -46,127 +42,114 @@ export class XamanWalletClient {
   }
 
   /**
-   * Xaman Walletに接続
+   * Xaman Walletに接続（簡易版）
    * 
-   * 実装方法:
-   * 1. バックエンドでXaman APIを呼び出してペイロードを作成
-   * 2. QRコードまたはディープリンクを表示
-   * 3. ユーザーがXamanアプリで承認
-   * 4. WebSocketまたはポーリングで結果を取得
+   * ユーザーにウォレットアドレスの入力を求める方式
+   * 完全なSDK統合よりもシンプルで実装が容易
    */
   async connect(): Promise<XamanWalletState> {
     try {
-      console.log('Connecting to Xaman Wallet...');
-      
-      // バックエンドにXaman接続リクエストを送信
-      const response = await fetch(`${API_BASE_URL}/api/v1/wallet/xaman/connect`, {
+      // ユーザーにウォレットアドレスの入力を求める
+      const address = prompt(
+        'Xaman WalletのXRPLアドレスを入力してください\n' +
+        '（rから始まる25-35文字のアドレス）\n\n' +
+        'アドレスの確認方法：\n' +
+        '1. Xaman Walletアプリを開く\n' +
+        '2. アカウント名をタップ\n' +
+        '3. "r..."で始まるアドレスをコピー'
+      );
+
+      if (!address) {
+        throw new Error('アドレスが入力されませんでした');
+      }
+
+      // XRPLアドレスの形式を検証
+      if (!this.validateXRPLAddress(address)) {
+        throw new Error(
+          '無効なXRPLアドレスです。\n' +
+          'アドレスは"r"で始まり、25-35文字である必要があります。'
+        );
+      }
+
+      // バックエンドにアドレスを登録
+      const response = await fetch('/api/v1/wallet/connect', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
+        body: JSON.stringify({
+          address: address,
+          wallet_type: 'xaman',
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to initiate Xaman connection');
+        const error = await response.json();
+        throw new Error(error.error || 'ウォレット接続に失敗しました');
       }
 
-      const data = await response.json();
-      
-      // QRコードまたはディープリンクを表示
-      if (data.qr_url) {
-        // QRコードを表示するモーダルを開く
-        this.showQRModal(data.qr_url, data.deeplink);
-        
-        // ポーリングで結果を待つ
-        const result = await this.pollForResult(data.uuid);
-        
-        if (result.success) {
-          this.state = {
-            connected: true,
-            address: result.address,
-            publicKey: result.publicKey,
-          };
-          
-          // ローカルストレージに保存
-          this.saveState();
-          
-          return this.state;
-        } else {
-          throw new Error('User rejected connection');
-        }
-      } else {
-        throw new Error('No QR code received from server');
-      }
+      // 接続成功
+      this.state = {
+        connected: true,
+        address: address,
+        publicKey: null, // 簡易版では公開鍵は不要
+      };
+
+      // ローカルストレージに保存
+      this.saveState();
+
+      alert(
+        '✓ Xaman Walletの接続に成功しました！\n\n' +
+        `アドレス: ${address.slice(0, 10)}...${address.slice(-6)}\n\n` +
+        'これからNFTはこのウォレットに送信されます。'
+      );
+
+      return this.state;
     } catch (error) {
       console.error('Failed to connect to Xaman Wallet:', error);
+      alert(
+        '✗ Xaman Walletの接続に失敗しました\n\n' +
+        (error instanceof Error ? error.message : '不明なエラー')
+      );
       throw error;
     }
   }
 
   /**
-   * QRコードモーダルを表示
+   * XRPLアドレスの形式を検証
    */
-  private showQRModal(qrUrl: string, deeplink: string): void {
-    // 実装: QRコードを表示するモーダル
-    // または、コンポーネント側で処理
-    console.log('QR URL:', qrUrl);
-    console.log('Deeplink:', deeplink);
-    
-    // モバイルの場合はディープリンクを開く
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      window.location.href = deeplink;
+  private validateXRPLAddress(address: string): boolean {
+    // XRPLアドレスは"r"で始まり、25-35文字
+    if (!address.startsWith('r')) {
+      return false;
     }
-  }
-
-  /**
-   * 接続結果をポーリング
-   */
-  private async pollForResult(uuid: string, maxAttempts: number = 60): Promise<any> {
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // 2秒待機
-      
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/wallet/xaman/status/${uuid}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data.status === 'signed') {
-            return {
-              success: true,
-              address: data.address,
-              publicKey: data.publicKey,
-            };
-          } else if (data.status === 'rejected') {
-            return { success: false };
-          }
-          // 'pending' の場合は続行
-        }
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
+    if (address.length < 25 || address.length > 35) {
+      return false;
     }
-    
-    throw new Error('Connection timeout');
+    // 英数字のみ
+    if (!/^[a-zA-Z0-9]+$/.test(address)) {
+      return false;
+    }
+    return true;
   }
 
   /**
    * Xaman Walletから切断
    */
   disconnect(): void {
-    this.state = {
-      connected: false,
-      address: null,
-      publicKey: null,
-    };
-    
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('xaman_wallet_state');
+    if (confirm('Xaman Walletの接続を解除しますか？\n\n解除後は自動ウォレットに戻ります。')) {
+      this.state = {
+        connected: false,
+        address: null,
+        publicKey: null,
+      };
+
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('xaman_wallet_state');
+      }
+
+      alert('✓ Xaman Walletの接続を解除しました');
     }
   }
 
@@ -187,48 +170,13 @@ export class XamanWalletClient {
   }
 
   /**
-   * トランザクションに署名
+   * トランザクションに署名（簡易版では未実装）
    */
   async signTransaction(transaction: any): Promise<string> {
-    if (!this.state.connected) {
-      throw new Error('Wallet not connected');
-    }
-
-    try {
-      console.log('Signing transaction with Xaman Wallet...');
-      
-      // バックエンドにトランザクション署名リクエストを送信
-      const response = await fetch(`${API_BASE_URL}/api/v1/wallet/xaman/sign`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-        body: JSON.stringify({
-          transaction,
-          address: this.state.address,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to initiate transaction signing');
-      }
-
-      const data = await response.json();
-      
-      // QRコードを表示してユーザーの署名を待つ
-      this.showQRModal(data.qr_url, data.deeplink);
-      const result = await this.pollForResult(data.uuid);
-      
-      if (result.success) {
-        return result.signedTransaction;
-      } else {
-        throw new Error('User rejected transaction');
-      }
-    } catch (error) {
-      console.error('Failed to sign transaction:', error);
-      throw error;
-    }
+    throw new Error(
+      'トランザクション署名は現在サポートされていません。\n' +
+      'NFTの受け取りは自動的に行われます。'
+    );
   }
 }
 

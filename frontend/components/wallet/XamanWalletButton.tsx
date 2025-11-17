@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { xamanWallet, XamanWalletState } from '@/lib/xaman-wallet';
 
 export default function XamanWalletButton() {
-  const [walletState, setWalletState] = useState<XamanWalletState>({
-    connected: false,
-    address: null,
-    publicKey: null,
-  });
+  const [walletState, setWalletState] = useState<XamanWalletState>(
+    xamanWallet.getState()
+  );
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // 初期状態を取得
+    setWalletState(xamanWallet.getState());
+  }, []);
 
   const handleConnect = async () => {
     setLoading(true);
@@ -17,22 +20,11 @@ export default function XamanWalletButton() {
       const state = await xamanWallet.connect();
       setWalletState(state);
       
-      // バックエンドにウォレットアドレスを送信
-      // ユーザーのウォレットとして登録
-      await fetch('/api/v1/wallet/connect', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-        body: JSON.stringify({
-          address: state.address,
-          wallet_type: 'xaman',
-        }),
-      });
+      // ページをリロードして最新の状態を反映
+      setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       console.error('Failed to connect wallet:', error);
-      alert('ウォレット接続に失敗しました');
+      // エラーはxamanWallet.connect()内で表示される
     } finally {
       setLoading(false);
     }
@@ -45,20 +37,23 @@ export default function XamanWalletButton() {
       address: null,
       publicKey: null,
     });
+    
+    // ページをリロードして最新の状態を反映
+    setTimeout(() => window.location.reload(), 500);
   };
 
-  if (walletState.connected) {
+  if (walletState.connected && walletState.address) {
     return (
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-lg">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span className="text-sm font-medium text-green-800">
-            {walletState.address?.slice(0, 8)}...{walletState.address?.slice(-6)}
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-sm font-medium text-green-800 font-mono">
+            {walletState.address.slice(0, 8)}...{walletState.address.slice(-6)}
           </span>
         </div>
         <button
           onClick={handleDisconnect}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
         >
           切断
         </button>
@@ -70,7 +65,7 @@ export default function XamanWalletButton() {
     <button
       onClick={handleConnect}
       disabled={loading}
-      className="flex items-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl"
     >
       {loading ? (
         <>

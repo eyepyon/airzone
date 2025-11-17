@@ -2,6 +2,18 @@
 
 WiFi-triggered NFT distribution and EC shop platform powered by XRPL (XRP Ledger) blockchain.
 
+Pitch deck  
+https://www.canva.com/design/DAG4wX75q2Q/8x4YbLt6gLt0rS4JGVMSMA/view?utm_content=DAG4wX75q2Q&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h44c606fe9d
+
+
+Website  
+https://airz.one/  
+
+Target Prize  
+XRPL Main Track  
+XRPL Deep Track  
+
+
 ## Overview
 
 Airzone is a platform that automatically distributes NFTs to users when they connect to WiFi through a captive portal, and allows them to use those NFTs to purchase products in an integrated e-commerce shop.
@@ -14,9 +26,6 @@ airzone/
 ├── frontend/         # Next.js web application
 └── scripts/          # Deployment and utility scripts
 ```
-  
-ミントテストページ  
-https://nft-mint-sample.vercel.app/  
 
 
 ## Quick Links

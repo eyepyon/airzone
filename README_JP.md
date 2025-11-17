@@ -2,6 +2,16 @@
 
 WiFiトリガー型NFT配布とECショッププラットフォーム（XRPL ブロックチェーン搭載）
 
+Pitch資料  
+https://www.canva.com/design/DAG4wX75q2Q/8x4YbLt6gLt0rS4JGVMSMA/view?utm_content=DAG4wX75q2Q&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h44c606fe9d
+
+Website  
+https://airz.one/  
+
+対象Prize
+XRPL Main Track
+XRPL Deep Track
+
 ## 概要
 
 Airzoneは、WiFi接続をトリガーとしてNFTを自動配布し、NFT保有者限定の商品販売を行う次世代プラットフォームです。XRPL (XRP Ledger) ブロックチェーンを使用して、高速・低コストでNFTを発行し、革新的なユーザー体験を提供します。

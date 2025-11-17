@@ -5,8 +5,8 @@ XRPLのBatch Transactions機能を使った一括送金サービス
 import logging
 from typing import Dict, List
 from datetime import datetime
-from backend.clients.xrpl_client import XRPLClient
-from backend.database.connection import get_db_connection
+from clients.xrpl_client import XRPLClient
+from database.connection import get_db_connection
 
 logger = logging.getLogger(__name__)
 

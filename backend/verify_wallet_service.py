@@ -17,7 +17,7 @@ from models.base import Base
 from models.user import User
 from models.wallet import Wallet
 from services.wallet_service import WalletService
-from clients.sui_client import SuiClient
+from clients.xrpl_client import XRPLClient
 
 
 def test_wallet_service():
@@ -37,14 +37,14 @@ def test_wallet_service():
         encryption_key = Fernet.generate_key()
         print(f"\n✓ Generated encryption key")
         
-        # Initialize SuiClient (testnet)
-        sui_client = SuiClient(network='testnet')
-        print(f"✓ Initialized SuiClient on testnet")
+        # Initialize XRPLClient (testnet)
+        xrpl_client = XRPLClient(network='testnet')
+        print(f"✓ Initialized XRPLClient on testnet")
         
         # Initialize WalletService
         wallet_service = WalletService(
             db_session=db_session,
-            sui_client=sui_client,
+            xrpl_client=xrpl_client,
             encryption_key=encryption_key
         )
         print(f"✓ Initialized WalletService")
@@ -190,7 +190,7 @@ def test_wallet_service():
         print("Implementation Summary")
         print("=" * 60)
         print("\nWalletService successfully implements:")
-        print("  ✓ Sui wallet generation (Requirement 1.3)")
+        print("  ✓ XRPL wallet generation (Requirement 1.3)")
         print("  ✓ Private key encryption using Fernet (Requirement 6.2)")
         print("  ✓ Secure private key storage (Requirement 6.2)")
         print("  ✓ Wallet retrieval by user ID")
@@ -198,13 +198,13 @@ def test_wallet_service():
         print("  ✓ Private key decryption for internal operations")
         print("  ✓ Duplicate wallet prevention")
         print("  ✓ Error handling for invalid inputs")
-        print("  ✓ Integration with SuiClient and WalletRepository")
+        print("  ✓ Integration with XRPLClient and WalletRepository")
         
         print("\nKey Features:")
         print("  • Uses cryptography.Fernet for symmetric encryption")
         print("  • Excludes private keys from public API responses")
         print("  • Provides secure decryption for transaction signing")
-        print("  • Integrates with Sui blockchain for wallet generation")
+        print("  • Integrates with XRPL blockchain for wallet generation")
         print("  • Follows repository pattern for data access")
         
         return True

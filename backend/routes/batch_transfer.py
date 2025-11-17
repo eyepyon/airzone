@@ -3,9 +3,9 @@ Batch Transfer API Routes
 XRPLのBatch Transactions機能を使った一括送金API
 """
 from flask import Blueprint, request, jsonify
-from backend.services.batch_transfer_service import BatchTransferService
-from backend.clients.xrpl_client import XRPLClient
-from backend.middleware.auth import require_auth, require_admin
+from services.batch_transfer_service import BatchTransferService
+from clients.xrpl_client import XRPLClient
+from middleware.auth import require_auth, require_admin
 import os
 import logging
 

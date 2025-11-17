@@ -316,3 +316,72 @@ def require_role(role: str) -> Callable:
         return decorated_function
     
     return decorator
+
+
+def require_admin(f: Callable) -> Callable:
+    """
+    Decorator to require admin privileges.
+    
+    This decorator ensures the user is authenticated and has admin privileges.
+    Currently checks if user has 'is_admin' flag in the database.
+    
+    Usage:
+        @app.route('/admin/users')
+        @require_admin
+        def admin_users(current_user):
+            return jsonify({'users': get_all_users()})
+    
+    Args:
+        f: The route function to protect
+        
+    Returns:
+        Callable: Wrapped function with admin authentication
+    """
+    @wraps(f)
+    @jwt_required
+    def decorated_function(*args, **kwargs):
+        from database.connection import get_db_connection
+        
+        user = get_current_user()
+        user_id = user['user_id']
+        
+        try:
+            # Check if user is admin
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+            
+            cursor.execute(
+                "SELECT is_admin FROM users WHERE id = %s",
+                (user_id,)
+            )
+            user_data = cursor.fetchone()
+            
+            cursor.close()
+            conn.close()
+            
+            if not user_data or not user_data.get('is_admin'):
+                logger.warning(
+                    f"Admin access denied for user {user_id} to {request.endpoint}"
+                )
+                return jsonify({
+                    'status': 'error',
+                    'error': 'Admin privileges required',
+                    'code': 403
+                }), 403
+            
+            logger.info(
+                f"Admin access granted: user {user_id} accessing {request.endpoint}"
+            )
+            
+            # Pass current_user to the route function
+            return f(user, *args, **kwargs)
+            
+        except Exception as e:
+            logger.error(f"Error checking admin privileges: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'error': 'Authorization check failed',
+                'code': 500
+            }), 500
+    
+    return decorated_function

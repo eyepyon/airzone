@@ -2,6 +2,7 @@
 
 import { useAuthStore } from '@/stores/auth-store';
 import { useRouter } from 'next/navigation';
+import Layout from '@/components/layout/Layout';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Loading from '@/components/ui/Loading';
@@ -13,8 +14,6 @@ const getExplorerUrl = (address: string) => {
   const network = XRPL_NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
   return `https://${network}.xrpl.org/accounts/${address}`;
 };
-
-import Layout from '@/components/layout/Layout';
 
 export default function DashboardPage() {
   const { user, wallet, logout, isLoading } = useAuthStore();

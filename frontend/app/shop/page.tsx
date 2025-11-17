@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Layout from '@/components/layout/Layout';
 import ProductList from '../../components/shop/ProductList';
 import { useCartStore } from '../../stores/cart-store';
 import { useAuthStore } from '../../stores/auth-store';
@@ -9,8 +10,6 @@ import { useNFTStore } from '../../stores/nft-store';
 import { getActiveProducts } from '../../lib/api/products';
 import type { Product } from '../../types';
 import Button from '../../components/ui/Button';
-
-import Layout from '@/components/layout/Layout';
 
 export default function ShopPage() {
   const router = useRouter();

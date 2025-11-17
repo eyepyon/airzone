@@ -189,6 +189,55 @@ class BatchTransferController extends Controller
     }
     
     /**
+     * 全ユーザーへのバッチ送金
+     */
+    public function sendToAll(Request $request)
+    {
+        $request->validate([
+            'amount_xrp' => 'required|numeric|min:0.000001',
+            'reason' => 'required|string|max:500',
+            'only_with_wallet' => 'boolean'
+        ]);
+        
+        // ウォレットを持つ全ユーザーのIDを取得
+        $query = DB::table('users')
+            ->select('id')
+            ->whereNotNull('wallet_address');
+        
+        if ($request->has('only_with_wallet') && $request->only_with_wallet) {
+            // 既にフィルタ済み
+        }
+        
+        $userIds = $query->pluck('id')->toArray();
+        
+        if (empty($userIds)) {
+            return redirect()
+                ->back()
+                ->with('error', 'No users with wallets found');
+        }
+        
+        // APIでバッチ送金実行
+        $response = Http::withToken(session('admin_token'))
+            ->post("{$this->apiBaseUrl}/api/v1/batch-transfer/send", [
+                'user_ids' => $userIds,
+                'amount_xrp' => $request->amount_xrp,
+                'reason' => $request->reason
+            ]);
+        
+        if ($response->successful()) {
+            $result = $response->json();
+            
+            return redirect()
+                ->route('admin.batch-transfers.index')
+                ->with('success', "Batch transfer to all users completed: {$result['summary']['successful']} successful, {$result['summary']['failed']} failed. Total: {$result['summary']['total_amount_xrp']} XRP");
+        }
+        
+        return redirect()
+            ->back()
+            ->with('error', 'Batch transfer failed: ' . ($response->json()['error'] ?? 'Unknown error'));
+    }
+    
+    /**
      * 統計情報
      */
     public function stats()

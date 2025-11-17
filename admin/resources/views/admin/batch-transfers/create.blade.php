@@ -1,59 +1,75 @@
 @extends('admin.layouts.app')
 
-@section('title', 'New Batch Transfer')
+@section('title', 'Batch XRP Transfer')
 
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">New Batch Transfer</h1>
+        <h1 class="h3 mb-0">💸 Batch XRP Transfer</h1>
         <a href="{{ route('admin.batch-transfers.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to History
         </a>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            {{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+    @endif
+
+    <!-- Info Banner -->
+    <div class="alert alert-info">
+        <h5><i class="fas fa-info-circle"></i> XRPL Batch Transactions</h5>
+        <p class="mb-0">
+            XRPLのTicket機能を使用して、複数のユーザーに効率的にXRPを送信します。
+            通常のトランザクションと同じ手数料（約0.00001 XRP/tx）で並列処理が可能です。
+        </p>
+    </div>
+
     <div class="row">
-        <!-- Manual Selection -->
-        <div class="col-md-6">
+        <!-- Quick Send Options -->
+        <div class="col-md-6 mb-4">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Manual User Selection</h5>
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> 全ユーザーに送信</h5>
                 </div>
                 <div class="card-body">
-                    <form id="manualTransferForm" action="{{ route('admin.batch-transfers.send') }}" method="POST">
+                    <form action="{{ route('admin.batch-transfers.send-all') }}" method="POST" onsubmit="return confirm('全ユーザーにXRPを送信しますか？');">
                         @csrf
                         
                         <div class="form-group">
-                            <label>Select Users</label>
-                            <select name="user_ids[]" id="userSelect" class="form-control" multiple size="10">
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}">
-                                        {{ $user->email }} 
-                                        @if($user->importance_level)
-                                            ({{ $user->importance_level }})
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                            <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple users</small>
+                            <label>送信量（XRP）</label>
+                            <input type="number" name="amount_xrp" class="form-control" 
+                                   step="0.000001" min="0.000001" required
+                                   placeholder="例: 10">
+                            <small class="form-text text-muted">各ユーザーに送信するXRP量</small>
                         </div>
 
                         <div class="form-group">
-                            <label>Amount per User (XRP)</label>
-                            <input type="number" name="amount_xrp" id="manualAmount" class="form-control" 
-                                   step="0.000001" min="0.000001" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Reason</label>
+                            <label>理由</label>
                             <input type="text" name="reason" class="form-control" 
-                                   placeholder="e.g., Monthly reward" required>
+                                   placeholder="例: 月次報酬" required>
                         </div>
 
-                        <button type="button" class="btn btn-info" onclick="previewManualTransfer()">
-                            <i class="fas fa-eye"></i> Preview
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Send
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="onlyWithWallet" name="only_with_wallet" checked>
+                                <label class="custom-control-label" for="onlyWithWallet">
+                                    ウォレットを持つユーザーのみ
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-paper-plane"></i> 全ユーザーに送信
                         </button>
                     </form>
                 </div>
@@ -61,74 +77,121 @@
         </div>
 
         <!-- VIP Users -->
-        <div class="col-md-6">
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h5 class="mb-0">Send to VIP Users</h5>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-crown"></i> VIPユーザーに送信</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.batch-transfers.send-to-vip') }}" method="POST">
+                    <form action="{{ route('admin.batch-transfers.send-to-vip') }}" method="POST" onsubmit="return confirm('VIPユーザーにXRPを送信しますか？');">
                         @csrf
                         
                         <div class="form-group">
-                            <label>Minimum Level</label>
+                            <label>最小レベル</label>
                             <select name="min_importance_level" class="form-control" required>
-                                <option value="Bronze">Bronze and above</option>
-                                <option value="Silver">Silver and above</option>
-                                <option value="Gold">Gold and above</option>
-                                <option value="Platinum">Platinum and above</option>
-                                <option value="Diamond">Diamond only</option>
+                                <option value="Bronze">Bronze 以上</option>
+                                <option value="Silver">Silver 以上</option>
+                                <option value="Gold" selected>Gold 以上</option>
+                                <option value="Platinum">Platinum 以上</option>
+                                <option value="Diamond">Diamond のみ</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label>Amount per User (XRP)</label>
+                            <label>送信量（XRP）</label>
                             <input type="number" name="amount_xrp" class="form-control" 
-                                   step="0.000001" min="0.000001" required>
+                                   step="0.000001" min="0.000001" required
+                                   placeholder="例: 50">
                         </div>
 
                         <div class="form-group">
-                            <label>Reason</label>
+                            <label>理由</label>
                             <input type="text" name="reason" class="form-control" 
-                                   placeholder="e.g., VIP monthly reward" required>
+                                   placeholder="例: VIP月次報酬" required>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-crown"></i> Send to VIP Users
+                        <button type="submit" class="btn btn-warning btn-block">
+                            <i class="fas fa-crown"></i> VIPユーザーに送信
                         </button>
                     </form>
                 </div>
             </div>
+        </div>
 
-            <!-- Top Referrers -->
+        <!-- Top Referrers -->
+        <div class="col-md-6 mb-4">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Send to Top Referrers</h5>
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-trophy"></i> トップ紹介者に送信</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.batch-transfers.send-to-top-referrers') }}" method="POST">
+                    <form action="{{ route('admin.batch-transfers.send-to-top-referrers') }}" method="POST" onsubmit="return confirm('トップ紹介者にXRPを送信しますか？');">
                         @csrf
                         
                         <div class="form-group">
-                            <label>Top N Users</label>
+                            <label>上位N人</label>
                             <input type="number" name="top_n" class="form-control" 
                                    min="1" max="1000" value="10" required>
+                            <small class="form-text text-muted">紹介数が多い上位N人</small>
                         </div>
 
                         <div class="form-group">
-                            <label>Amount per User (XRP)</label>
+                            <label>送信量（XRP）</label>
                             <input type="number" name="amount_xrp" class="form-control" 
-                                   step="0.000001" min="0.000001" required>
+                                   step="0.000001" min="0.000001" required
+                                   placeholder="例: 100">
                         </div>
 
                         <div class="form-group">
-                            <label>Reason</label>
+                            <label>理由</label>
                             <input type="text" name="reason" class="form-control" 
-                                   placeholder="e.g., Top referrer reward" required>
+                                   placeholder="例: トップ紹介者ボーナス" required>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-trophy"></i> Send to Top Referrers
+                        <button type="submit" class="btn btn-success btn-block">
+                            <i class="fas fa-trophy"></i> トップ紹介者に送信
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Selection -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-hand-pointer"></i> カスタム選択</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('admin.batch-transfers.send') }}" method="POST" id="customForm">
+                        @csrf
+                        
+                        <div class="form-group">
+                            <label>ユーザーID（カンマ区切り）</label>
+                            <textarea name="user_ids_text" class="form-control" rows="3" 
+                                      placeholder="例: 1,2,3,4,5"></textarea>
+                            <small class="form-text text-muted">または下のユーザー選択を使用</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>送信量（XRP）</label>
+                            <input type="number" name="amount_xrp" class="form-control" 
+                                   step="0.000001" min="0.000001" required
+                                   placeholder="例: 25">
+                        </div>
+
+                        <div class="form-group">
+                            <label>理由</label>
+                            <input type="text" name="reason" class="form-control" 
+                                   placeholder="例: 特別報酬" required>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary btn-block mb-2" onclick="showUserSelector()">
+                            <i class="fas fa-search"></i> ユーザーを検索
+                        </button>
+
+                        <button type="submit" class="btn btn-info btn-block">
+                            <i class="fas fa-paper-plane"></i> 選択したユーザーに送信
                         </button>
                     </form>
                 </div>
@@ -136,95 +199,125 @@
         </div>
     </div>
 
-    <!-- Preview Modal -->
-    <div class="modal fade" id="previewModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Batch Transfer Preview</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body" id="previewContent">
-                    <!-- Preview content will be loaded here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitManualTransfer()">
-                        Confirm and Send
-                    </button>
+    <!-- Sponsor Wallet Status -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-wallet"></i> スポンサーウォレット状態</h5>
+        </div>
+        <div class="card-body">
+            <div id="sponsorStatus">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-2">ウォレット情報を取得中...</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- User Selector Modal -->
+<div class="modal fade" id="userSelectorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ユーザー選択</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="userSearch" class="form-control mb-3" placeholder="メールアドレスで検索...">
+                <div id="userList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- ユーザーリストがここに表示される -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                <button type="button" class="btn btn-primary" onclick="applyUserSelection()">選択を適用</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-function previewManualTransfer() {
-    const userIds = Array.from(document.getElementById('userSelect').selectedOptions).map(opt => opt.value);
-    const amountXrp = document.getElementById('manualAmount').value;
-    
-    if (userIds.length === 0) {
-        alert('Please select at least one user');
-        return;
+// スポンサーウォレット状態を取得
+fetch('/api/v1/admin/xrpl/sponsor-health', {
+    headers: {
+        'Authorization': 'Bearer {{ session("admin_token") }}'
     }
-    
-    if (!amountXrp || amountXrp <= 0) {
-        alert('Please enter a valid amount');
-        return;
-    }
-    
-    fetch('{{ route("admin.batch-transfers.preview") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            user_ids: userIds,
-            amount_xrp: parseFloat(amountXrp)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        let html = `
-            <div class="alert alert-info">
-                <h5>Summary</h5>
-                <ul class="mb-0">
-                    <li>Total Users: ${data.total_users}</li>
-                    <li>Valid Users (with wallet): ${data.valid_users}</li>
-                    <li>Invalid Users (no wallet): ${data.invalid_users}</li>
-                    <li>Amount per User: ${data.amount_per_user_xrp} XRP</li>
-                    <li><strong>Total Amount: ${data.total_amount_xrp} XRP</strong></li>
-                </ul>
+})
+.then(response => response.json())
+.then(data => {
+    const statusDiv = document.getElementById('sponsorStatus');
+    if (data.healthy) {
+        statusDiv.innerHTML = `
+            <div class="alert alert-success">
+                <h6><i class="fas fa-check-circle"></i> ウォレット正常</h6>
+                <p class="mb-0">
+                    <strong>残高:</strong> ${data.balance_xrp.toFixed(6)} XRP<br>
+                    <strong>アドレス:</strong> <code>${data.sponsor_address}</code><br>
+                    <strong>ネットワーク:</strong> ${data.network}
+                </p>
             </div>
         `;
-        
-        if (data.users.length > 0) {
-            html += '<h6>Recipients:</h6><ul>';
-            data.users.forEach(user => {
-                html += `<li>${user.email} (${user.importance_level || 'N/A'})</li>`;
-            });
-            html += '</ul>';
-        }
-        
-        if (data.users_without_wallet.length > 0) {
-            html += '<div class="alert alert-warning"><h6>Users without wallet (will be skipped):</h6><ul>';
-            data.users_without_wallet.forEach(user => {
-                html += `<li>${user.email}</li>`;
-            });
-            html += '</ul></div>';
-        }
-        
-        document.getElementById('previewContent').innerHTML = html;
-        $('#previewModal').modal('show');
-    })
-    .catch(error => {
-        alert('Preview failed: ' + error.message);
-    });
+    } else {
+        statusDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6><i class="fas fa-exclamation-triangle"></i> ウォレット警告</h6>
+                <p class="mb-0">
+                    ${data.warnings.join('<br>')}
+                </p>
+            </div>
+        `;
+    }
+})
+.catch(error => {
+    document.getElementById('sponsorStatus').innerHTML = `
+        <div class="alert alert-warning">
+            <p class="mb-0">ウォレット情報の取得に失敗しました</p>
+        </div>
+    `;
+});
+
+// ユーザー選択モーダル
+let selectedUsers = [];
+
+function showUserSelector() {
+    $('#userSelectorModal').modal('show');
+    loadUsers();
 }
 
-function submitManualTransfer() {
-    document.getElementById('manualTransferForm').submit();
+function loadUsers() {
+    // ユーザーリストを取得（実装は省略）
+    document.getElementById('userList').innerHTML = '<p class="text-muted">ユーザーリストを読み込み中...</p>';
 }
+
+function applyUserSelection() {
+    const userIds = selectedUsers.join(',');
+    document.querySelector('[name="user_ids_text"]').value = userIds;
+    $('#userSelectorModal').modal('hide');
+}
+
+// カスタムフォーム送信時の処理
+document.getElementById('customForm').addEventListener('submit', function(e) {
+    const userIdsText = document.querySelector('[name="user_ids_text"]').value;
+    if (!userIdsText.trim()) {
+        e.preventDefault();
+        alert('ユーザーIDを入力してください');
+        return false;
+    }
+    
+    // カンマ区切りをJSON配列に変換
+    const userIds = userIdsText.split(',').map(id => id.trim()).filter(id => id);
+    
+    // hidden inputを作成
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'user_ids';
+    input.value = JSON.stringify(userIds);
+    this.appendChild(input);
+    
+    return confirm(`${userIds.length}人のユーザーにXRPを送信しますか？`);
+});
 </script>
 @endsection

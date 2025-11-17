@@ -194,7 +194,7 @@ def preview_batch_transfer(current_user):
         }
     """
     try:
-        from backend.database.connection import get_db_connection
+        from database.connection import get_db_connection
         
         data = request.get_json()
         user_ids = data.get('user_ids', [])

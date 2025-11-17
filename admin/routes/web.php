@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\NFTController;
+use App\Http\Controllers\Admin\BatchTransferController;
 
 // 認証
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -37,4 +38,15 @@ Route::middleware('auth:admin')->group(function () {
     // 重要ユーザー管理
     Route::get('/users/importance', [App\Http\Controllers\Admin\UserController::class, 'importance'])->name('users.importance');
     Route::post('/users/{id}/update-score', [App\Http\Controllers\Admin\UserController::class, 'updateScore'])->name('users.updateScore');
+    
+    // 一括送金管理
+    Route::prefix('batch-transfers')->name('admin.batch-transfers.')->group(function () {
+        Route::get('/', [BatchTransferController::class, 'index'])->name('index');
+        Route::get('/create', [BatchTransferController::class, 'create'])->name('create');
+        Route::get('/stats', [BatchTransferController::class, 'stats'])->name('stats');
+        Route::post('/send', [BatchTransferController::class, 'send'])->name('send');
+        Route::post('/send-all', [BatchTransferController::class, 'sendToAll'])->name('send-all');
+        Route::post('/send-to-vip', [BatchTransferController::class, 'sendToVip'])->name('send-to-vip');
+        Route::post('/send-to-top-referrers', [BatchTransferController::class, 'sendToTopReferrers'])->name('send-to-top-referrers');
+    });
 });

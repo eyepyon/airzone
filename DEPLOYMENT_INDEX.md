@@ -60,7 +60,7 @@ Quick reference guide to all deployment-related documentation and files.
 | Script | Purpose | Usage |
 |--------|---------|-------|
 | `scripts/generate_secrets.py` | Generate secure secret keys | `python3 scripts/generate_secrets.py` |
-| `scripts/generate_sponsor_wallet.py` | Generate Sui sponsor wallet | `python3 scripts/generate_sponsor_wallet.py` |
+| `scripts/generate_sponsor_wallet.py` | Generate XRPL sponsor wallet | `python3 scripts/generate_sponsor_wallet.py` |
 | `scripts/setup_database.py` | Database initialization | `python3 scripts/setup_database.py` |
 
 ## 🚀 Quick Start

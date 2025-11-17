@@ -15,9 +15,6 @@ airzone/
 └── scripts/          # Deployment and utility scripts
 ```
   
-メンバー開発リポジトリ  
-https://github.com/Jun0908/sui-airzone  
-
 ミントテストページ  
 https://nft-mint-sample.vercel.app/  
 
@@ -60,15 +57,15 @@ For detailed instructions, see [backend/DATABASE_SETUP.md](backend/DATABASE_SETU
 
 ### 2. Smart Contract Deployment
 
-The smart contract is ready to deploy. See [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md) for instructions.
+XRPL統合の詳細は [docs/xrpl-integration.md](docs/xrpl-integration.md) を参照してください。
 
 Quick start:
 ```bash
-# Deploy to Sui testnet
-bash scripts/deploy_contract.sh testnet
+# Generate XRPL sponsor wallet
+python scripts/generate_sponsor_wallet.py
 
-# Verify deployment
-cd backend && python ../scripts/verify_contract.py
+# Verify XRPL client
+python backend/verify_xrpl_client.py
 ```
 
 ### 3. Backend Setup

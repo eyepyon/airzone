@@ -17,8 +17,8 @@ Use this checklist to ensure all deployment steps are completed correctly.
 - [ ] Google OAuth credentials obtained
 - [ ] Stripe account created
 - [ ] Stripe API keys obtained (test and live)
-- [ ] Sui wallet for sponsoring created
-- [ ] Sui smart contract deployed
+- [ ] XRPL sponsor wallet created
+- [ ] XRPL sponsor wallet funded
 
 ## System Installation
 
@@ -47,9 +47,8 @@ Use this checklist to ensure all deployment steps are completed correctly.
 - [ ] Database credentials configured
 - [ ] Google OAuth credentials added
 - [ ] Stripe API keys added (live keys for production)
-- [ ] Sui network configured (testnet or mainnet)
-- [ ] Sui sponsor private key added
-- [ ] Sui package ID added
+- [ ] XRPL network configured (testnet or mainnet)
+- [ ] XRPL sponsor seed added
 - [ ] CORS origins configured
 - [ ] `.env` file permissions set to 600
 - [ ] `.env` file owned by www-data
@@ -59,7 +58,7 @@ Use this checklist to ensure all deployment steps are completed correctly.
 - [ ] `NEXT_PUBLIC_API_URL` set to production URL
 - [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` added (live key)
 - [ ] `NEXT_PUBLIC_GOOGLE_CLIENT_ID` added
-- [ ] `NEXT_PUBLIC_SUI_NETWORK` configured
+- [ ] `NEXT_PUBLIC_XRPL_NETWORK` configured
 - [ ] `.env.local` file permissions set to 600
 - [ ] `.env.local` file owned by www-data
 

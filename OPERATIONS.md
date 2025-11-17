@@ -238,9 +238,9 @@ python verify_sponsored_transactions.py
 - **危険:** < 95%
 
 **スポンサーウォレット残高**
-- **正常:** > 10 SUI
-- **警告:** 5-10 SUI
-- **危険:** < 5 SUI
+- **正常:** > 100 XRP
+- **警告:** 50-100 XRP
+- **危険:** < 50 XRP
 
 ### 監視スクリプト
 
@@ -278,18 +278,18 @@ fi
 
 cd /var/www/airzone/backend
 BALANCE=$(python -c "
-from clients.sui_client import SuiClient
+from clients.xrpl_client import XRPLClient
 from config import Config
-client = SuiClient(Config.SUI_NETWORK, Config.SUI_SPONSOR_PRIVATE_KEY)
-balance = client.get_sponsor_balance() / 1_000_000_000
+client = XRPLClient(Config.XRPL_NETWORK, Config.XRPL_SPONSOR_SEED)
+balance = client.get_sponsor_balance() / 1_000_000
 print(balance)
 ")
 
-if (( $(echo "$BALANCE < 5" | bc -l) )); then
-    echo "CRITICAL: Sponsor wallet balance is ${BALANCE} SUI"
+if (( $(echo "$BALANCE < 50" | bc -l) )); then
+    echo "CRITICAL: Sponsor wallet balance is ${BALANCE} XRP"
     # アラート送信
-elif (( $(echo "$BALANCE < 10" | bc -l) )); then
-    echo "WARNING: Sponsor wallet balance is ${BALANCE} SUI"
+elif (( $(echo "$BALANCE < 100" | bc -l) )); then
+    echo "WARNING: Sponsor wallet balance is ${BALANCE} XRP"
 fi
 ```
 

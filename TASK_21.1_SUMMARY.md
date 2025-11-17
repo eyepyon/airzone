@@ -80,7 +80,7 @@ python backend/verify_database.py
 | Table | Purpose |
 |-------|---------|
 | users | User accounts (Google OAuth) |
-| wallets | Sui blockchain wallets |
+| wallets | XRPL blockchain wallets |
 | nft_mints | NFT minting tracking |
 | products | E-commerce catalog |
 | orders | Customer orders |

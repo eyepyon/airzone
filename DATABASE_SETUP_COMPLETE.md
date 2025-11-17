@@ -22,7 +22,7 @@ Task 21.1 (データベース初期化 / Database Initialization) has been succe
 
 Creates all 9 required tables:
 - `users` - User accounts with Google OAuth
-- `wallets` - Sui blockchain wallet information
+- `wallets` - XRPL blockchain wallet information
 - `nft_mints` - NFT minting operation tracking
 - `products` - E-commerce product catalog
 - `orders` - Customer orders
@@ -226,11 +226,12 @@ After database setup is complete:
    - Set JWT secret keys
    - Configure Google OAuth credentials
    - Set Stripe API keys
-   - Configure Sui blockchain settings
+   - Configure XRPL blockchain settings
 
-2. **Deploy Smart Contracts** (Task 20.4)
-   - Deploy Sui Move contracts to testnet
-   - Update `SUI_PACKAGE_ID` in `.env`
+2. **Setup XRPL** (Task 20.4)
+   - Generate XRPL sponsor wallet
+   - Fund wallet with XRP
+   - Update `XRPL_SPONSOR_SEED` in `.env`
 
 3. **Start Application**
    ```bash

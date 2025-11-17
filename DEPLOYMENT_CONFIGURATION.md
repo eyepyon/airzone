@@ -71,8 +71,7 @@ nano .env
 - `DB_PASSWORD`: Strong database password
 - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: From Google Cloud Console
 - `STRIPE_SECRET_KEY` & `STRIPE_WEBHOOK_SECRET`: From Stripe Dashboard
-- `SUI_SPONSOR_PRIVATE_KEY`: Generated sponsor wallet
-- `SUI_PACKAGE_ID`: Deployed smart contract package ID
+- `XRPL_SPONSOR_SEED`: Generated sponsor wallet seed
 
 **Set secure file permissions:**
 
@@ -98,7 +97,7 @@ nano .env.local
 - `NEXT_PUBLIC_API_URL`: Backend API URL (https://airz.one/api/v1)
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key
 - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: Google OAuth client ID
-- `NEXT_PUBLIC_SUI_NETWORK`: testnet or mainnet
+- `NEXT_PUBLIC_XRPL_NETWORK`: testnet or mainnet
 
 ## Secret Key Generation
 

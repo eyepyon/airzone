@@ -9,7 +9,6 @@ Before you begin, ensure you have the following installed:
 - **Python 3.11+** - [Download](https://www.python.org/downloads/)
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **MySQL 8.0+** - [Download](https://dev.mysql.com/downloads/)
-- **Sui CLI** (optional, for contract deployment) - [Install Guide](https://docs.sui.io/build/install)
 
 ## Step-by-Step Setup
 
@@ -96,10 +95,9 @@ For detailed instructions, see [backend/DATABASE_SETUP.md](backend/DATABASE_SETU
    STRIPE_PUBLISHABLE_KEY=your-stripe-publishable
    STRIPE_WEBHOOK_SECRET=your-webhook-secret
    
-   # Sui Blockchain
-   SUI_NETWORK=testnet
-   SUI_SPONSOR_PRIVATE_KEY=your-sponsor-key
-   SUI_PACKAGE_ID=your-package-id
+   # XRPL Blockchain
+   XRPL_NETWORK=testnet
+   XRPL_SPONSOR_SEED=your-sponsor-seed
    
    # Security
    ENCRYPTION_KEY=your-encryption-key
@@ -307,9 +305,10 @@ After setup is complete:
    - Get API keys
    - Set up webhook endpoint
 
-3. **Deploy Smart Contract:**
-   - Follow [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md)
-   - Update `SUI_PACKAGE_ID` in backend
+3. **Setup XRPL:**
+   - Generate sponsor wallet
+   - Fund with test XRP
+   - Verify connection
 
 4. **Test the Flow:**
    - Register a user

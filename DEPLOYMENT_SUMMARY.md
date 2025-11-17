@@ -17,7 +17,7 @@ This document summarizes the deployment configuration implementation for the Air
   - JWT configuration
   - Google OAuth credentials
   - Stripe API keys
-  - Sui blockchain configuration
+  - XRPL blockchain configuration
   - CORS settings
   - Encryption key for wallet private keys
   - Logging configuration
@@ -28,7 +28,7 @@ This document summarizes the deployment configuration implementation for the Air
 - **Purpose:** Template for production frontend configuration
 - **Includes:**
   - API URL configuration
-  - Sui blockchain network settings
+  - XRPL blockchain network settings
   - Stripe publishable key
   - Google OAuth client ID
   - Application metadata

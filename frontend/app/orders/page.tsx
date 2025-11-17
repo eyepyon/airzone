@@ -24,10 +24,14 @@ export default function OrdersPage() {
     const fetchOrders = async () => {
       try {
         setLoading(true);
+        setError(null);
         const data = await getOrders();
-        setOrders(data.orders);
+        setOrders(data.orders || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '注文の取得に失敗しました');
+        console.error('Failed to fetch orders:', err);
+        const errorMessage = err instanceof Error ? err.message : '注文の取得に失敗しました';
+        setError(errorMessage);
+        setOrders([]);
       } finally {
         setLoading(false);
       }
@@ -70,14 +74,6 @@ export default function OrdersPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading size="lg" />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,15 +88,44 @@ export default function OrdersPage() {
             </p>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loading size="lg" />
+            </div>
+          )}
+
           {/* Error Message */}
-          {error && (
+          {error && !loading && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm sm:text-base text-red-800">{error}</p>
+              <div className="flex items-start">
+                <svg
+                  className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <div>
+                  <h3 className="text-sm font-medium text-red-800">エラーが発生しました</h3>
+                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="mt-3 text-sm text-red-600 hover:text-red-800 underline"
+                  >
+                    ページを再読み込み
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
           {/* Orders List */}
-          {orders.length === 0 ? (
+          {!loading && orders.length === 0 && !error ? (
             <Card className="text-center py-12 sm:py-16">
               <div className="text-4xl sm:text-5xl mb-4">📦</div>
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
@@ -115,7 +140,7 @@ export default function OrdersPage() {
                 </button>
               </Link>
             </Card>
-          ) : (
+          ) : !loading && !error ? (
             <div className="space-y-4 sm:space-y-6">
               {orders.map((order) => (
                 <Link key={order.id} href={`/orders/${order.id}`}>

@@ -6,11 +6,11 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Loading from '@/components/ui/Loading';
 
-const SUI_NETWORK = process.env.NEXT_PUBLIC_SUI_NETWORK || 'testnet';
+const XRPL_NETWORK = process.env.NEXT_PUBLIC_XRPL_NETWORK || 'testnet';
 
 const getExplorerUrl = (address: string) => {
-  const network = SUI_NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
-  return `https://suiscan.xyz/${network}/account/${address}`;
+  const network = XRPL_NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
+  return `https://${network}.xrpl.org/accounts/${address}`;
 };
 
 export default function DashboardPage() {
@@ -97,7 +97,7 @@ export default function DashboardPage() {
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
-                      View on Explorer ({SUI_NETWORK})
+                      View on Explorer ({XRPL_NETWORK})
                     </a>
                   </div>
                 </div>

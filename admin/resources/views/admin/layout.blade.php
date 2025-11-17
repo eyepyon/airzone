@@ -20,6 +20,8 @@
                         <a href="{{ route('products.index') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium">商品</a>
                         <a href="{{ route('orders.index') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium">注文</a>
                         <a href="{{ route('nfts.index') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium">NFT</a>
+                        <a href="{{ route('referrals.index') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium">紹介</a>
+                        <a href="{{ route('users.importance') }}" class="inline-flex items-center px-3 py-2 text-sm font-medium">👑 重要ユーザー</a>
                     </div>
                 </div>
                 <div class="flex items-center">

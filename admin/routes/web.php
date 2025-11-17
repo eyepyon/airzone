@@ -28,4 +28,13 @@ Route::middleware('auth:admin')->group(function () {
     
     // NFT管理
     Route::resource('nfts', NFTController::class)->only(['index', 'show']);
+    
+    // 紹介管理
+    Route::get('/referrals', [App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('referrals.index');
+    Route::get('/referrals/ranking', [App\Http\Controllers\Admin\ReferralController::class, 'ranking'])->name('referrals.ranking');
+    Route::get('/referrals/{id}', [App\Http\Controllers\Admin\ReferralController::class, 'show'])->name('referrals.show');
+    
+    // 重要ユーザー管理
+    Route::get('/users/importance', [App\Http\Controllers\Admin\UserController::class, 'importance'])->name('users.importance');
+    Route::post('/users/{id}/update-score', [App\Http\Controllers\Admin\UserController::class, 'updateScore'])->name('users.updateScore');
 });

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Layout from '@/components/layout/Layout';
 import { useAuthStore } from '@/stores/auth-store';
 import ReferralCard from '@/components/referral/ReferralCard';
 import Card from '@/components/ui/Card';
@@ -64,16 +65,19 @@ export default function ReferralPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading size="lg" />
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading size="lg" />
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+    <Layout>
+      <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
@@ -243,8 +247,9 @@ export default function ReferralPage() {
               </div>
             </div>
           </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }

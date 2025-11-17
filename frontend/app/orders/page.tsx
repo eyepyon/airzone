@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Layout from '@/components/layout/Layout';
 import { Card, Loading } from '@/components/ui';
 import { useAuthStore } from '@/stores';
 import { getOrders } from '@/lib/api';
@@ -75,9 +76,10 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+    <Layout>
+      <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
@@ -219,8 +221,9 @@ export default function OrdersPage() {
               ))}
             </div>
           ) : null}
+          </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }

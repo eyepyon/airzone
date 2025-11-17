@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Layout from '@/components/layout/Layout';
 import { useAuthStore } from '../../stores/auth-store';
 import { useNFTStore } from '../../stores/nft-store';
 import NFTGallery from '../../components/nft/NFTGallery';
@@ -41,9 +42,11 @@ export default function NFTsPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading size="lg" text="Loading..." />
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading size="lg" text="読み込み中..." />
+        </div>
+      </Layout>
     );
   }
 
@@ -52,41 +55,43 @@ export default function NFTsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">My NFTs</h1>
-              <p className="text-gray-600">
-                View and manage your Airzone NFT collection
-              </p>
-              {wallet && (
-                <p className="text-sm text-gray-500 mt-2 font-mono">
-                  Wallet: {wallet.address.slice(0, 8)}...{wallet.address.slice(-6)}
+    <Layout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">マイNFT</h1>
+                <p className="text-gray-600">
+                  あなたのAirzone NFTコレクションを表示・管理
                 </p>
-              )}
+                {wallet && (
+                  <p className="text-sm text-gray-500 mt-2 font-mono">
+                    ウォレット: {wallet.address.slice(0, 8)}...{wallet.address.slice(-6)}
+                  </p>
+                )}
+              </div>
+              
+              <Button
+                onClick={handleMintNFT}
+                disabled={!!mintingTaskId || nftsLoading}
+                variant="primary"
+              >
+                {mintingTaskId ? 'ミント中...' : '新しいNFTをミント'}
+              </Button>
             </div>
-            
-            <Button
-              onClick={handleMintNFT}
-              disabled={!!mintingTaskId || nftsLoading}
-              variant="primary"
-            >
-              {mintingTaskId ? 'Minting...' : 'Mint New NFT'}
-            </Button>
           </div>
-        </div>
 
-        {/* NFT Gallery */}
-        <NFTGallery
-          nfts={nfts}
-          loading={nftsLoading}
-          onNFTClick={handleNFTClick}
-          emptyMessage="You don't have any NFTs yet"
-        />
+          {/* NFT Gallery */}
+          <NFTGallery
+            nfts={nfts}
+            loading={nftsLoading}
+            onNFTClick={handleNFTClick}
+            emptyMessage="まだNFTを持っていません"
+          />
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }

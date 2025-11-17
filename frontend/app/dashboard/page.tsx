@@ -14,6 +14,8 @@ const getExplorerUrl = (address: string) => {
   return `https://${network}.xrpl.org/accounts/${address}`;
 };
 
+import Layout from '@/components/layout/Layout';
+
 export default function DashboardPage() {
   const { user, wallet, logout, isLoading } = useAuthStore();
   const router = useRouter();
@@ -25,9 +27,11 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading />
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading />
+        </div>
+      </Layout>
     );
   }
 
@@ -36,17 +40,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back, {user.name}!</p>
+    <Layout>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">ダッシュボード</h1>
+            <p className="text-gray-600 mt-1">ようこそ、{user.name}さん！</p>
           </div>
-          <Button onClick={handleLogout} variant="secondary">
-            Logout
-          </Button>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
@@ -304,6 +304,6 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }

@@ -226,6 +226,10 @@ app.register_blueprint(download_blueprint, url_prefix='/api/v1/downloads')
 from routes.wallet import wallet_blueprint
 app.register_blueprint(wallet_blueprint, url_prefix='/api/v1/wallet')
 
+# Register referral blueprint
+from routes.referral import referral_blueprint
+app.register_blueprint(referral_blueprint, url_prefix='/api/v1/referral')
+
 
 if __name__ == '__main__':
     app.run(

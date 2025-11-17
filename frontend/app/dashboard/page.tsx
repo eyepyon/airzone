@@ -129,41 +129,44 @@ export default function DashboardPage() {
             </Card>
           )}
 
-          <Card className="md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4">🔗 外部ウォレット接続</h2>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Xaman Wallet（旧Xumm）を接続して、より高度なセキュリティとウォレット管理を利用できます。
-              </p>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-blue-900 mb-2">
-                  Xaman Walletとは？
-                </h3>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• XRPLの公式モバイルウォレット</li>
-                  <li>• 秘密鍵をあなた自身が管理</li>
-                  <li>• 最高レベルのセキュリティ</li>
-                  <li>• NFTの直接管理が可能</li>
-                </ul>
-              </div>
+          {/* Xaman Wallet統合は開発中 */}
+          {false && (
+            <Card className="md:col-span-2">
+              <h2 className="text-xl font-semibold mb-4">🔗 外部ウォレット接続</h2>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Xaman Wallet（旧Xumm）を接続して、より高度なセキュリティとウォレット管理を利用できます。
+                </p>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h3 className="text-sm font-semibold text-blue-900 mb-2">
+                    Xaman Walletとは？
+                  </h3>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• XRPLの公式モバイルウォレット</li>
+                    <li>• 秘密鍵をあなた自身が管理</li>
+                    <li>• 最高レベルのセキュリティ</li>
+                    <li>• NFTの直接管理が可能</li>
+                  </ul>
+                </div>
 
-              <div className="flex justify-center pt-2">
-                <XamanWalletButton />
-              </div>
+                <div className="flex justify-center pt-2">
+                  <XamanWalletButton />
+                </div>
 
-              <div className="text-xs text-gray-500 text-center">
-                <a 
-                  href="https://xaman.app/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  Xaman Walletをダウンロード
-                </a>
+                <div className="text-xs text-gray-500 text-center">
+                  <a 
+                    href="https://xaman.app/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Xaman Walletをダウンロード
+                  </a>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
         </div>
 
         <div className="mt-8">

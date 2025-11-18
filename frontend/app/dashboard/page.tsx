@@ -47,7 +47,7 @@ export default function DashboardPage() {
             <p className="text-gray-600 mt-1">ようこそ、{user.name}さん！</p>
           </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <h2 className="text-xl font-semibold mb-4">User Information</h2>
             <div className="space-y-2">
@@ -301,6 +301,7 @@ export default function DashboardPage() {
               </Button>
             </div>
           </Card>
+        </div>
         </div>
       </div>
     </Layout>

@@ -69,8 +69,22 @@ export default function ReferralPage() {
       });
 
       if (!statsResponse.ok) {
-        const errorData = await statsResponse.json();
-        throw new Error(errorData.error || '統計の取得に失敗しました');
+        const contentType = statsResponse.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await statsResponse.json();
+          throw new Error(errorData.error || '統計の取得に失敗しました');
+        } else {
+          const errorText = await statsResponse.text();
+          console.error('Non-JSON response:', errorText);
+          throw new Error(`統計の取得に失敗しました (${statsResponse.status})`);
+        }
+      }
+
+      const contentType = statsResponse.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await statsResponse.text();
+        console.error('Non-JSON response:', responseText);
+        throw new Error('サーバーから不正なレスポンスが返されました');
       }
 
       const statsData = await statsResponse.json();

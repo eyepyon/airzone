@@ -17,7 +17,7 @@ wallet_blueprint = Blueprint('wallet', __name__)
 @jwt_required
 def xaman_signin():
     """
-    Create Xaman sign-in request.
+    Create Xaman sign-in request using Xaman API.
     
     Request Body:
         {
@@ -44,54 +44,104 @@ def xaman_signin():
         
         # Xaman APIでサインインペイロードを作成
         from config import Config
+        import os
         
-        # Xaman API設定を確認
-        xaman_api_key = getattr(Config, 'XAMAN_API_KEY', None)
-        xaman_api_secret = getattr(Config, 'XAMAN_API_SECRET', None)
+        # Xaman API設定を取得
+        xaman_api_key = os.getenv('XAMAN_API_KEY')
+        xaman_api_secret = os.getenv('XAMAN_API_SECRET')
         
-        if xaman_api_key and xaman_api_secret:
-            # 実際のXaman APIを使用
-            from clients.xaman_client import XamanClient
-            
-            xaman_client = XamanClient(xaman_api_key, xaman_api_secret)
-            payload = xaman_client.create_signin_payload()
-            
+        if not xaman_api_key or not xaman_api_secret:
+            logger.error("Xaman API credentials not configured")
             return jsonify({
-                'status': 'success',
-                'data': {
-                    'uuid': payload['uuid'],
-                    'qr_code': payload['refs']['qr_png'],
-                    'deep_link': payload['next']['always'],
-                    'websocket': payload['refs']['websocket_status'],
-                }
-            }), 200
-        else:
-            # フォールバック: 簡易版（開発用）
-            logger.warning("Xaman API credentials not configured, using fallback")
-            
-            import uuid as uuid_lib
-            request_uuid = str(uuid_lib.uuid4())
-            
-            # QRコード生成（簡易版）
-            qr_data = f"xaman://signin?uuid={request_uuid}"
-            qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
-            
-            return jsonify({
-                'status': 'success',
-                'data': {
-                    'uuid': request_uuid,
-                    'qr_code': qr_url,
-                    'deep_link': qr_data,
-                    'websocket': f"wss://xumm.app/sign/{request_uuid}",
-                    'message': 'Xamanアプリで署名してください（開発モード）'
-                }
-            }), 200
+                'status': 'error',
+                'error': 'Xaman API credentials not configured. Please set XAMAN_API_KEY and XAMAN_API_SECRET in .env',
+                'code': 500
+            }), 500
+        
+        # 実際のXaman APIを使用
+        from clients.xaman_client import XamanClient
+        
+        xaman_client = XamanClient(xaman_api_key, xaman_api_secret)
+        payload = xaman_client.create_signin_payload()
+        
+        # ペイロードUUIDをセッションに保存（ステータス確認用）
+        # 実際にはRedisなどを使用すべき
+        
+        logger.info(f"Created Xaman signin payload for user {user_id}: {payload['uuid']}")
+        
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'uuid': payload['uuid'],
+                'qr_code': payload['refs']['qr_png'],
+                'deep_link': payload['next']['always'],
+                'websocket': payload['refs']['websocket_status'],
+            }
+        }), 200
         
     except Exception as e:
-        logger.error(f"Error creating Xaman sign-in request: {str(e)}")
+        logger.error(f"Error creating Xaman sign-in request: {str(e)}", exc_info=True)
         return jsonify({
             'status': 'error',
-            'error': 'Failed to create sign-in request',
+            'error': f'Failed to create sign-in request: {str(e)}',
+            'code': 500
+        }), 500
+
+
+@wallet_blueprint.route('/xaman/status/<uuid>', methods=['GET'])
+@jwt_required
+def xaman_status(uuid: str):
+    """
+    Get Xaman payload status.
+    
+    Response:
+        {
+            "status": "success",
+            "data": {
+                "signed": true,
+                "account": "rXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            }
+        }
+    """
+    try:
+        current_user = get_current_user()
+        user_id = current_user['user_id']
+        
+        # Xaman APIでステータスを取得
+        import os
+        from clients.xaman_client import XamanClient
+        
+        xaman_api_key = os.getenv('XAMAN_API_KEY')
+        xaman_api_secret = os.getenv('XAMAN_API_SECRET')
+        
+        if not xaman_api_key or not xaman_api_secret:
+            return jsonify({
+                'status': 'error',
+                'error': 'Xaman API credentials not configured',
+                'code': 500
+            }), 500
+        
+        xaman_client = XamanClient(xaman_api_key, xaman_api_secret)
+        status = xaman_client.get_payload_status(uuid)
+        
+        # レスポンスを整形
+        result = {
+            'signed': status.get('meta', {}).get('signed', False),
+            'cancelled': status.get('meta', {}).get('cancelled', False),
+            'expired': status.get('meta', {}).get('expired', False),
+            'account': status.get('response', {}).get('account') if status.get('response') else None,
+        }
+        
+        return jsonify({
+            'status': 'success',
+            'data': result
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting Xaman status: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': 'Failed to get status',
             'code': 500
         }), 500
 

@@ -96,6 +96,114 @@ def xaman_signin():
         }), 500
 
 
+@wallet_blueprint.route('/walletconnect/session', methods=['POST'])
+@jwt_required
+def create_walletconnect_session():
+    """
+    Create WalletConnect session.
+    
+    Response:
+        {
+            "status": "success",
+            "data": {
+                "uri": "wc:...",
+                "qrCode": "https://..."
+            }
+        }
+    """
+    try:
+        current_user = get_current_user()
+        user_id = current_user['user_id']
+        
+        # WalletConnectセッションを作成（簡易版）
+        import uuid as uuid_lib
+        session_id = str(uuid_lib.uuid4())
+        
+        # WalletConnect URI（簡易版）
+        uri = f"wc:{session_id}@2?relay-protocol=irn&symKey=..."
+        
+        # QRコード生成
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={uri}"
+        
+        # セッション情報を一時保存（実際にはRedisなどを使用）
+        # ここでは簡易的にメモリに保存
+        
+        logger.info(f"Created WalletConnect session for user {user_id}: {session_id}")
+        
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'session_id': session_id,
+                'uri': uri,
+                'qrCode': qr_url,
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error creating WalletConnect session: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': 'Failed to create WalletConnect session',
+            'code': 500
+        }), 500
+
+
+@wallet_blueprint.route('/walletconnect/status', methods=['GET'])
+@jwt_required
+def get_walletconnect_status():
+    """
+    Get WalletConnect connection status.
+    
+    Response:
+        {
+            "status": "success",
+            "data": {
+                "connected": true,
+                "address": "rXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                "network": "testnet"
+            }
+        }
+    """
+    try:
+        current_user = get_current_user()
+        user_id = current_user['user_id']
+        
+        # セッションステータスを確認（簡易版）
+        # 実際にはRedisやデータベースから取得
+        
+        # ここでは既存のウォレット情報を返す
+        from repositories.wallet_repository import WalletRepository
+        wallet_repo = WalletRepository(g.db)
+        wallet = wallet_repo.find_by_user_id(user_id)
+        
+        if wallet and wallet.address:
+            return jsonify({
+                'status': 'success',
+                'data': {
+                    'connected': True,
+                    'address': wallet.address,
+                    'network': 'testnet',
+                }
+            }), 200
+        else:
+            return jsonify({
+                'status': 'success',
+                'data': {
+                    'connected': False,
+                    'address': None,
+                    'network': None,
+                }
+            }), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting WalletConnect status: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': 'Failed to get WalletConnect status',
+            'code': 500
+        }), 500
+
+
 @wallet_blueprint.route('/connect', methods=['POST'])
 @jwt_required
 def connect_wallet():

@@ -6,7 +6,7 @@ import Layout from '@/components/layout/Layout';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Loading from '@/components/ui/Loading';
-import XamanWalletConnectSimple from '@/components/wallet/XamanWalletConnectSimple';
+import XamanWalletConnectAuto from '@/components/wallet/XamanWalletConnectAuto';
 
 const XRPL_NETWORK = process.env.NEXT_PUBLIC_XRPL_NETWORK || 'testnet';
 
@@ -246,7 +246,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="pt-2">
-                <XamanWalletConnectSimple />
+                <XamanWalletConnectAuto />
               </div>
 
               <div className="text-xs text-gray-500 text-center">

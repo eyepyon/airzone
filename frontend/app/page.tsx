@@ -14,7 +14,7 @@ export default function Home() {
             WiFi接続でNFTを受け取り、限定商品にアクセス
           </p>
           <p className="text-base sm:text-lg text-gray-500 mb-8 sm:mb-12 px-4 max-w-2xl mx-auto">
-            店舗のWiFiに接続するだけで、Sui ブロックチェーン上のNFTが自動配布されます。
+            店舗のWiFiに接続するだけで、XRPL ブロックチェーン上のNFTが自動配布されます。
             NFTを使って特別な商品を購入できます。
           </p>
 
@@ -54,7 +54,7 @@ export default function Home() {
               NFT配布
             </h3>
             <p className="text-sm sm:text-base text-gray-600">
-              認証後、Sui ブロックチェーン上のNFTが自動的にあなたのウォレットに配布されます。
+              認証後、XRPL ブロックチェーン上のNFTが自動的にあなたのウォレットに配布されます。
             </p>
           </div>
 

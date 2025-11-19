@@ -248,7 +248,7 @@
     - ユーザー情報の取得
     - _Requirements: 1.1_
   
-  - [x] 4.2 Sui ブロックチェーンクライアントの実装
+  - [x] 4.2 XRPL ブロックチェーンクライアントの実装
 
 
 
@@ -335,7 +335,7 @@
 
 
     - WalletService を作成（backend/services/wallet_service.py）
-    - Sui ウォレットの生成
+    - XRPL ウォレットの生成
     - 秘密鍵の暗号化と保存
     - _Requirements: 1.3, 6.2_
 
@@ -706,10 +706,9 @@
 
 ## Blockchain Integration
 
-- [x] 20. Sui Move スマートコントラクトの実装
+- [x] 20. XRPL実装
   - [x] 20.1 Move プロジェクトのセットアップ
-    - contracts/ ディレクトリを作成
-    - Move プロジェクトの初期化（sui move new）
+    - ディレクトリを作成）
     - Move.toml の設定（依存関係、アドレス設定）
     - _Requirements: 3.2_
   

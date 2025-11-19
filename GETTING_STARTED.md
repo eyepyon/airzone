@@ -141,8 +141,7 @@ For detailed instructions, see [backend/DATABASE_SETUP.md](backend/DATABASE_SETU
 
 If you want to deploy your own smart contract:
 
-1. **Install Sui CLI:**
-   Follow the [Sui installation guide](https://docs.sui.io/build/install)
+1. **Install XRPL CLI:**
 
 2. **Deploy the contract:**
    ```bash

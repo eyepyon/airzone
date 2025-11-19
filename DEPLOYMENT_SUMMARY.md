@@ -358,11 +358,11 @@ After deployment configuration:
 1. **Configure external services:**
    - Google OAuth credentials
    - Stripe API keys
-   - Sui blockchain configuration
+   - XRPL blockchain configuration
 
-2. **Deploy smart contracts:**
-   - Deploy Sui Move contracts
-   - Update SUI_PACKAGE_ID
+2. **Deploy contracts:**
+   - Deploy XRPL 
+   - Update XRPL_PACKAGE_ID
 
 3. **Initialize database:**
    - Run migrations

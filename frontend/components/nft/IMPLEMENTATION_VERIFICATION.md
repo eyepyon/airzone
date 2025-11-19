@@ -88,7 +88,7 @@ All components have been successfully implemented and verified.
 ## Requirements Coverage
 
 ### Requirement 1.3 ✅
-**"WHEN 新規ユーザーが作成される, THE Airzone System SHALL Sui ブロックチェーン上に新しいウォレットアドレスを生成し wallets テーブルに保存する"**
+**"WHEN 新規ユーザーが作成される, THE Airzone System SHALL XRPL ブロックチェーン上に新しいウォレットアドレスを生成し wallets テーブルに保存する"**
 
 - ✅ NFT pages display wallet address
 - ✅ NFTs are associated with wallet addresses

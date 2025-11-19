@@ -2,16 +2,16 @@
 
 ## Introduction
 
-Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続トリガー型の NFT 配布・EC ショップ統合プラットフォームです。ユーザーが店舗や施設の WiFi に接続すると、Sui ブロックチェーン上の NFT が自動的に配布され、その NFT を使用して EC ショップで商品を購入できるシステムを提供します。
+Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続トリガー型の NFT 配布・EC ショップ統合プラットフォームです。ユーザーが店舗や施設の WiFi に接続すると、XRPL ブロックチェーン上の NFT が自動的に配布され、その NFT を使用して EC ショップで商品を購入できるシステムを提供します。
 
 ## Glossary
 
 - **Airzone System**: WiFi 接続トリガー型の NFT 配布・EC ショップ統合プラットフォーム全体（ドメイン: https://airz.one/）
 - **OpenNDS**: オープンソースのキャプティブポータルソフトウェア
 - **Captive Portal**: WiFi 接続時にユーザーを認証ページにリダイレクトする仕組み
-- **NFT (Non-Fungible Token)**: Sui ブロックチェーン上で発行される代替不可能なデジタル資産
-- **Sui Blockchain**: Move 言語で記述されたスマートコントラクトを実行するブロックチェーンプラットフォーム
-- **Wallet**: ユーザーの Sui ブロックチェーンアドレスを管理するデジタルウォレット
+- **NFT (Non-Fungible Token)**: XRPL ブロックチェーン上で発行される代替不可能なデジタル資産
+- **XRPL Blockchain**: マートコントラクトを実行するブロックチェーンプラットフォーム
+- **Wallet**: ユーザーの XRPL ブロックチェーンアドレスを管理するデジタルウォレット
 - **EC Shop**: NFT を使用して商品を購入できる電子商取引ショップ
 - **Sponsor Wallet**: NFT 発行時のガス代を負担するシステム側のウォレット
 - **JWT (JSON Web Token)**: ユーザー認証に使用されるトークン
@@ -22,13 +22,13 @@ Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続�
 
 ### Requirement 1: ユーザー認証とウォレット管理
 
-**User Story:** ユーザーとして、Google アカウントでログインし、自動的に Sui ウォレットを作成してもらいたい。これにより、ブロックチェーンの知識がなくても NFT を受け取れるようになる。
+**User Story:** ユーザーとして、Google アカウントでログインし、自動的に XRPLウォレットを作成してもらいたい。これにより、ブロックチェーンの知識がなくても NFT を受け取れるようになる。
 
 #### Acceptance Criteria
 
 1. WHEN ユーザーが Google OAuth 認証を完了する, THE Airzone System SHALL JWT アクセストークンを発行する
 2. WHEN 新規ユーザーが初回ログインする, THE Airzone System SHALL users テーブルに新しいユーザーレコードを作成する
-3. WHEN 新規ユーザーが作成される, THE Airzone System SHALL Sui ブロックチェーン上に新しいウォレットアドレスを生成し wallets テーブルに保存する
+3. WHEN 新規ユーザーが作成される, THE Airzone System SHALL XRPL ブロックチェーン上に新しいウォレットアドレスを生成し wallets テーブルに保存する
 4. THE Airzone System SHALL JWT アクセストークンの有効期限を 1 時間に設定する
 5. THE Airzone System SHALL JWT リフレッシュトークンの有効期限を 30 日間に設定する
 
@@ -51,7 +51,7 @@ Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続�
 #### Acceptance Criteria
 
 1. WHEN ユーザーが WiFi 認証を完了する, THE Airzone System SHALL Task Manager に NFT 発行タスクを追加する
-2. WHEN NFT 発行タスクが実行される, THE Airzone System SHALL Sui ブロックチェーン上で Move スマートコントラクトを呼び出す
+2. WHEN NFT 発行タスクが実行される, THE Airzone System SHALL XRPL ブロックチェーン上で Move スマートコントラクトを呼び出す
 3. WHEN NFT が発行される, THE Airzone System SHALL Sponsor Wallet を使用してガス代を支払う
 4. WHEN NFT 発行が成功する, THE Airzone System SHALL nft_mints テーブルに発行記録を保存する
 5. WHEN NFT 発行が失敗する, THE Airzone System SHALL エラーログを記録し、リトライ処理を 3 回まで実行する
@@ -107,7 +107,7 @@ Airzone は、OpenNDS キャプティブポータルを使用した WiFi 接続�
 2. THE Airzone System SHALL Tailwind CSS を使用してレスポンシブデザインを提供する
 3. THE Airzone System SHALL Zustand を使用してグローバル状態管理を実装する
 4. WHEN ユーザーがページを読み込む, THE Airzone System SHALL 200 ミリ秒以内に初期コンテンツを表示する
-5. THE Airzone System SHALL @mysten/dapp-kit を使用して Sui ウォレット接続機能を提供する
+5. THE Airzone System SHALL @mysten/dapp-kit を使用して XRPL ウォレット接続機能を提供する
 6. THE Airzone System SHALL @stripe/react-stripe-js を使用して安全な決済フォームを表示する
 
 ### Requirement 8: バックエンド API とデータ処理

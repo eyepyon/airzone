@@ -2,12 +2,12 @@
 
 ## Overview
 
-Airzone（https://airz.one/）は、OpenNDS キャプティブポータルと Sui ブロックチェーンを統合した、WiFi 接続トリガー型の NFT 配布・EC ショッププラットフォームです。
+Airzone（https://airz.one/）は、OpenNDS キャプティブポータルと XRPL ブロックチェーンを統合した、WiFi 接続トリガー型の NFT 配布・EC ショッププラットフォームです。
 
 ### 主要機能
 - Google OAuth による認証と自動ウォレット生成
 - OpenNDS キャプティブポータル統合
-- Sui ブロックチェーン上での NFT 自動発行
+- XRPL ブロックチェーン上での NFT 自動発行
 - NFT ゲート付き EC ショップ
 - Stripe 決済統合
 - 非同期タスク処理
@@ -17,7 +17,7 @@ Airzone（https://airz.one/）は、OpenNDS キャプティブポータルと Su
 - **Backend**: Flask 3.0 + Python 3.11+ + SQLAlchemy
 - **Database**: MySQL 8.0
 - **Task Queue**: Python threading / asyncio
-- **Blockchain**: Sui (Move)
+- **Blockchain**: XRPL
 - **Payment**: Stripe
 - **Infrastructure**: Apache 2.4 (直接デプロイ)
 
@@ -384,7 +384,7 @@ class WalletService:
         pass
     
     def create_wallet(self, user_id: str) -> Wallet:
-        """新しい Sui ウォレットを生成"""
+        """新しい XRPL ウォレットを生成"""
         pass
     
     def get_wallet_balance(self, address: str) -> int:

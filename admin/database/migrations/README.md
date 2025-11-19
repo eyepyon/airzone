@@ -1,50 +1,155 @@
-# データベースマイグレーション
+# Database Migrations
 
-## user_activities テーブル
+このディレクトリには、Airzone アプリケーションのデータベーススキーマを作成するためのLaravel migrationファイルが含まれています。
 
-効果測定（DAU、MAU、ダウンロード数など）のためのユーザーアクティビティを記録するテーブルです。
+## マイグレーションファイル一覧
 
-### マイグレーション実行
+1. `2024_01_01_000001_create_users_table.php` - ユーザーテーブル
+2. `2024_01_01_000002_create_wallets_table.php` - XRPLウォレットテーブル
+3. `2024_01_01_000003_create_products_table.php` - 商品テーブル
+4. `2024_01_01_000004_create_orders_table.php` - 注文テーブル
+5. `2024_01_01_000005_create_order_items_table.php` - 注文明細テーブル
+6. `2024_01_01_000006_create_payments_table.php` - 決済テーブル
+7. `2024_01_01_000007_create_nft_mints_table.php` - NFTミントテーブル
+8. `2024_01_01_000008_create_referrals_table.php` - 紹介テーブル
+9. `2024_01_01_000009_create_coin_transactions_table.php` - コイン取引テーブル
+
+## 使用方法
+
+### Laravel管理画面から実行
 
 ```bash
-# Laravelマイグレーション実行
+cd admin
 php artisan migrate
 ```
 
-### 手動でテーブル作成する場合
+### マイグレーションのロールバック
 
-```sql
-CREATE TABLE user_activities (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id CHAR(36) NOT NULL,
-    activity_type VARCHAR(255) NOT NULL,
-    ip_address VARCHAR(255) NULL,
-    user_agent VARCHAR(255) NULL,
-    metadata JSON NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_user_created (user_id, created_at),
-    INDEX idx_activity_created (activity_type, created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```bash
+php artisan migrate:rollback
 ```
 
-## アクティビティタイプ
+### すべてのマイグレーションをリセット
 
-- `login`: ユーザーログイン（DAU/MAU計測用）
-- `download`: 商品ダウンロード（DL数計測用）
-- `purchase`: 商品購入（売上分析用）
+```bash
+php artisan migrate:reset
+```
 
-## バックエンド連携
+### マイグレーションをリセットして再実行
 
-バックエンドAPIは以下のタイミングでアクティビティを自動記録します：
+```bash
+php artisan migrate:refresh
+```
 
-1. **ログイン時** (`/api/v1/auth/google`)
-   - `activity_type`: `login`
-   - DAU/MAU計測に使用
+## テーブル構造
 
-2. **ダウンロード時** (`/api/v1/downloads/product/{product_id}`)
-   - `activity_type`: `download`
-   - ダウンロード数計測に使用
+### users
+- Google OAuth認証を使用するユーザー情報
+- 各ユーザーは1つのXRPLウォレットを持つ
 
-3. **購入時** (`/api/v1/orders`)
-   - `activity_type`: `purchase`
-   - 売上分析に使用
+### wallets
+- XRPLブロックチェーンウォレット情報
+- 秘密鍵は暗号化されて保存される
+
+### products
+- EC ショップの商品情報
+- NFT所有要件をオプションで設定可能
+
+### orders
+- 顧客の注文情報
+- ステータス: pending, processing, completed, failed, cancelled
+
+### order_items
+- 注文の明細情報
+- 商品、数量、価格を記録
+
+### payments
+- Stripe決済情報
+- ステータス: pending, processing, succeeded, failed, cancelled
+
+### nft_mints
+- NFTミント操作の追跡
+- ステータス: pending, minting, completed, failed
+
+### referrals
+- ユーザー紹介システム
+- 紹介者と被紹介者の関係を記録
+
+### coin_transactions
+- コイン取引履歴
+- ユーザーのコイン残高変動を追跡
+
+## 注意事項
+
+1. **実行順序**: マイグレーションファイルは番号順に実行されます。外部キー制約があるため、順序を変更しないでください。
+
+2. **データベース設定**: `.env`ファイルでデータベース接続情報を設定してください：
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_DATABASE=airdb
+   DB_USERNAME=kanri
+   DB_PASSWORD=your_password
+   ```
+
+3. **UUID**: すべてのテーブルで主キーとしてUUID（36文字の文字列）を使用しています。
+
+4. **タイムスタンプ**: すべてのテーブルに`created_at`と`updated_at`カラムがあります（一部例外あり）。
+
+5. **外部キー制約**: 関連テーブルが削除された場合、カスケード削除が設定されています。
+
+## Python バックエンドとの互換性
+
+これらのマイグレーションは、Pythonバックエンド（Flask + SQLAlchemy）のモデル定義と完全に互換性があります：
+
+- `backend/models/user.py`
+- `backend/models/wallet.py`
+- `backend/models/product.py`
+- `backend/models/order.py`
+- `backend/models/payment.py`
+- `backend/models/nft_mint.py`
+- `backend/models/referral.py`
+
+## トラブルシューティング
+
+### マイグレーションエラーが発生した場合
+
+1. データベース接続を確認
+   ```bash
+   php artisan db:show
+   ```
+
+2. マイグレーションステータスを確認
+   ```bash
+   php artisan migrate:status
+   ```
+
+3. 特定のマイグレーションのみ実行
+   ```bash
+   php artisan migrate --path=/database/migrations/2024_01_01_000001_create_users_table.php
+   ```
+
+### 外部キー制約エラー
+
+外部キー制約エラーが発生した場合は、参照先のテーブルが先に作成されているか確認してください。
+
+## 開発環境
+
+- Laravel 10.x
+- MySQL 8.0+
+- PHP 8.1+
+
+## 本番環境への適用
+
+本番環境では、以下の手順でマイグレーションを実行してください：
+
+```bash
+# バックアップを取得
+mysqldump -u username -p airdb > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# マイグレーション実行
+php artisan migrate --force
+```
+
+`--force`フラグは本番環境で必要です。

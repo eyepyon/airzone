@@ -31,6 +31,7 @@ export default function ProductDetailPage() {
     if (user) {
       fetchNFTs();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, user]);
 
   const loadProduct = async () => {

@@ -254,7 +254,7 @@ export default function NFTDetailPage() {
                         Transaction
                       </h3>
                       <a
-                        href={`https://suiexplorer.com/txblock/${nft.transaction_digest}?network=testnet`}
+                        href={`https://testnet.xrpl.org/transactions/${nft.transaction_digest}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-mono break-all"
@@ -329,14 +329,14 @@ export default function NFTDetailPage() {
                   <Button
                     onClick={() =>
                       window.open(
-                        `https://suiexplorer.com/txblock/${nft.transaction_digest}?network=testnet`,
+                        `https://testnet.xrpl.org/transactions/${nft.transaction_digest}`,
                         '_blank'
                       )
                     }
                     variant="primary"
                     className="w-full"
                   >
-                    View on Sui Explorer
+                    View on XRPL Explorer
                   </Button>
                 </CardContent>
               </Card>

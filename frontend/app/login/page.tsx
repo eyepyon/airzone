@@ -76,7 +76,7 @@ export default function LoginPage() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span>Automatic Sui wallet creation</span>
+                  <span>Automatic XRPL wallet creation</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <svg

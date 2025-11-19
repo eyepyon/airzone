@@ -118,7 +118,7 @@ export default function NFTCard({ nft, onClick }: NFTCardProps) {
       {nft.transaction_digest && (
         <CardFooter className="p-3">
           <a
-            href={`https://suiexplorer.com/txblock/${nft.transaction_digest}?network=testnet`}
+            href={`https://testnet.xrpl.org/transactions/${nft.transaction_digest}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-blue-600 hover:text-blue-800 hover:underline"

@@ -13,6 +13,66 @@ logger = logging.getLogger(__name__)
 wallet_blueprint = Blueprint('wallet', __name__)
 
 
+@wallet_blueprint.route('/xaman/signin', methods=['POST'])
+@jwt_required
+def xaman_signin():
+    """
+    Create Xaman sign-in request.
+    
+    Request Body:
+        {
+            "network": "testnet"
+        }
+    
+    Response:
+        {
+            "status": "success",
+            "data": {
+                "uuid": "xxx-xxx-xxx",
+                "qr_code": "https://...",
+                "deep_link": "xaman://...",
+                "websocket": "wss://..."
+            }
+        }
+    """
+    try:
+        current_user = get_current_user()
+        user_id = current_user['user_id']
+        
+        data = request.get_json() or {}
+        network = data.get('network', 'testnet')
+        
+        # Xaman APIでサインリクエストを作成
+        # 注: 実際のXaman API実装が必要
+        # ここでは簡易的なレスポンスを返す
+        
+        import uuid
+        request_uuid = str(uuid.uuid4())
+        
+        # QRコード生成（簡易版）
+        qr_data = f"xaman://signin?uuid={request_uuid}"
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
+        
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'uuid': request_uuid,
+                'qr_code': qr_url,
+                'deep_link': qr_data,
+                'websocket': f"wss://xumm.app/sign/{request_uuid}",
+                'message': 'Xamanアプリで署名してください'
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error creating Xaman sign-in request: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'error': 'Failed to create sign-in request',
+            'code': 500
+        }), 500
+
+
 @wallet_blueprint.route('/connect', methods=['POST'])
 @jwt_required
 def connect_wallet():

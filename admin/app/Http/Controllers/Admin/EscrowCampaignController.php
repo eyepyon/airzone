@@ -43,7 +43,7 @@ class EscrowCampaignController extends Controller
         $validated['current_participants'] = 0;
         $validated['created_at'] = now();
         $validated['updated_at'] = now();
-        $validated['is_active'] = $request->has('is_active');
+        $validated['is_active'] = $request->has('is_active') ? 1 : 0;
 
         DB::table('escrow_campaigns')->insert($validated);
 
@@ -102,7 +102,7 @@ class EscrowCampaignController extends Controller
         ]);
 
         $validated['updated_at'] = now();
-        $validated['is_active'] = $request->has('is_active');
+        $validated['is_active'] = $request->has('is_active') ? 1 : 0;
 
         DB::table('escrow_campaigns')->where('id', $id)->update($validated);
 

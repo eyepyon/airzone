@@ -16,13 +16,8 @@ const getExplorerUrl = (address: string) => {
 };
 
 export default function DashboardPage() {
-  const { user, wallet, logout, isLoading } = useAuthStore();
+  const { user, wallet, isLoading } = useAuthStore();
   const router = useRouter();
-
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
 
   if (isLoading) {
     return (

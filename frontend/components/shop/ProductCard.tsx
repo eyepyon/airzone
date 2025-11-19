@@ -19,7 +19,6 @@ interface ProductCardProps {
 export default function ProductCard({
   product,
   onAddToCart,
-  showNFTRequirement = true,
 }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false);
   const { nfts } = useNFTStore();

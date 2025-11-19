@@ -56,7 +56,7 @@ export class XamanWalletConnector {
    * Xaman Browser Extensionが利用可能か確認
    */
   private hasXamanExtension(): boolean {
-    return typeof window !== 'undefined' && !!(window as any).xaman;
+    return typeof window !== 'undefined' && !!(window as unknown as Record<string, unknown>).xaman;
   }
 
   /**
@@ -64,23 +64,27 @@ export class XamanWalletConnector {
    */
   private async connectViaExtension(): Promise<WalletConnection> {
     try {
-      const xaman = (window as any).xaman;
+      const xaman = (window as unknown as Record<string, unknown>).xaman as {
+        request: (params: { method: string }) => Promise<string[] | string>;
+      };
       
       // アカウント接続をリクエスト
       const accounts = await xaman.request({
         method: 'xrpl_requestAccounts',
       });
 
-      if (!accounts || accounts.length === 0) {
+      if (!accounts || (Array.isArray(accounts) && accounts.length === 0)) {
         throw new Error('アカウントが見つかりませんでした');
       }
 
-      const address = accounts[0];
+      const address = Array.isArray(accounts) ? accounts[0] : accounts;
       
       // ネットワーク情報を取得
-      const network = await xaman.request({
+      const networkResult = await xaman.request({
         method: 'xrpl_getNetwork',
       });
+      
+      const network = Array.isArray(networkResult) ? networkResult[0] : networkResult;
 
       this.connection = {
         address,
@@ -204,7 +208,7 @@ export class XamanWalletConnector {
   /**
    * WalletConnect接続を待機
    */
-  private async waitForWalletConnectConnection(uri: string): Promise<WalletConnection> {
+  private async waitForWalletConnectConnection(_uri: string): Promise<WalletConnection> {
     // WebSocketまたはポーリングで接続を待機
     return new Promise((resolve, reject) => {
       const checkInterval = setInterval(async () => {

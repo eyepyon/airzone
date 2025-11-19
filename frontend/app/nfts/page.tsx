@@ -6,13 +6,12 @@ import Layout from '@/components/layout/Layout';
 import { useAuthStore } from '../../stores/auth-store';
 import { useNFTStore } from '../../stores/nft-store';
 import NFTGallery from '../../components/nft/NFTGallery';
-import Button from '../../components/ui/Button';
 import Loading from '../../components/ui/Loading';
 
 export default function NFTsPage() {
   const router = useRouter();
   const { user, wallet, isLoading: authLoading } = useAuthStore();
-  const { nfts, loading: nftsLoading, fetchNFTs, requestMint, mintingTaskId } = useNFTStore();
+  const { nfts, loading: nftsLoading, fetchNFTs } = useNFTStore();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -25,16 +24,6 @@ export default function NFTsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, wallet, authLoading]);
-
-  const handleMintNFT = async () => {
-    if (!wallet) return;
-    
-    try {
-      await requestMint(wallet.address);
-    } catch (error) {
-      console.error('Failed to request NFT mint:', error);
-    }
-  };
 
   const handleNFTClick = (nft: { id: string }) => {
     router.push(`/nfts/${nft.id}`);

@@ -200,11 +200,13 @@ export default function ProductDetailPage() {
 
               <div className="flex items-center gap-4 mb-6">
                 <span className="text-4xl font-bold text-gray-900">
-                  ¥{product.price.toLocaleString()}
+                  {product.price !== undefined && product.price !== null
+                    ? `¥${product.price.toLocaleString()}`
+                    : '価格未設定'}
                 </span>
                 {isOutOfStock && (
                   <span className="bg-red-500 text-white px-3 py-1 rounded text-sm font-semibold">
-                    Out of Stock
+                    在庫切れ
                   </span>
                 )}
               </div>
@@ -315,10 +317,12 @@ export default function ProductDetailPage() {
                 size="lg"
               >
                 {isLocked
-                  ? 'NFT Required to Purchase'
+                  ? 'NFT必須'
                   : isOutOfStock
-                  ? 'Out of Stock'
-                  : `Add to Cart - ¥${(product.price * quantity).toLocaleString()}`}
+                  ? '在庫切れ'
+                  : product.price !== undefined && product.price !== null
+                  ? `カートに追加 - ¥${(product.price * quantity).toLocaleString()}`
+                  : 'カートに追加'}
               </Button>
 
               {!user && (

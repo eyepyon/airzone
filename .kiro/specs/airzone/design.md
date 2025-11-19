@@ -85,7 +85,7 @@ Airzone（https://airz.one/）は、OpenNDS キャプティブポータルと XR
           └───────────────────┘                    │
                                                                 │
                               ┌─────────────────────────────────▼────────┐
-                              │         Sui Blockchain Network            │
+                              │         XRPL Blockchain Network            │
                               │  ┌────────────────────────────────────┐  │
                               │  │  Move Smart Contract               │  │
                               │  │  - NFT Minting Module              │  │

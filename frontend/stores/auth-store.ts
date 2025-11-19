@@ -68,6 +68,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isAuthenticated: false,
       error: null,
     });
+    
+    // Clear cart on logout
+    if (typeof window !== 'undefined') {
+      try {
+        // Clear cart from localStorage
+        const cartStore = localStorage.getItem('cart-storage');
+        if (cartStore) {
+          const cart = JSON.parse(cartStore);
+          cart.state.items = [];
+          cart.state.total = 0;
+          localStorage.setItem('cart-storage', JSON.stringify(cart));
+        }
+      } catch (error) {
+        console.error('Failed to clear cart:', error);
+      }
+      
+      // Redirect to home page after logout
+      window.location.href = '/';
+    }
   },
 
   refreshToken: async () => {

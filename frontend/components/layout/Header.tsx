@@ -101,7 +101,9 @@ export default function Header() {
                   {user.name}
                 </span>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                  }}
                   className="text-sm px-4 py-2 text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                 >
                   ログアウト

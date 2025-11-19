@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
+import { getXRPJPYRate, getWalletBalance } from '@/lib/xrpl-payment';
 
 interface XRPLPaymentFormProps {
   orderId: string;
@@ -12,6 +13,8 @@ interface XRPLPaymentFormProps {
   onSuccess?: (orderId: string) => void;
   onError?: (error: Error) => void;
 }
+
+type PaymentStatus = 'idle' | 'creating' | 'waiting' | 'processing' | 'completed' | 'failed';
 
 export default function XRPLPaymentForm({
   orderId,
@@ -21,25 +24,84 @@ export default function XRPLPaymentForm({
 }: XRPLPaymentFormProps) {
   const router = useRouter();
   const { wallet } = useAuthStore();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [status, setStatus] = useState<PaymentStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [xrpRate, setXrpRate] = useState(150);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
-  // XRP/JPY レート（実際にはAPIから取得すべき）
-  const XRP_JPY_RATE = 150; // 1 XRP = 150 JPY（仮）
-  const amountXRP = (amount / XRP_JPY_RATE).toFixed(6);
+  const amountXRP = (amount / xrpRate).toFixed(6);
+  const SPONSOR_ADDRESS = process.env.NEXT_PUBLIC_XRPL_SPONSOR_ADDRESS || 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH';
 
-  const handlePayment = async () => {
-    if (!wallet) {
-      setErrorMessage('ウォレットが見つかりません');
-      return;
+  // XRP/JPYレートとウォレット残高を取得
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const rate = await getXRPJPYRate();
+        setXrpRate(rate);
+
+        if (wallet?.address) {
+          const balance = await getWalletBalance(wallet.address);
+          setWalletBalance(balance);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      }
+    };
+
+    fetchData();
+  }, [wallet]);
+
+  // 支払いステータスをポーリング
+  useEffect(() => {
+    if (status === 'waiting' && !pollingInterval) {
+      const interval = setInterval(async () => {
+        try {
+          // バックエンドで支払い確認
+          const response = await fetch(`/api/v1/payments/xrpl/check/${orderId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.data.status === 'completed') {
+              clearInterval(interval);
+              setPollingInterval(null);
+              setStatus('completed');
+              if (onSuccess) {
+                onSuccess(orderId);
+              }
+              setTimeout(() => {
+                router.push(`/orders/${orderId}?payment=success`);
+              }, 2000);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to check payment status:', error);
+        }
+      }, 5000); // 5秒ごとにチェック
+
+      setPollingInterval(interval);
     }
 
-    setIsProcessing(true);
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [status, pollingInterval, orderId, onSuccess, router]);
+
+  const handleExecutePayment = async () => {
+    setStatus('processing');
     setErrorMessage(null);
 
     try {
-      // XRPLでの支払い処理
-      const response = await fetch('/api/v1/payments/xrpl', {
+      // バックエンドで実際にXRPL決済を実行
+      const response = await fetch('/api/v1/payments/xrpl/execute', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,32 +109,33 @@ export default function XRPLPaymentForm({
         },
         body: JSON.stringify({
           order_id: orderId,
-          wallet_address: wallet.address,
-          amount_xrp: parseFloat(amountXRP),
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || '支払い処理に失敗しました');
+        throw new Error(error.error || '決済の実行に失敗しました');
       }
 
       const data = await response.json();
+      setStatus('completed');
 
-      // 支払い成功
+      // 成功後の処理
       if (onSuccess) {
         onSuccess(orderId);
       }
-      router.push(`/orders/${orderId}?payment=success`);
+
+      setTimeout(() => {
+        router.push(`/orders/${orderId}?payment=success&tx=${data.data.transaction_hash}`);
+      }, 2000);
+
     } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : '予期しないエラーが発生しました';
+      const errorMsg = err instanceof Error ? err.message : '予期しないエラーが発生しました';
       setErrorMessage(errorMsg);
+      setStatus('failed');
       if (onError) {
         onError(err instanceof Error ? err : new Error(errorMsg));
       }
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -132,7 +195,7 @@ export default function XRPLPaymentForm({
             </span>
           </div>
           <p className="text-xs text-gray-500 text-right">
-            レート: 1 XRP = ¥{XRP_JPY_RATE}
+            レート: 1 XRP = ¥{xrpRate}
           </p>
         </div>
       </Card>
@@ -149,6 +212,11 @@ export default function XRPLPaymentForm({
               <p className="text-sm font-mono text-gray-900 break-all">
                 {wallet.address}
               </p>
+              {walletBalance !== null && (
+                <p className="text-xs text-gray-600 mt-2">
+                  残高: {walletBalance.toFixed(6)} XRP
+                </p>
+              )}
             </div>
             <div className="ml-4">
               <svg
@@ -178,6 +246,12 @@ export default function XRPLPaymentForm({
             <span className="text-gray-600">ネットワーク</span>
             <span className="font-medium text-gray-900">
               XRPL {process.env.NEXT_PUBLIC_XRPL_NETWORK || 'Testnet'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">送金先</span>
+            <span className="font-medium text-gray-900 font-mono text-xs">
+              {SPONSOR_ADDRESS.substring(0, 10)}...{SPONSOR_ADDRESS.substring(SPONSOR_ADDRESS.length - 6)}
             </span>
           </div>
           <div className="flex justify-between">
@@ -214,42 +288,57 @@ export default function XRPLPaymentForm({
         </div>
       )}
 
-      {/* Payment Button */}
-      <Button
-        onClick={handlePayment}
-        variant="primary"
-        size="lg"
-        className="w-full bg-purple-600 hover:bg-purple-700"
-        disabled={isProcessing}
-      >
-        {isProcessing ? (
-          <span className="flex items-center justify-center">
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+      {/* Payment Status & Actions */}
+      {status === 'idle' && (
+        <Button
+          onClick={handleExecutePayment}
+          variant="primary"
+          size="lg"
+          className="w-full bg-purple-600 hover:bg-purple-700"
+        >
+          {`${amountXRP} XRP で支払う`}
+        </Button>
+      )}
+
+      {status === 'processing' && (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mb-4"></div>
+          <p className="text-gray-600">XRPLブロックチェーンで決済処理中...</p>
+          <p className="text-sm text-gray-500 mt-2">トランザクションを送信しています</p>
+        </div>
+      )}
+
+      {status === 'completed' && (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            処理中...
-          </span>
-        ) : (
-          `${amountXRP} XRP で支払う`
-        )}
-      </Button>
+          </div>
+          <h3 className="text-lg font-semibold text-green-900 mb-2">
+            支払い完了！
+          </h3>
+          <p className="text-sm text-green-700">
+            XRPLブロックチェーンで決済が完了しました
+          </p>
+          <p className="text-xs text-gray-500 mt-2">
+            注文詳細ページにリダイレクトしています...
+          </p>
+        </div>
+      )}
+
+      {status === 'failed' && (
+        <div className="space-y-4">
+          <Button
+            onClick={handleExecutePayment}
+            variant="primary"
+            size="lg"
+            className="w-full bg-purple-600 hover:bg-purple-700"
+          >
+            再試行
+          </Button>
+        </div>
+      )}
 
       {/* Security Notice */}
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
@@ -270,7 +359,8 @@ export default function XRPLPaymentForm({
               安全な決済
             </h4>
             <p className="text-xs text-purple-700 mt-1">
-              トランザクションはXRPL上で処理され、ブロックチェーンに記録されます。
+              トランザクションは実際のXRPLブロックチェーン上で処理され、
+              ブロックチェーンに永続的に記録されます。
               支払い完了後、自動的にNFTがミントされます。
             </p>
           </div>

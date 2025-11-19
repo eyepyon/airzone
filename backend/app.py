@@ -214,6 +214,10 @@ app.register_blueprint(order_blueprint, url_prefix='/api/v1/orders')
 from routes.payment import payment_blueprint
 app.register_blueprint(payment_blueprint, url_prefix='/api/v1/payments')
 
+# Register XRPL payment blueprint
+from routes.xrpl_payment import xrpl_payment_blueprint
+app.register_blueprint(xrpl_payment_blueprint, url_prefix='/api/v1/payments/xrpl')
+
 # Register wifi blueprint
 from routes.wifi import wifi_blueprint
 app.register_blueprint(wifi_blueprint, url_prefix='/api/v1/wifi')

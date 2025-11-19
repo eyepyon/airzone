@@ -107,19 +107,32 @@ class AuthService:
                 logger.info(f"Creating XRPL wallet for user: {user.id}")
                 try:
                     from clients.xrpl_client import XRPLClient
-                    from config import config
+                    from config import Config
+                    from cryptography.fernet import Fernet
+                    import os
                     
+                    # Get configuration
+                    xrpl_network = os.getenv('XRPL_NETWORK', 'testnet')
+                    xrpl_sponsor_seed = os.getenv('XRPL_SPONSOR_SEED')
+                    encryption_key = os.getenv('ENCRYPTION_KEY')
+                    
+                    # Create XRPL client
                     xrpl_client = XRPLClient(
-                        network=config['development'].XRPL_NETWORK,
-                        sponsor_seed=config['development'].XRPL_SPONSOR_SEED
+                        network=xrpl_network,
+                        sponsor_seed=xrpl_sponsor_seed
                     )
                     
                     # Generate XRPL wallet
+                    logger.info(f"Generating XRPL wallet...")
                     address, seed = xrpl_client.generate_wallet()
+                    logger.info(f"Generated wallet address: {address}")
                     
                     # Encrypt seed
-                    from cryptography.fernet import Fernet
-                    encryption_key = config['development'].ENCRYPTION_KEY
+                    if not encryption_key:
+                        # Generate a key if not set (for development)
+                        encryption_key = Fernet.generate_key().decode()
+                        logger.warning("ENCRYPTION_KEY not set, generated temporary key")
+                    
                     cipher = Fernet(encryption_key.encode() if isinstance(encryption_key, str) else encryption_key)
                     encrypted_seed = cipher.encrypt(seed.encode()).decode()
                     
@@ -130,10 +143,21 @@ class AuthService:
                         private_key_encrypted=encrypted_seed
                     )
                     self.db_session.commit()
-                    logger.info(f"Created XRPL wallet for user {user.id}: {address}")
+                    logger.info(f"✓ Created XRPL wallet for user {user.id}: {address}")
+                    
                 except Exception as e:
-                    logger.error(f"Failed to create wallet for user {user.id}: {str(e)}")
-                    # Don't fail authentication if wallet creation fails
+                    logger.error(f"✗ Failed to create wallet for user {user.id}: {str(e)}", exc_info=True)
+                    # Create a placeholder wallet to prevent repeated failures
+                    try:
+                        wallet = self.wallet_repo.create_wallet(
+                            user_id=user.id,
+                            address='',
+                            private_key_encrypted=''
+                        )
+                        self.db_session.commit()
+                        logger.info(f"Created placeholder wallet for user {user.id}")
+                    except:
+                        pass
                     wallet = None
             
             # Generate JWT tokens

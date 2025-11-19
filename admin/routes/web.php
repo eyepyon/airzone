@@ -17,28 +17,28 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // 管理画面（認証必須）
 Route::middleware('auth:admin')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    
+
+    // 重要ユーザー管理（resourceルートより前に定義）
+    Route::get('/users/importance', [UserController::class, 'importance'])->name('users.importance');
+    Route::post('/users/{id}/update-score', [UserController::class, 'updateScore'])->name('users.updateScore');
+
     // ユーザー管理
     Route::resource('users', UserController::class);
-    
+
     // 商品管理
     Route::resource('products', ProductController::class);
-    
+
     // 注文管理
     Route::resource('orders', OrderController::class)->only(['index', 'show', 'update']);
-    
+
     // NFT管理
     Route::resource('nfts', NFTController::class)->only(['index', 'show']);
-    
-    // 紹介管理
-    Route::get('/referrals', [App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('referrals.index');
+
+    // 紹介管理（resourceルートより前に定義）
     Route::get('/referrals/ranking', [App\Http\Controllers\Admin\ReferralController::class, 'ranking'])->name('referrals.ranking');
     Route::get('/referrals/{id}', [App\Http\Controllers\Admin\ReferralController::class, 'show'])->name('referrals.show');
-    
-    // 重要ユーザー管理
-    Route::get('/users/importance', [App\Http\Controllers\Admin\UserController::class, 'importance'])->name('users.importance');
-    Route::post('/users/{id}/update-score', [App\Http\Controllers\Admin\UserController::class, 'updateScore'])->name('users.updateScore');
-    
+    Route::get('/referrals', [App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('referrals.index');
+
     // 一括送金管理
     Route::prefix('batch-transfers')->name('admin.batch-transfers.')->group(function () {
         Route::get('/', [BatchTransferController::class, 'index'])->name('index');

@@ -1,36 +1,9 @@
 /**
  * XRPL Payment Utilities
- * XRPLネットワークで実際にトランザクションを発行
+ * XRPLネットワークとの通信（バックエンド経由）
  */
 
-import { Client, Wallet, xrpToDrops, dropsToXrp } from 'xrpl';
-
-const XRPL_NETWORK = process.env.NEXT_PUBLIC_XRPL_NETWORK || 'testnet';
-const SPONSOR_ADDRESS = process.env.NEXT_PUBLIC_XRPL_SPONSOR_ADDRESS || '';
-
-// XRPLクライアントのシングルトン
-let clientInstance: Client | null = null;
-
-/**
- * XRPLクライアントを取得
- */
-async function getClient(): Promise<Client> {
-  if (!clientInstance) {
-    const wsUrl =
-      XRPL_NETWORK === 'mainnet'
-        ? 'wss://xrplcluster.com'
-        : 'wss://s.altnet.rippletest.net:51233';
-
-    clientInstance = new Client(wsUrl);
-    await clientInstance.connect();
-  }
-
-  if (!clientInstance.isConnected()) {
-    await clientInstance.connect();
-  }
-
-  return clientInstance;
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.airz.one';
 
 /**
  * XRPLアドレスの検証
@@ -43,85 +16,61 @@ export function validateXRPLAddress(address: string): boolean {
 }
 
 /**
- * ウォレットの残高を取得
+ * ウォレットの残高を取得（バックエンド経由）
  */
 export async function getWalletBalance(address: string): Promise<number> {
   try {
-    const client = await getClient();
-    const response = await client.request({
-      command: 'account_info',
-      account: address,
-      ledger_index: 'validated',
+    const response = await fetch(`${API_URL}/api/v1/wallet/balance?address=${address}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      },
     });
 
-    const balanceDrops = response.result.account_data.Balance;
-    return parseFloat(dropsToXrp(String(balanceDrops)));
+    if (!response.ok) {
+      throw new Error('残高の取得に失敗しました');
+    }
+
+    const data = await response.json();
+    return data.data.balance_xrp || 0;
   } catch (error) {
     console.error('Failed to get wallet balance:', error);
-    throw new Error('ウォレット残高の取得に失敗しました');
+    return 0;
   }
 }
 
 /**
- * XRP決済を実行（ユーザーのウォレットから）
+ * XRP決済を実行（バックエンド経由）
  */
 export async function sendXRPPayment(
-  fromWalletSeed: string,
-  toAddress: string,
-  amountXRP: number,
-  memo?: string
+  orderId: string,
+  amountXRP: number
 ): Promise<{
   hash: string;
   validated: boolean;
   ledgerIndex: number;
 }> {
   try {
-    const client = await getClient();
+    const response = await fetch(`${API_URL}/api/v1/payments/xrpl/execute`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      },
+      body: JSON.stringify({
+        order_id: orderId,
+      }),
+    });
 
-    // ウォレットを作成
-    const wallet = Wallet.fromSeed(fromWalletSeed);
-
-    // トランザクションを準備
-    const payment: any = {
-      TransactionType: 'Payment',
-      Account: wallet.address,
-      Destination: toAddress,
-      Amount: xrpToDrops(String(amountXRP)),
-    };
-
-    // メモを追加（オプション）
-    if (memo) {
-      payment.Memos = [
-        {
-          Memo: {
-            MemoType: Buffer.from('order_id', 'utf8').toString('hex').toUpperCase(),
-            MemoData: Buffer.from(memo, 'utf8').toString('hex').toUpperCase(),
-          },
-        },
-      ];
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'XRP決済に失敗しました');
     }
 
-    // トランザクションを準備（自動的にFeeとSequenceを設定）
-    const prepared = await client.autofill(payment);
-
-    // トランザクションに署名
-    const signed = wallet.sign(prepared);
-
-    // トランザクションを送信
-    const result = await client.submitAndWait(signed.tx_blob);
-
-    // 結果を確認
-    if (result.result.meta && typeof result.result.meta === 'object') {
-      const meta = result.result.meta as any;
-      if (meta.TransactionResult !== 'tesSUCCESS') {
-        throw new Error(`Transaction failed: ${meta.TransactionResult}`);
-      }
-    }
-
+    const data = await response.json();
     return {
-      hash: result.result.hash,
-      validated: result.result.validated || false,
-      ledgerIndex: result.result.ledger_index || 0,
+      hash: data.data.transaction_hash,
+      validated: true,
+      ledgerIndex: 0,
     };
   } catch (error) {
     console.error('XRPL payment failed:', error);
@@ -130,92 +79,25 @@ export async function sendXRPPayment(
 }
 
 /**
- * スポンサーウォレットへの支払いを実行
- * （バックエンドで秘密鍵を管理する安全な方法）
- */
-export async function requestXRPLPayment(
-  orderId: string,
-  amountXRP: number
-): Promise<{
-  paymentUrl: string;
-  taskId: string;
-}> {
-  try {
-    const response = await fetch('/api/v1/payments/xrpl/request', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-      },
-      body: JSON.stringify({
-        order_id: orderId,
-        amount_xrp: amountXRP,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'XRP決済リクエストに失敗しました');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to request XRPL payment:', error);
-    throw error;
-  }
-}
-
-/**
- * XRP決済のステータスを確認
- */
-export async function checkXRPLPaymentStatus(taskId: string): Promise<{
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  transaction_hash?: string;
-  error?: string;
-}> {
-  try {
-    const response = await fetch(`/api/v1/payments/xrpl/status/${taskId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('ステータスの取得に失敗しました');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Failed to check payment status:', error);
-    throw error;
-  }
-}
-
-/**
- * トランザクションの詳細を取得
+ * トランザクションの詳細を取得（バックエンド経由）
  */
 export async function getTransactionDetails(txHash: string): Promise<any> {
   try {
-    const client = await getClient();
-    const response = await client.request({
-      command: 'tx',
-      transaction: txHash,
+    const response = await fetch(`${API_URL}/api/v1/payments/xrpl/verify/${txHash}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      },
     });
 
-    return response.result;
+    if (!response.ok) {
+      throw new Error('トランザクション詳細の取得に失敗しました');
+    }
+
+    const data = await response.json();
+    return data.data;
   } catch (error) {
     console.error('Failed to get transaction details:', error);
     throw error;
-  }
-}
-
-/**
- * XRPLクライアントを切断
- */
-export async function disconnectClient(): Promise<void> {
-  if (clientInstance && clientInstance.isConnected()) {
-    await clientInstance.disconnect();
-    clientInstance = null;
   }
 }
 

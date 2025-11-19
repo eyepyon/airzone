@@ -10,62 +10,61 @@ use Illuminate\Support\Facades\Http;
 class BatchTransferController extends Controller
 {
     private $apiBaseUrl;
-    
+
     public function __construct()
     {
         $this->apiBaseUrl = env('API_BASE_URL', 'http://localhost:5000');
     }
-    
+
     /**
-     * バッチ送金履歴一覧
+     * バッチ送金管理画面
      */
     public function index(Request $request)
     {
-        $limit = $request->get('limit', 50);
-        $offset = $request->get('offset', 0);
-        
-        // APIから履歴を取得
-        $response = Http::withToken(session('admin_token'))
-            ->get("{$this->apiBaseUrl}/api/v1/batch-transfer/history", [
-                'limit' => $limit,
-                'offset' => $offset
-            ]);
-        
-        if ($response->successful()) {
-            $data = $response->json();
-            
-            return view('admin.batch-transfers.index', [
-                'transfers' => $data['transfers'] ?? [],
-                'total' => $data['total'] ?? 0,
-                'limit' => $limit,
-                'offset' => $offset
-            ]);
-        }
-        
+        // 統計情報を表示
+        $stats = [
+            'total_users' => DB::table('users')->count(),
+            'users_with_referral_code' => DB::table('users')->whereNotNull('referral_code')->count(),
+            'total_referrals' => DB::table('referrals')->where('status', 'completed')->count(),
+            'total_nfts' => DB::table('nft_mints')->where('status', 'completed')->count(),
+        ];
+
         return view('admin.batch-transfers.index', [
-            'transfers' => [],
-            'total' => 0,
-            'error' => 'Failed to load batch transfer history'
+            'stats' => $stats
         ]);
     }
-    
+
     /**
      * バッチ送金フォーム
      */
     public function create()
     {
-        // ユーザー一覧を取得
+        // ウォレットを持つユーザー一覧を取得
         $users = DB::table('users')
-            ->select('id', 'email', 'wallet_address', 'importance_level')
-            ->whereNotNull('wallet_address')
-            ->orderBy('importance_score', 'desc')
+            ->select('id', 'name', 'email')
+            ->whereNotNull('referral_code')
+            ->orderBy('created_at', 'desc')
+            ->limit(1000)
             ->get();
-        
+
+        // VIPユーザー数を取得
+        $vipStats = [
+            'total_users' => DB::table('users')->count(),
+            'users_with_wallets' => DB::table('users')->whereNotNull('referral_code')->count(),
+            'top_referrers' => DB::table('referrals')
+                ->select('referrer_id')
+                ->where('status', 'completed')
+                ->groupBy('referrer_id')
+                ->havingRaw('COUNT(*) >= 5')
+                ->count()
+        ];
+
         return view('admin.batch-transfers.create', [
-            'users' => $users
+            'users' => $users,
+            'vipStats' => $vipStats
         ]);
     }
-    
+
     /**
      * バッチ送金プレビュー
      */
@@ -75,23 +74,23 @@ class BatchTransferController extends Controller
             'user_ids' => 'required|array',
             'amount_xrp' => 'required|numeric|min:0.000001'
         ]);
-        
+
         // APIでプレビュー
         $response = Http::withToken(session('admin_token'))
             ->post("{$this->apiBaseUrl}/api/v1/batch-transfer/preview", [
                 'user_ids' => $request->user_ids,
                 'amount_xrp' => $request->amount_xrp
             ]);
-        
+
         if ($response->successful()) {
             return response()->json($response->json());
         }
-        
+
         return response()->json([
             'error' => 'Preview failed'
         ], 500);
     }
-    
+
     /**
      * バッチ送金実行
      */
@@ -102,7 +101,7 @@ class BatchTransferController extends Controller
             'amount_xrp' => 'required|numeric|min:0.000001',
             'reason' => 'required|string|max:500'
         ]);
-        
+
         // APIでバッチ送金実行
         $response = Http::withToken(session('admin_token'))
             ->post("{$this->apiBaseUrl}/api/v1/batch-transfer/send", [
@@ -110,20 +109,20 @@ class BatchTransferController extends Controller
                 'amount_xrp' => $request->amount_xrp,
                 'reason' => $request->reason
             ]);
-        
+
         if ($response->successful()) {
             $result = $response->json();
-            
+
             return redirect()
                 ->route('admin.batch-transfers.index')
                 ->with('success', "Batch transfer completed: {$result['summary']['successful']} successful, {$result['summary']['failed']} failed");
         }
-        
+
         return redirect()
             ->back()
             ->with('error', 'Batch transfer failed: ' . $response->json()['error'] ?? 'Unknown error');
     }
-    
+
     /**
      * VIPユーザーへのバッチ送金
      */
@@ -134,7 +133,7 @@ class BatchTransferController extends Controller
             'amount_xrp' => 'required|numeric|min:0.000001',
             'reason' => 'required|string|max:500'
         ]);
-        
+
         // APIでVIPバッチ送金実行
         $response = Http::withToken(session('admin_token'))
             ->post("{$this->apiBaseUrl}/api/v1/batch-transfer/send-to-vip", [
@@ -142,20 +141,20 @@ class BatchTransferController extends Controller
                 'amount_xrp' => $request->amount_xrp,
                 'reason' => $request->reason
             ]);
-        
+
         if ($response->successful()) {
             $result = $response->json();
-            
+
             return redirect()
                 ->route('admin.batch-transfers.index')
                 ->with('success', "VIP batch transfer completed: {$result['summary']['successful']} successful, {$result['summary']['failed']} failed");
         }
-        
+
         return redirect()
             ->back()
             ->with('error', 'VIP batch transfer failed: ' . $response->json()['error'] ?? 'Unknown error');
     }
-    
+
     /**
      * トップ紹介者へのバッチ送金
      */
@@ -166,7 +165,7 @@ class BatchTransferController extends Controller
             'amount_xrp' => 'required|numeric|min:0.000001',
             'reason' => 'required|string|max:500'
         ]);
-        
+
         // APIでトップ紹介者バッチ送金実行
         $response = Http::withToken(session('admin_token'))
             ->post("{$this->apiBaseUrl}/api/v1/batch-transfer/send-to-top-referrers", [
@@ -174,20 +173,20 @@ class BatchTransferController extends Controller
                 'amount_xrp' => $request->amount_xrp,
                 'reason' => $request->reason
             ]);
-        
+
         if ($response->successful()) {
             $result = $response->json();
-            
+
             return redirect()
                 ->route('admin.batch-transfers.index')
                 ->with('success', "Top referrer batch transfer completed: {$result['summary']['successful']} successful, {$result['summary']['failed']} failed");
         }
-        
+
         return redirect()
             ->back()
             ->with('error', 'Top referrer batch transfer failed: ' . $response->json()['error'] ?? 'Unknown error');
     }
-    
+
     /**
      * 全ユーザーへのバッチ送金
      */
@@ -198,24 +197,24 @@ class BatchTransferController extends Controller
             'reason' => 'required|string|max:500',
             'only_with_wallet' => 'boolean'
         ]);
-        
+
         // ウォレットを持つ全ユーザーのIDを取得
         $query = DB::table('users')
             ->select('id')
             ->whereNotNull('wallet_address');
-        
+
         if ($request->has('only_with_wallet') && $request->only_with_wallet) {
             // 既にフィルタ済み
         }
-        
+
         $userIds = $query->pluck('id')->toArray();
-        
+
         if (empty($userIds)) {
             return redirect()
                 ->back()
                 ->with('error', 'No users with wallets found');
         }
-        
+
         // APIでバッチ送金実行
         $response = Http::withToken(session('admin_token'))
             ->post("{$this->apiBaseUrl}/api/v1/batch-transfer/send", [
@@ -223,43 +222,36 @@ class BatchTransferController extends Controller
                 'amount_xrp' => $request->amount_xrp,
                 'reason' => $request->reason
             ]);
-        
+
         if ($response->successful()) {
             $result = $response->json();
-            
+
             return redirect()
                 ->route('admin.batch-transfers.index')
                 ->with('success', "Batch transfer to all users completed: {$result['summary']['successful']} successful, {$result['summary']['failed']} failed. Total: {$result['summary']['total_amount_xrp']} XRP");
         }
-        
+
         return redirect()
             ->back()
             ->with('error', 'Batch transfer failed: ' . ($response->json()['error'] ?? 'Unknown error'));
     }
-    
+
     /**
      * 統計情報
      */
     public function stats()
     {
-        $stats = DB::table('batch_transfer_stats')
-            ->orderBy('transfer_date', 'desc')
-            ->limit(30)
-            ->get();
-        
-        $totalStats = DB::table('batch_transfers')
-            ->where('status', 'success')
-            ->selectRaw('
-                COUNT(*) as total_transfers,
-                SUM(amount_xrp) as total_amount_xrp,
-                AVG(amount_xrp) as avg_amount_xrp,
-                COUNT(DISTINCT user_id) as unique_users
-            ')
-            ->first();
-        
+        // 簡易統計情報を表示
+        $stats = [
+            'total_users' => DB::table('users')->count(),
+            'users_with_referral_code' => DB::table('users')->whereNotNull('referral_code')->count(),
+            'total_referrals' => DB::table('referrals')->where('status', 'completed')->count(),
+            'total_nfts' => DB::table('nft_mints')->where('status', 'completed')->count(),
+            'total_orders' => DB::table('orders')->where('status', 'completed')->count(),
+        ];
+
         return view('admin.batch-transfers.stats', [
-            'daily_stats' => $stats,
-            'total_stats' => $totalStats
+            'stats' => $stats
         ]);
     }
 }

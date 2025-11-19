@@ -70,7 +70,10 @@ export default function StakingPage() {
 
       if (campaignsRes.ok) {
         const campaignsData = await campaignsRes.json();
+        console.log('Campaigns API response:', campaignsData);
         setCampaigns(campaignsData.campaigns || []);
+      } else {
+        console.error('Campaigns API error:', campaignsRes.status, await campaignsRes.text());
       }
 
       // 自分のステーク一覧を取得

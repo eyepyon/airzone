@@ -14,11 +14,13 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->string('id', 36)->primary();
             $table->string('email', 255)->unique()->nullable(false);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
             $table->string('google_id', 255)->unique()->nullable(false);
             $table->string('name', 255)->nullable(false);
+            $table->rememberToken();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
-            
             // Indexes
             $table->index('google_id', 'idx_google_id');
             $table->index('email', 'idx_email');

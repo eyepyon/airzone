@@ -26,7 +26,10 @@ export function canPurchaseProduct(
     return { canPurchase: false, reason: 'ログインが必要です' };
   }
 
-  switch (product.purchase_restriction) {
+  // If purchase_restriction is not set, default to public
+  const restriction = product.purchase_restriction || 'public';
+
+  switch (restriction) {
     case 'onsite_only':
       return checkOnsiteAccess();
 

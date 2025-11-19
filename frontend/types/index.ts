@@ -45,13 +45,13 @@ export interface Product {
   price: number;
   stock_quantity: number;
   image_url: string | null;
-  product_type: ProductType;
-  delivery_method: DeliveryMethod | null;
-  purchase_restriction: PurchaseRestriction;
-  required_nft_id: string | null;
+  product_type?: ProductType; // Optional for backward compatibility
+  delivery_method?: DeliveryMethod | null; // Optional for backward compatibility
+  purchase_restriction?: PurchaseRestriction; // Optional for backward compatibility
+  required_nft_id?: string | null;
   is_active: boolean;
-  event_date: string | null; // For event tickets
-  venue: string | null; // For event tickets
+  event_date?: string | null; // For event tickets
+  venue?: string | null; // For event tickets
   created_at: string;
   updated_at: string;
 }

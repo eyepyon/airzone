@@ -25,13 +25,21 @@ export default function ProductCard({
   const { nfts } = useNFTStore();
   const { user } = useAuthStore();
 
+  // Set default values for backward compatibility
+  const productWithDefaults = {
+    ...product,
+    product_type: product.product_type || 'goods',
+    purchase_restriction: product.purchase_restriction || 'public',
+    delivery_method: product.delivery_method || null,
+  };
+
   // Check purchase eligibility
-  const purchaseCheck = canPurchaseProduct(product, nfts, !!user);
+  const purchaseCheck = canPurchaseProduct(productWithDefaults as Product, nfts, !!user);
   const isOutOfStock = product.stock_quantity <= 0;
   const canPurchase = purchaseCheck.canPurchase && !isOutOfStock;
   
-  const restrictionBadge = getRestrictionBadge(product.purchase_restriction);
-  const productTypeBadge = getProductTypeBadge(product.product_type);
+  const restrictionBadge = getRestrictionBadge(productWithDefaults.purchase_restriction);
+  const productTypeBadge = getProductTypeBadge(productWithDefaults.product_type);
 
   const handleAddToCart = async () => {
     if (!canPurchase || !onAddToCart) return;
@@ -44,7 +52,10 @@ export default function ProductCard({
     }
   };
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | undefined) => {
+    if (price === undefined || price === null) {
+      return '価格未設定';
+    }
     return new Intl.NumberFormat('ja-JP', {
       style: 'currency',
       currency: 'JPY',
@@ -91,20 +102,26 @@ export default function ProductCard({
       </Link>
 
       <CardContent className="flex-1 p-4">
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${productTypeBadge.color}`}>
-            {productTypeBadge.icon} {productTypeBadge.label}
-          </span>
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${restrictionBadge.color}`}>
-            {restrictionBadge.icon} {restrictionBadge.label}
-          </span>
-          {product.delivery_method && product.product_type === 'goods' && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-              {product.delivery_method === 'pickup' ? '📍' : '🚚'} {getDeliveryMethodLabel(product.delivery_method)}
-            </span>
-          )}
-        </div>
+        {/* Badges - Only show if new fields exist */}
+        {(product.product_type || product.purchase_restriction) && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {product.product_type && (
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${productTypeBadge.color}`}>
+                {productTypeBadge.icon} {productTypeBadge.label}
+              </span>
+            )}
+            {product.purchase_restriction && (
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${restrictionBadge.color}`}>
+                {restrictionBadge.icon} {restrictionBadge.label}
+              </span>
+            )}
+            {product.delivery_method && product.product_type === 'goods' && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                {product.delivery_method === 'pickup' ? '📍' : '🚚'} {getDeliveryMethodLabel(product.delivery_method)}
+              </span>
+            )}
+          </div>
+        )}
 
         <Link href={`/shop/${product.id}`}>
           <h3 className="text-lg font-semibold text-gray-900 mb-2 hover:text-blue-600 transition-colors">

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\NFTController;
 use App\Http\Controllers\Admin\BatchTransferController;
+use App\Http\Controllers\Admin\EscrowCampaignController;
 
 // 認証
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -48,5 +49,17 @@ Route::middleware('auth:admin')->group(function () {
         Route::post('/send-all', [BatchTransferController::class, 'sendToAll'])->name('send-all');
         Route::post('/send-to-vip', [BatchTransferController::class, 'sendToVip'])->name('send-to-vip');
         Route::post('/send-to-top-referrers', [BatchTransferController::class, 'sendToTopReferrers'])->name('send-to-top-referrers');
+    });
+
+    // エスクローキャンペーン管理
+    Route::prefix('escrow-campaigns')->name('admin.escrow-campaigns.')->group(function () {
+        Route::get('/', [EscrowCampaignController::class, 'index'])->name('index');
+        Route::get('/create', [EscrowCampaignController::class, 'create'])->name('create');
+        Route::post('/', [EscrowCampaignController::class, 'store'])->name('store');
+        Route::get('/stats', [EscrowCampaignController::class, 'stats'])->name('stats');
+        Route::get('/{id}', [EscrowCampaignController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [EscrowCampaignController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [EscrowCampaignController::class, 'update'])->name('update');
+        Route::delete('/{id}', [EscrowCampaignController::class, 'destroy'])->name('destroy');
     });
 });

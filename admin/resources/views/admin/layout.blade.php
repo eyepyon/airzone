@@ -34,7 +34,7 @@
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
-                
+
                 <div class="hidden md:flex md:items-center md:space-x-1">
                     <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <i class="fas fa-home mr-1"></i> ダッシュボード
@@ -60,8 +60,11 @@
                     <a href="{{ route('admin.batch-transfers.index') }}" class="nav-link {{ request()->routeIs('admin.batch-transfers.*') ? 'active' : '' }}">
                         <i class="fas fa-paper-plane mr-1"></i> 一括送金
                     </a>
+                    <a href="{{ route('admin.escrow-campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.escrow-campaigns.*') ? 'active' : '' }}">
+                        <i class="fas fa-lock mr-1"></i> エスクロー
+                    </a>
                 </div>
-                
+
                 <div class="flex items-center">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -71,7 +74,7 @@
                     </form>
                 </div>
             </div>
-            
+
             <!-- Mobile Menu -->
             <div id="mobile-menu" class="mobile-menu md:hidden pb-4">
                 <div class="flex flex-col space-y-1">
@@ -99,11 +102,14 @@
                     <a href="{{ route('admin.batch-transfers.index') }}" class="nav-link {{ request()->routeIs('admin.batch-transfers.*') ? 'active' : '' }}">
                         <i class="fas fa-paper-plane mr-2"></i> 一括送金
                     </a>
+                    <a href="{{ route('admin.escrow-campaigns.index') }}" class="nav-link {{ request()->routeIs('admin.escrow-campaigns.*') ? 'active' : '' }}">
+                        <i class="fas fa-lock mr-2"></i> エスクロー
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
-    
+
     <script>
         document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
             document.getElementById('mobile-menu')?.classList.toggle('active');

@@ -201,13 +201,16 @@ class EscrowCampaignService:
             return [
                 {
                     'id': e['id'],
+                    'campaign_id': e['campaign_id'],
                     'campaign_name': e['campaign_name'],
-                    'amount_xrp': e['amount_drops'] / 1_000_000,
+                    'amount_drops': e['amount_drops'],
                     'lock_days': e['lock_days'],
                     'finish_after': e['finish_after'].isoformat(),
                     'status': e['status'],
                     'nft_reward': e['nft_reward_name'],
                     'transaction_hash': e['transaction_hash'],
+                    'escrow_sequence': e['escrow_sequence'],
+                    'created_at': e['created_at'].isoformat(),
                 }
                 for e in escrows
             ]

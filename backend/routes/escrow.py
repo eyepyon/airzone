@@ -38,27 +38,24 @@ def get_campaigns():
         
         return jsonify({
             'status': 'success',
-            'data': {
-                'campaigns': [
-                    {
-                        'id': c['id'],
-                        'name': c['name'],
-                        'description': c['description'],
-                        'min_amount_xrp': c['min_amount_drops'] / 1_000_000,
-                        'lock_days': c['lock_days'],
-                        'nft_reward': {
-                            'name': c['nft_reward_name'],
-                            'description': c['nft_reward_description'],
-                            'image_url': c['nft_reward_image_url'],
-                        },
-                        'start_date': c['start_date'].isoformat(),
-                        'end_date': c['end_date'].isoformat(),
-                        'max_participants': c['max_participants'],
-                        'current_participants': c['current_participants'],
-                    }
-                    for c in campaigns
-                ]
-            }
+            'campaigns': [
+                {
+                    'id': c['id'],
+                    'name': c['name'],
+                    'description': c['description'],
+                    'min_amount_drops': c['min_amount_drops'],
+                    'lock_days': c['lock_days'],
+                    'nft_reward_name': c['nft_reward_name'],
+                    'nft_reward_description': c['nft_reward_description'],
+                    'nft_reward_image_url': c['nft_reward_image_url'],
+                    'start_date': c['start_date'].isoformat(),
+                    'end_date': c['end_date'].isoformat(),
+                    'max_participants': c['max_participants'],
+                    'current_participants': c['current_participants'],
+                    'status': 'active',
+                }
+                for c in campaigns
+            ]
         }), 200
         
     except Exception as e:
@@ -207,9 +204,7 @@ def get_my_stakes():
         
         return jsonify({
             'status': 'success',
-            'data': {
-                'stakes': stakes
-            }
+            'stakes': stakes
         }), 200
         
     except Exception as e:

@@ -15,27 +15,27 @@
         <div class="text-center p-4 bg-amber-50 rounded-lg">
             <div class="text-4xl mb-2">🥉</div>
             <div class="font-bold">Bronze</div>
-            <div class="text-sm text-gray-600">0-499pt</div>
+            <div class="text-sm text-gray-600">0-49pt</div>
         </div>
         <div class="text-center p-4 bg-gray-50 rounded-lg">
             <div class="text-4xl mb-2">🥈</div>
             <div class="font-bold">Silver</div>
-            <div class="text-sm text-gray-600">500-1,499pt</div>
+            <div class="text-sm text-gray-600">50-199pt</div>
         </div>
         <div class="text-center p-4 bg-yellow-50 rounded-lg">
             <div class="text-4xl mb-2">🥇</div>
             <div class="font-bold">Gold</div>
-            <div class="text-sm text-gray-600">1,500-2,999pt</div>
+            <div class="text-sm text-gray-600">200-499pt</div>
         </div>
         <div class="text-center p-4 bg-blue-50 rounded-lg">
             <div class="text-4xl mb-2">💎</div>
             <div class="font-bold">Platinum</div>
-            <div class="text-sm text-gray-600">3,000-4,999pt</div>
+            <div class="text-sm text-gray-600">500-999pt</div>
         </div>
         <div class="text-center p-4 bg-purple-50 rounded-lg">
             <div class="text-4xl mb-2">👑</div>
             <div class="font-bold">Diamond</div>
-            <div class="text-sm text-gray-600">5,000pt~</div>
+            <div class="text-sm text-gray-600">1,000pt~</div>
         </div>
     </div>
 </div>
@@ -46,27 +46,19 @@
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div class="p-3 bg-gray-50 rounded">
             <div class="text-sm text-gray-600">購入</div>
-            <div class="font-bold">100pt / 回</div>
+            <div class="font-bold">10pt / 回</div>
         </div>
         <div class="p-3 bg-gray-50 rounded">
             <div class="text-sm text-gray-600">紹介成功</div>
-            <div class="font-bold">50pt / 件</div>
+            <div class="font-bold">5pt / 件</div>
         </div>
         <div class="p-3 bg-gray-50 rounded">
             <div class="text-sm text-gray-600">NFT発行</div>
-            <div class="font-bold">30pt / 回</div>
-        </div>
-        <div class="p-3 bg-gray-50 rounded">
-            <div class="text-sm text-gray-600">リファラルクリック</div>
-            <div class="font-bold">5pt / 回</div>
-        </div>
-        <div class="p-3 bg-gray-50 rounded">
-            <div class="text-sm text-gray-600">ログイン</div>
-            <div class="font-bold">2pt / 日</div>
+            <div class="font-bold">2pt / 回</div>
         </div>
         <div class="p-3 bg-gray-50 rounded">
             <div class="text-sm text-gray-600">購入金額</div>
-            <div class="font-bold">0.1pt / 円</div>
+            <div class="font-bold">0.01pt / 円</div>
         </div>
     </div>
 </div>
@@ -76,7 +68,7 @@
     <div class="px-6 py-4 border-b">
         <h2 class="text-xl font-bold">重要度ランキング</h2>
     </div>
-    
+
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead class="bg-gray-50">
@@ -87,7 +79,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">スコア</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">購入数</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">紹介数</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ログイン</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">NFT数</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
                 </tr>
             </thead>
@@ -130,9 +122,9 @@
                     </td>
                     <td class="px-6 py-4">{{ number_format($user->purchase_count) }}</td>
                     <td class="px-6 py-4">{{ number_format($user->referral_count) }}</td>
-                    <td class="px-6 py-4">{{ number_format($user->login_count) }}</td>
+                    <td class="px-6 py-4">{{ number_format($user->nft_count) }}</td>
                     <td class="px-6 py-4">
-                        <a href="{{ route('users.show', $user->id) }}" 
+                        <a href="{{ route('users.show', $user->id) }}"
                            class="text-blue-600 hover:text-blue-800">
                             詳細
                         </a>

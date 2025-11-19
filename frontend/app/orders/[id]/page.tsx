@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Loading, Button } from '@/components/ui';
 import { useAuthStore } from '@/stores';
 import { getOrderById } from '@/lib/api';
+import { mintNFTForOrder } from '@/lib/api/nfts';
 import type { Order } from '@/types';
 
 export default function OrderDetailPage({
@@ -14,10 +15,13 @@ export default function OrderDetailPage({
   params: { id: string };
 }) {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const searchParams = useSearchParams();
+  const { isAuthenticated, wallet } = useAuthStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nftMinting, setNftMinting] = useState(false);
+  const [nftMinted, setNftMinted] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -40,6 +44,29 @@ export default function OrderDetailPage({
     fetchOrder();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, isAuthenticated]);
+
+  // Auto-mint NFT after successful payment
+  useEffect(() => {
+    const paymentSuccess = searchParams.get('payment') === 'success';
+    
+    if (paymentSuccess && order && order.status === 'completed' && wallet && !nftMinting && !nftMinted) {
+      const autoMintNFT = async () => {
+        try {
+          setNftMinting(true);
+          await mintNFTForOrder(order.id);
+          setNftMinted(true);
+        } catch (err) {
+          console.error('NFT auto-mint failed:', err);
+          // エラーは表示しない（バックグラウンドで処理）
+        } finally {
+          setNftMinting(false);
+        }
+      };
+
+      autoMintNFT();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order, wallet, searchParams]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -149,6 +176,51 @@ export default function OrderDetailPage({
               </div>
             </div>
           </Card>
+
+          {/* NFT Minting Status */}
+          {order.status === 'completed' && (
+            <>
+              {nftMinting && (
+                <Card className="mb-6 border-2 border-blue-200 bg-blue-50">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex items-center">
+                      <svg className="animate-spin h-5 w-5 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <div>
+                        <p className="text-sm font-semibold text-blue-900">NFTをミント中...</p>
+                        <p className="text-xs text-blue-700 mt-1">XRPL上でNFTを作成し、あなたのウォレットに送信しています。</p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+              
+              {nftMinted && (
+                <Card className="mb-6 border-2 border-green-200 bg-green-50">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 text-green-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-semibold text-green-900">🎉 NFTミント完了！</p>
+                        <p className="text-xs text-green-700 mt-1">
+                          NFTがXRPL上で正常にミントされ、あなたのウォレットに送信されました。
+                        </p>
+                        <Link href="/nfts" className="inline-block mt-2">
+                          <button className="text-xs text-green-800 hover:text-green-900 underline font-medium">
+                            マイNFTを確認 →
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            </>
+          )}
 
           {/* Order Items */}
           <Card className="mb-6">

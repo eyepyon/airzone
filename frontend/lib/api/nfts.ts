@@ -46,6 +46,18 @@ export async function mintNFT(walletAddress: string): Promise<MintNFTResponse> {
 }
 
 /**
+ * Request NFT minting for a specific order (automatic after purchase)
+ * @param orderId - Order ID to mint NFT for
+ * @returns Mint response with task ID
+ */
+export async function mintNFTForOrder(orderId: string): Promise<MintNFTResponse> {
+  return apiRequest<MintNFTResponse>('/api/v1/nfts/mint-for-order', {
+    method: 'POST',
+    body: JSON.stringify({ order_id: orderId }),
+  });
+}
+
+/**
  * Get NFT minting task status
  * @param taskId - Task ID from mint request
  * @returns Task status and NFT data if completed

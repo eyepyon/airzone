@@ -12,27 +12,23 @@ class ReferralController extends Controller
      */
     public function index()
     {
-        // ユーザーごとの紹介統計と重要度スコアを取得
+        // ユーザーごとの紹介統計を取得
         $referralStats = DB::table('users')
             ->leftJoin('referrals', 'users.id', '=', 'referrals.referrer_id')
-            ->leftJoin('referral_clicks', 'users.id', '=', 'referral_clicks.referrer_id')
             ->select(
                 'users.id',
                 'users.name',
                 'users.email',
                 'users.referral_code',
                 'users.coins',
-                'users.importance_score',
-                'users.importance_level',
                 DB::raw('COUNT(DISTINCT referrals.id) as total_referrals'),
                 DB::raw('COUNT(DISTINCT CASE WHEN referrals.status = "completed" THEN referrals.id END) as completed_referrals'),
                 DB::raw('COUNT(DISTINCT CASE WHEN referrals.status = "pending" THEN referrals.id END) as pending_referrals'),
-                DB::raw('SUM(CASE WHEN referrals.status = "completed" THEN referrals.coins_awarded ELSE 0 END) as total_coins_earned'),
-                DB::raw('COUNT(DISTINCT referral_clicks.id) as click_count')
+                DB::raw('SUM(CASE WHEN referrals.status = "completed" THEN referrals.coins_awarded ELSE 0 END) as total_coins_earned')
             )
-            ->groupBy('users.id', 'users.name', 'users.email', 'users.referral_code', 'users.coins', 'users.importance_score', 'users.importance_level')
+            ->groupBy('users.id', 'users.name', 'users.email', 'users.referral_code', 'users.coins')
             ->having('total_referrals', '>', 0)
-            ->orderBy('users.importance_score', 'desc')
+            ->orderBy('total_referrals', 'desc')
             ->paginate(20);
 
         // 全体統計
@@ -62,7 +58,7 @@ class ReferralController extends Controller
     {
         // ユーザー情報
         $user = DB::table('users')->where('id', $userId)->first();
-        
+
         if (!$user) {
             abort(404);
         }

@@ -48,7 +48,7 @@
     <div class="px-6 py-4 border-b">
         <h2 class="text-xl font-bold">紹介者一覧</h2>
     </div>
-    
+
     <div class="overflow-x-auto">
         <table class="min-w-full">
             <thead class="bg-gray-50">
@@ -71,29 +71,12 @@
                         <div class="text-sm text-gray-500">{{ $stat->email }}</div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-1 text-xs font-mono bg-purple-100 text-purple-800 rounded">
-                                {{ $stat->referral_code }}
-                            </span>
-                            @if($stat->importance_level)
-                                <span class="text-lg">
-                                    @if($stat->importance_level === 'diamond') 👑
-                                    @elseif($stat->importance_level === 'platinum') 💎
-                                    @elseif($stat->importance_level === 'gold') 🥇
-                                    @elseif($stat->importance_level === 'silver') 🥈
-                                    @else 🥉
-                                    @endif
-                                </span>
-                            @endif
-                        </div>
+                        <span class="px-2 py-1 text-xs font-mono bg-purple-100 text-purple-800 rounded">
+                            {{ $stat->referral_code ?? 'N/A' }}
+                        </span>
                     </td>
                     <td class="px-6 py-4">
-                        <div>
-                            <span class="text-lg font-bold">{{ number_format($stat->total_referrals) }}</span>
-                            @if($stat->click_count > 0)
-                                <div class="text-xs text-gray-500">クリック: {{ number_format($stat->click_count) }}</div>
-                            @endif
-                        </div>
+                        <span class="text-lg font-bold">{{ number_format($stat->total_referrals) }}</span>
                     </td>
                     <td class="px-6 py-4">
                         <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded">
@@ -114,7 +97,7 @@
                         <span class="font-semibold">{{ number_format($stat->coins ?? 0) }}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <a href="{{ route('referrals.show', $stat->id) }}" 
+                        <a href="{{ route('referrals.show', $stat->id) }}"
                            class="text-blue-600 hover:text-blue-800">
                             詳細
                         </a>
@@ -130,7 +113,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <!-- ページネーション -->
     @if($referralStats->hasPages())
     <div class="px-6 py-4 border-t">

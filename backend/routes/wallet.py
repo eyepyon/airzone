@@ -42,27 +42,50 @@ def xaman_signin():
         data = request.get_json() or {}
         network = data.get('network', 'testnet')
         
-        # Xaman APIでサインリクエストを作成
-        # 注: 実際のXaman API実装が必要
-        # ここでは簡易的なレスポンスを返す
+        # Xaman APIでサインインペイロードを作成
+        from config import Config
         
-        import uuid
-        request_uuid = str(uuid.uuid4())
+        # Xaman API設定を確認
+        xaman_api_key = getattr(Config, 'XAMAN_API_KEY', None)
+        xaman_api_secret = getattr(Config, 'XAMAN_API_SECRET', None)
         
-        # QRコード生成（簡易版）
-        qr_data = f"xaman://signin?uuid={request_uuid}"
-        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
-        
-        return jsonify({
-            'status': 'success',
-            'data': {
-                'uuid': request_uuid,
-                'qr_code': qr_url,
-                'deep_link': qr_data,
-                'websocket': f"wss://xumm.app/sign/{request_uuid}",
-                'message': 'Xamanアプリで署名してください'
-            }
-        }), 200
+        if xaman_api_key and xaman_api_secret:
+            # 実際のXaman APIを使用
+            from clients.xaman_client import XamanClient
+            
+            xaman_client = XamanClient(xaman_api_key, xaman_api_secret)
+            payload = xaman_client.create_signin_payload()
+            
+            return jsonify({
+                'status': 'success',
+                'data': {
+                    'uuid': payload['uuid'],
+                    'qr_code': payload['refs']['qr_png'],
+                    'deep_link': payload['next']['always'],
+                    'websocket': payload['refs']['websocket_status'],
+                }
+            }), 200
+        else:
+            # フォールバック: 簡易版（開発用）
+            logger.warning("Xaman API credentials not configured, using fallback")
+            
+            import uuid as uuid_lib
+            request_uuid = str(uuid_lib.uuid4())
+            
+            # QRコード生成（簡易版）
+            qr_data = f"xaman://signin?uuid={request_uuid}"
+            qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={qr_data}"
+            
+            return jsonify({
+                'status': 'success',
+                'data': {
+                    'uuid': request_uuid,
+                    'qr_code': qr_url,
+                    'deep_link': qr_data,
+                    'websocket': f"wss://xumm.app/sign/{request_uuid}",
+                    'message': 'Xamanアプリで署名してください（開発モード）'
+                }
+            }), 200
         
     except Exception as e:
         logger.error(f"Error creating Xaman sign-in request: {str(e)}")

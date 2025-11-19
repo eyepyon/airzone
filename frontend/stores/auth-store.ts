@@ -117,8 +117,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const response = await getCurrentUser();
       set({
-        user: response.user || response,
-        wallet: response.wallet || null,
+        user: response.user,
+        wallet: response.wallet,
         token,
         isAuthenticated: true,
         isLoading: false,
@@ -132,8 +132,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           const newToken = getAuthToken();
           const response = await getCurrentUser();
           set({
-            user: response.user || response,
-            wallet: response.wallet || null,
+            user: response.user,
+            wallet: response.wallet,
             token: newToken,
             isAuthenticated: true,
             isLoading: false,

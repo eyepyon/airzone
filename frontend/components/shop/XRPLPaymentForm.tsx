@@ -28,8 +28,7 @@ export default function XRPLPaymentForm({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [xrpRate, setXrpRate] = useState(150);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
-  const [qrCode, setQrCode] = useState<string | null>(null);
+
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
   const amountXRP = (amount / xrpRate).toFixed(6);

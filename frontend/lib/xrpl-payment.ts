@@ -42,8 +42,7 @@ export async function getWalletBalance(address: string): Promise<number> {
  * XRP決済を実行（バックエンド経由）
  */
 export async function sendXRPPayment(
-  orderId: string,
-  amountXRP: number
+  orderId: string
 ): Promise<{
   hash: string;
   validated: boolean;
@@ -81,7 +80,7 @@ export async function sendXRPPayment(
 /**
  * トランザクションの詳細を取得（バックエンド経由）
  */
-export async function getTransactionDetails(txHash: string): Promise<any> {
+export async function getTransactionDetails(txHash: string): Promise<Record<string, unknown>> {
   try {
     const response = await fetch(`${API_URL}/api/v1/payments/xrpl/verify/${txHash}`, {
       headers: {

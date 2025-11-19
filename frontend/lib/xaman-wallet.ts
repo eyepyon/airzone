@@ -319,7 +319,7 @@ export class XamanWalletClient {
   /**
    * トランザクションに署名
    */
-  async signTransaction(transaction: any): Promise<string> {
+  async signTransaction(transaction: Record<string, unknown>): Promise<string> {
     if (!this.isConnected()) {
       throw new Error('ウォレットが接続されていません');
     }

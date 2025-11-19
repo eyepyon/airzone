@@ -7,6 +7,7 @@ import type {
   GoogleAuthRequest,
   RefreshTokenRequest,
   User,
+  Wallet,
 } from '../../types';
 
 /**
@@ -56,10 +57,10 @@ export async function refreshToken(
 
 /**
  * Get current authenticated user information
- * @returns Current user data
+ * @returns Current user data with wallet
  */
-export async function getCurrentUser(): Promise<User> {
-  return apiRequest<User>('/api/v1/auth/me', {
+export async function getCurrentUser(): Promise<{ user: User; wallet: Wallet | null }> {
+  return apiRequest<{ user: User; wallet: Wallet | null }>('/api/v1/auth/me', {
     method: 'GET',
   });
 }

@@ -15,6 +15,8 @@ class Product(BaseModel):
     # Product fields
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
+    category = Column(String(20), nullable=True, default='goods')  # goods, nft, ticket
+    delivery_method = Column(String(20), nullable=True, default='venue_pickup')  # venue_pickup, home_delivery
     price = Column(Integer, nullable=False)  # Price in smallest currency unit (e.g., cents, yen)
     stock_quantity = Column(Integer, nullable=False, default=0)
     image_url = Column(String(500), nullable=True)

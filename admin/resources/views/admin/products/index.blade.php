@@ -13,6 +13,8 @@
         <thead class="bg-gray-50">
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">商品名</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">カテゴリー</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">受取方法</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">価格</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">在庫</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ステータス</th>
@@ -24,6 +26,30 @@
             @foreach($products as $product)
             <tr>
                 <td class="px-6 py-4">{{ $product->name }}</td>
+                <td class="px-6 py-4">
+                    @if(isset($product->category))
+                        @if($product->category == 'goods')
+                            <span class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">グッズ</span>
+                        @elseif($product->category == 'nft')
+                            <span class="px-2 py-1 text-xs rounded bg-purple-100 text-purple-800">NFT</span>
+                        @elseif($product->category == 'ticket')
+                            <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800">チケット</span>
+                        @endif
+                    @else
+                        <span class="text-gray-400">-</span>
+                    @endif
+                </td>
+                <td class="px-6 py-4">
+                    @if(isset($product->delivery_method))
+                        @if($product->delivery_method == 'venue_pickup')
+                            <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">会場内受取</span>
+                        @elseif($product->delivery_method == 'home_delivery')
+                            <span class="px-2 py-1 text-xs rounded bg-orange-100 text-orange-800">宅配便配送</span>
+                        @endif
+                    @else
+                        <span class="text-gray-400">-</span>
+                    @endif
+                </td>
                 <td class="px-6 py-4">¥{{ number_format($product->price) }}</td>
                 <td class="px-6 py-4">{{ $product->stock_quantity }}</td>
                 <td class="px-6 py-4">

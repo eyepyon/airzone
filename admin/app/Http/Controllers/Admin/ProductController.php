@@ -25,6 +25,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable',
+            'category' => 'required|in:goods,nft,ticket',
+            'delivery_method' => 'required|in:venue_pickup,home_delivery',
             'price' => 'required|integer|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'image_url' => 'nullable|url',
@@ -52,6 +54,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|max:255',
             'description' => 'nullable',
+            'category' => 'required|in:goods,nft,ticket',
+            'delivery_method' => 'required|in:venue_pickup,home_delivery',
             'price' => 'required|integer|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'image_url' => 'nullable|url',

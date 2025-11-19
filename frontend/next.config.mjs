@@ -5,7 +5,7 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: "",
-  output: "export",
+  // output: "export", // APIを使用するため静的エクスポートは無効化
 };
 
 export default nextConfig;

@@ -6,6 +6,8 @@ import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import { useNFTStore } from '@/stores/nft-store';
 import CheckoutForm from '@/components/shop/CheckoutForm';
+import XRPLPaymentForm from '@/components/shop/XRPLPaymentForm';
+import PaymentMethodSelector, { PaymentMethod } from '@/components/shop/PaymentMethodSelector';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import Loading from '@/components/ui/Loading';
@@ -23,6 +25,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [nftCheckPassed, setNftCheckPassed] = useState(false);
   const [isCheckingNFTs, setIsCheckingNFTs] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -334,19 +337,28 @@ export default function CheckoutPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">お支払い情報</h2>
-                  <p className="text-gray-600 text-sm">
-                    安全な決済フォームでお支払いください。
-                  </p>
-                </div>
-
-                <CheckoutForm
-                  orderId={order.id}
-                  amount={order.total_amount}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
+                {/* Payment Method Selector */}
+                <PaymentMethodSelector
+                  onSelect={setPaymentMethod}
+                  selectedMethod={paymentMethod}
                 />
+
+                {/* Payment Form */}
+                {paymentMethod === 'stripe' ? (
+                  <CheckoutForm
+                    orderId={order.id}
+                    amount={order.total_amount}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                  />
+                ) : (
+                  <XRPLPaymentForm
+                    orderId={order.id}
+                    amount={order.total_amount}
+                    onSuccess={handlePaymentSuccess}
+                    onError={handlePaymentError}
+                  />
+                )}
               </div>
             )}
           </Card>

@@ -34,6 +34,10 @@ export interface NFT {
   updated_at: string;
 }
 
+export type ProductType = 'nft' | 'goods' | 'event_ticket';
+export type DeliveryMethod = 'pickup' | 'shipping' | 'digital';
+export type PurchaseRestriction = 'onsite_only' | 'onsite_and_referral' | 'nft_holders' | 'public';
+
 export interface Product {
   id: string;
   name: string;
@@ -41,8 +45,13 @@ export interface Product {
   price: number;
   stock_quantity: number;
   image_url: string | null;
+  product_type: ProductType;
+  delivery_method: DeliveryMethod | null;
+  purchase_restriction: PurchaseRestriction;
   required_nft_id: string | null;
   is_active: boolean;
+  event_date: string | null; // For event tickets
+  venue: string | null; // For event tickets
   created_at: string;
   updated_at: string;
 }
@@ -58,6 +67,17 @@ export interface Order {
   payment?: Payment;
 }
 
+export interface ShippingAddress {
+  recipient_name: string;
+  postal_code: string;
+  prefecture: string;
+  city: string;
+  address_line1: string;
+  address_line2?: string;
+  phone_number: string;
+  delivery_time_preference?: string;
+}
+
 export interface OrderItem {
   id: string;
   order_id: string;
@@ -65,6 +85,9 @@ export interface OrderItem {
   quantity: number;
   unit_price: number;
   subtotal: number;
+  delivery_method: DeliveryMethod | null;
+  shipping_address: ShippingAddress | null;
+  pickup_qr_code: string | null;
   created_at: string;
   product?: Product;
 }
@@ -214,6 +237,8 @@ export interface CreateOrderRequest {
   items: {
     product_id: string;
     quantity: number;
+    delivery_method?: DeliveryMethod;
+    shipping_address?: ShippingAddress;
   }[];
 }
 

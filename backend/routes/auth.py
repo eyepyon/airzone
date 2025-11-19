@@ -126,11 +126,15 @@ def google_auth():
         if hasattr(expires_in, 'total_seconds'):
             expires_in = int(expires_in.total_seconds())
         
+        # Extract wallet from user_dict if present
+        wallet = user_dict.pop('wallet', None)
+        
         # Return success response
         return jsonify({
             'status': 'success',
             'data': {
                 'user': user_dict,
+                'wallet': wallet,
                 'access_token': access_token,
                 'refresh_token': refresh_token,
                 'token_type': 'Bearer',

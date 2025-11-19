@@ -86,6 +86,7 @@ class AuthService:
             # Find or create user
             user = self.user_repo.find_by_google_id(google_id)
             
+            is_new_user = False
             if not user:
                 # Create new user
                 logger.info(f"Creating new user for Google ID: {google_id}")
@@ -96,14 +97,57 @@ class AuthService:
                 )
                 self.db_session.commit()
                 logger.info(f"Created new user: {user.id}")
+                is_new_user = True
             else:
                 logger.info(f"Existing user authenticated: {user.id}")
+            
+            # Ensure user has a wallet (create if new user or missing)
+            wallet = self.wallet_repo.find_by_user_id(user.id)
+            if not wallet:
+                logger.info(f"Creating XRPL wallet for user: {user.id}")
+                try:
+                    from clients.xrpl_client import XRPLClient
+                    from config import config
+                    
+                    xrpl_client = XRPLClient(
+                        network=config['development'].XRPL_NETWORK,
+                        sponsor_seed=config['development'].XRPL_SPONSOR_SEED
+                    )
+                    
+                    # Generate XRPL wallet
+                    address, seed = xrpl_client.generate_wallet()
+                    
+                    # Encrypt seed
+                    from cryptography.fernet import Fernet
+                    encryption_key = config['development'].ENCRYPTION_KEY
+                    cipher = Fernet(encryption_key.encode() if isinstance(encryption_key, str) else encryption_key)
+                    encrypted_seed = cipher.encrypt(seed.encode()).decode()
+                    
+                    # Create wallet record
+                    wallet = self.wallet_repo.create_wallet(
+                        user_id=user.id,
+                        address=address,
+                        private_key_encrypted=encrypted_seed
+                    )
+                    self.db_session.commit()
+                    logger.info(f"Created XRPL wallet for user {user.id}: {address}")
+                except Exception as e:
+                    logger.error(f"Failed to create wallet for user {user.id}: {str(e)}")
+                    # Don't fail authentication if wallet creation fails
+                    wallet = None
             
             # Generate JWT tokens
             access_token = self.create_access_token(user.id)
             refresh_token = self.create_refresh_token(user.id)
             
-            return (user.to_dict(), access_token, refresh_token)
+            # Include wallet info in response
+            user_dict = user.to_dict()
+            if wallet:
+                user_dict['wallet'] = wallet.to_dict()
+            else:
+                user_dict['wallet'] = None
+            
+            return (user_dict, access_token, refresh_token)
             
         except ValueError as e:
             logger.error(f"Authentication failed: {str(e)}")

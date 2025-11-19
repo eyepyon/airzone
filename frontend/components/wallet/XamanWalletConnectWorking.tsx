@@ -220,7 +220,7 @@ export default function XamanWalletConnectWorking({
               </li>
               <li className="flex items-start">
                 <span className="font-bold mr-2">3.</span>
-                <span>"r"で始まるアドレスをコピー</span>
+                <span>&quot;r&quot;で始まるアドレスをコピー</span>
               </li>
               <li className="flex items-start">
                 <span className="font-bold mr-2">4.</span>
@@ -307,7 +307,7 @@ export default function XamanWalletConnectWorking({
           <p className="text-xs text-gray-600">
             <strong>接続方法：</strong><br />
             Xamanアプリからウォレットアドレスをコピーして入力するだけです。
-            アドレスは"r"で始まる25-35文字の文字列です。
+            アドレスは&quot;r&quot;で始まる25-35文字の文字列です。
           </p>
         </div>
       </div>

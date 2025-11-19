@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { NFT } from '../../types';
 import Card, { CardContent, CardFooter } from '../ui/Card';
 
@@ -58,10 +59,11 @@ export default function NFTCard({ nft, onClick }: NFTCardProps) {
     >
       <div className="relative aspect-square bg-gray-100">
         {nft.status === 'completed' ? (
-          <img
+          <Image
             src={imageUrl}
             alt={name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder-nft.png';

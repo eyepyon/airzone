@@ -193,7 +193,7 @@ export class XamanWalletConnector {
       });
 
       // WebSocketで接続を待機
-      this.waitForWalletConnectConnection(uri)
+      this.waitForWalletConnectConnection()
         .then((connection) => {
           document.body.removeChild(modal);
           resolve(connection);
@@ -208,7 +208,7 @@ export class XamanWalletConnector {
   /**
    * WalletConnect接続を待機
    */
-  private async waitForWalletConnectConnection(_uri: string): Promise<WalletConnection> {
+  private async waitForWalletConnectConnection(): Promise<WalletConnection> {
     // WebSocketまたはポーリングで接続を待機
     return new Promise((resolve, reject) => {
       const checkInterval = setInterval(async () => {

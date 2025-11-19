@@ -62,7 +62,7 @@ export default function LoginPage() {
 
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="text-center text-sm text-gray-600">
-              <p className="font-semibold mb-2">What you'll get:</p>
+              <p className="font-semibold mb-2">What you&apos;ll get:</p>
               <ul className="space-y-1 text-left">
                 <li className="flex items-center gap-2">
                   <svg

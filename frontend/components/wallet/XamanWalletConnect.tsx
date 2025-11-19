@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { xamanWallet } from '@/lib/xaman-wallet';
 import Button from '@/components/ui/Button';
@@ -247,7 +248,9 @@ export default function XamanWalletConnect({
               <p className="text-sm text-gray-700 mb-3 text-center">
                 Xamanアプリでスキャン
               </p>
-              <img src={qrUrl} alt="QR Code" className="w-48 h-48 mx-auto" />
+              <div className="relative w-48 h-48 mx-auto">
+                <Image src={qrUrl} alt="QR Code" fill className="object-contain" />
+              </div>
             </div>
 
             <Button

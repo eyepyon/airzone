@@ -224,7 +224,7 @@ export default function XamanWalletConnectSimple({
             <strong>接続方法：</strong><br />
             1. Xaman Walletアプリを開く<br />
             2. アカウント名をタップ<br />
-            3. "r"で始まるアドレスをコピー<br />
+            3. &quot;r&quot;で始まるアドレスをコピー<br />
             4. 上のボタンをクリックして入力
           </p>
         </div>

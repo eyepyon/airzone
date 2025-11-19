@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCartStore } from '@/stores/cart-store';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -63,12 +64,13 @@ export default function ShoppingCart() {
           <Card key={item.product.id} className="p-4">
             <div className="flex gap-4">
               {/* Product Image */}
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 relative w-24 h-24">
                 {item.product.image_url ? (
-                  <img
+                  <Image
                     src={item.product.image_url}
                     alt={item.product.name}
-                    className="w-24 h-24 object-cover rounded-lg"
+                    fill
+                    className="object-cover rounded-lg"
                   />
                 ) : (
                   <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">

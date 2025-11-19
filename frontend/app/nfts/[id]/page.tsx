@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
@@ -128,7 +129,7 @@ export default function NFTDetailPage() {
               NFT Not Found
             </h2>
             <p className="text-gray-600 mb-6">
-              The NFT you're looking for doesn't exist or you don't have access to it.
+              The NFT you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
             </p>
             <Button onClick={() => router.push('/nfts')} variant="primary">
               Back to NFTs
@@ -176,10 +177,11 @@ export default function NFTDetailPage() {
           <Card padding="none" className="overflow-hidden">
             <div className="relative aspect-square bg-gray-100">
               {nft.status === 'completed' ? (
-                <img
+                <Image
                   src={imageUrl}
                   alt={name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = '/placeholder-nft.png';

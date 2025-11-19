@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '@/components/layout/Layout';
@@ -244,11 +245,14 @@ export default function StakingPage() {
                 campaigns.map((campaign) => (
                   <Card key={campaign.id} className="overflow-hidden">
                     {campaign.nft_reward_image_url && (
-                      <img
-                        src={campaign.nft_reward_image_url}
-                        alt={campaign.nft_reward_name}
-                        className="w-full h-48 object-cover"
-                      />
+                      <div className="relative w-full h-48">
+                        <Image
+                          src={campaign.nft_reward_image_url}
+                          alt={campaign.nft_reward_name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
                     )}
                     <div className="p-6">
                       <div className="flex justify-between items-start mb-4">

@@ -257,6 +257,84 @@ def get_user_orders():
         }), 500
 
 
+@order_blueprint.route('/validate-nft-requirements', methods=['POST'])
+@jwt_required()
+@validate_json_request(required_fields=['product_ids'])
+def validate_nft_requirements():
+    """
+    Validate NFT requirements for products.
+    
+    POST /api/v1/orders/validate-nft-requirements
+    
+    Request Body:
+        {
+            "product_ids": ["uuid1", "uuid2"]
+        }
+    
+    Returns:
+        200: Validation result
+        400: Validation error
+        401: Unauthorized
+        
+    Requirements: 5.2
+    """
+    try:
+        # Get current user
+        user_id = get_jwt_identity()
+        
+        # Get sanitized request data
+        data = request.sanitized_data
+        product_ids = data.get('product_ids', [])
+        
+        # Validate product_ids structure
+        if not isinstance(product_ids, list) or len(product_ids) == 0:
+            raise ValidationError("product_ids must be a non-empty array")
+        
+        # Validate each product ID
+        validated_product_ids = []
+        for idx, product_id in enumerate(product_ids):
+            try:
+                validated_id = InputValidator.validate_uuid(product_id)
+                validated_product_ids.append(validated_id)
+            except ValidationError:
+                raise ValidationError(
+                    f"Invalid product_id format at index {idx}",
+                    field=f"product_ids[{idx}]"
+                )
+        
+        # Validate NFT requirements using service
+        order_service = OrderService(g.db)
+        result = order_service.validate_nft_requirements(user_id, validated_product_ids)
+        
+        logger.info(
+            f"NFT requirements validation",
+            extra={
+                'user_id': user_id,
+                'product_count': len(validated_product_ids),
+                'valid': result['valid']
+            }
+        )
+        
+        return jsonify({
+            'status': 'success',
+            'data': result
+        }), 200
+        
+    except ValidationError as e:
+        logger.warning(f"NFT validation error: {str(e)}")
+        return jsonify(e.to_dict()), e.code
+    except Exception as e:
+        logger.error(
+            f"Unexpected error validating NFT requirements: {str(e)}",
+            exc_info=True
+        )
+        return jsonify({
+            'status': 'error',
+            'error': 'Failed to validate NFT requirements',
+            'code': 500
+        }), 500
+
+
 @order_blueprint.route('/<order_id>', methods=['GET'])
 @jwt_required()
 def get_order_detail(order_id: str):

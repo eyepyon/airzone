@@ -1,7 +1,7 @@
 """
 User model for storing user account information.
 """
-from sqlalchemy import Column, String, Index
+from sqlalchemy import Column, String, Integer, Index
 from sqlalchemy.orm import relationship
 from models.base import BaseModel
 
@@ -17,6 +17,11 @@ class User(BaseModel):
     email = Column(String(255), unique=True, nullable=False)
     google_id = Column(String(255), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
+    
+    # Referral fields
+    referral_code = Column(String(20), unique=True, nullable=True)
+    referred_by = Column(String(36), nullable=True)
+    coins = Column(Integer, default=0)
     
     # Relationships
     wallets = relationship('Wallet', back_populates='user', cascade='all, delete-orphan')

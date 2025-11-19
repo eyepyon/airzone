@@ -358,6 +358,92 @@ class OrderService:
             logger.error(f"Error verifying NFT requirement: {str(e)}")
             return False
     
+    def validate_nft_requirements(
+        self,
+        user_id: str,
+        product_ids: List[str]
+    ) -> Dict:
+        """
+        Validate NFT requirements for a list of products.
+        
+        Args:
+            user_id: User's unique identifier
+            product_ids: List of product IDs to validate
+            
+        Returns:
+            Dict: Validation result with format:
+                  {
+                      'valid': bool,
+                      'message': str,
+                      'missing_nfts': List[str]
+                  }
+            
+        Requirements: 5.2 - NFT requirement validation
+        """
+        try:
+            # Get user's wallet
+            wallet = self.wallet_repo.find_by_user_id(user_id)
+            if not wallet:
+                return {
+                    'valid': False,
+                    'message': 'ウォレットが見つかりません。ウォレットを作成してください。',
+                    'missing_nfts': []
+                }
+            
+            # Get all products
+            products_with_nft_requirement = []
+            for product_id in product_ids:
+                product = self.product_repo.find_by_id(product_id)
+                if product and product.required_nft_id:
+                    products_with_nft_requirement.append(product)
+            
+            # If no products require NFTs, validation passes
+            if not products_with_nft_requirement:
+                return {
+                    'valid': True,
+                    'message': 'NFT要件はありません',
+                    'missing_nfts': []
+                }
+            
+            # Get user's completed NFTs
+            user_nfts = self.nft_repo.find_by_wallet(wallet.address)
+            completed_nft_ids = [
+                nft.id for nft in user_nfts 
+                if nft.status.value == 'completed'
+            ]
+            
+            # Check each product's NFT requirement
+            missing_nfts = []
+            for product in products_with_nft_requirement:
+                if product.required_nft_id not in completed_nft_ids:
+                    missing_nfts.append({
+                        'product_id': product.id,
+                        'product_name': product.name,
+                        'required_nft_id': product.required_nft_id
+                    })
+            
+            if missing_nfts:
+                product_names = ', '.join([nft['product_name'] for nft in missing_nfts])
+                return {
+                    'valid': False,
+                    'message': f'以下の商品に必要なNFTを保有していません: {product_names}',
+                    'missing_nfts': missing_nfts
+                }
+            
+            return {
+                'valid': True,
+                'message': 'すべてのNFT要件を満たしています',
+                'missing_nfts': []
+            }
+            
+        except Exception as e:
+            logger.error(f"Error validating NFT requirements: {str(e)}")
+            return {
+                'valid': False,
+                'message': 'NFT要件の確認中にエラーが発生しました',
+                'missing_nfts': []
+            }
+    
     def _get_order_with_items(self, order_id: str) -> Optional[Dict]:
         """
         Get order with items and product details.

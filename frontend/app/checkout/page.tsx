@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
-import { useNFTStore } from '@/stores/nft-store';
 import CheckoutForm from '@/components/shop/CheckoutForm';
 import XRPLPaymentForm from '@/components/shop/XRPLPaymentForm';
 import PaymentMethodSelector, { PaymentMethod } from '@/components/shop/PaymentMethodSelector';
@@ -19,7 +18,6 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, total, clearCart } = useCartStore();
   const { user, isAuthenticated } = useAuthStore();
-  const { nfts, fetchNFTs } = useNFTStore();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
@@ -50,41 +48,68 @@ export default function CheckoutPage() {
       if (!user) return;
 
       setIsCheckingNFTs(true);
+      setError(null);
+      
       try {
-        // Fetch user's NFTs if not already loaded
-        if (nfts.length === 0) {
-          await fetchNFTs();
+        // まず、商品にNFT要件があるかチェック
+        const productsWithNFTRequirement = items.filter(
+          (item) => item.product.required_nft_id
+        );
+
+        if (productsWithNFTRequirement.length === 0) {
+          // NFT要件がない商品のみの場合
+          setNftCheckPassed(true);
+          setIsCheckingNFTs(false);
+          return;
         }
 
-        // Check if user has required NFTs for all products
-        const requiredNFTs = items
-          .filter((item) => item.product.required_nft_id)
-          .map((item) => item.product.required_nft_id);
+        // バックエンドAPIでNFT保有を確認
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+          setError('認証トークンがありません。再度ログインしてください。');
+          setNftCheckPassed(false);
+          setIsCheckingNFTs(false);
+          return;
+        }
 
-        if (requiredNFTs.length > 0) {
-          const userNFTIds = nfts
-            .filter((nft) => nft.status === 'completed')
-            .map((nft) => nft.id);
+        // 商品IDのリストを作成
+        const productIds = items.map((item) => item.product.id);
 
-          const hasAllRequiredNFTs = requiredNFTs.every((requiredId) =>
-            userNFTIds.includes(requiredId!)
-          );
+        // バックエンドAPIを呼び出してNFT保有を確認
+        const response = await fetch('/api/v1/orders/validate-nft-requirements', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            product_ids: productIds,
+          }),
+        });
 
-          if (!hasAllRequiredNFTs) {
-            setError(
-              'カート内の一部の商品に必要なNFTを保有していません。NFTを取得してから再度お試しください。'
-            );
-            setNftCheckPassed(false);
-          } else {
-            setNftCheckPassed(true);
-          }
-        } else {
-          // No NFT requirements
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'NFT確認に失敗しました');
+        }
+
+        const data = await response.json();
+        
+        if (data.data.valid) {
           setNftCheckPassed(true);
+        } else {
+          setError(
+            data.data.message || 
+            'カート内の一部の商品に必要なNFTを保有していません。NFTを取得してから再度お試しください。'
+          );
+          setNftCheckPassed(false);
         }
       } catch (err) {
         console.error('NFT check failed:', err);
-        setError('NFTの確認中にエラーが発生しました');
+        setError(
+          err instanceof Error 
+            ? err.message 
+            : 'NFTの確認中にエラーが発生しました'
+        );
         setNftCheckPassed(false);
       } finally {
         setIsCheckingNFTs(false);

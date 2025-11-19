@@ -10,14 +10,26 @@ import Loading from '@/components/ui/Loading';
 
 interface ReferralStats {
   total_referrals: number;
-  successful_referrals: number;
-  total_clicks: number;
+  completed_referrals: number;
+  pending_referrals: number;
   total_coins_earned: number;
-  recent_referrals: Array<{
+  current_coins: number;
+}
+
+interface ReferralHistory {
+  referrals: Array<{
     id: string;
-    referred_email: string;
+    referred_user_id: string;
+    referred_email?: string;
     status: string;
-    coins_earned: number;
+    coins_awarded: number;
+    created_at: string;
+  }>;
+  coin_transactions: Array<{
+    id: string;
+    amount: number;
+    transaction_type: string;
+    description: string;
     created_at: string;
   }>;
 }
@@ -26,6 +38,7 @@ export default function ReferralPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const [stats, setStats] = useState<ReferralStats | null>(null);
+  const [history, setHistory] = useState<ReferralHistory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,17 +56,36 @@ export default function ReferralPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/v1/referral/stats', {
+      const token = localStorage.getItem('access_token');
+      if (!token) {
+        throw new Error('認証トークンがありません');
+      }
+
+      // 統計を取得
+      const statsResponse = await fetch('/api/v1/referral/stats', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
-      } else {
-        throw new Error('統計の取得に失敗しました');
+      if (!statsResponse.ok) {
+        const errorData = await statsResponse.json();
+        throw new Error(errorData.error || '統計の取得に失敗しました');
+      }
+
+      const statsData = await statsResponse.json();
+      setStats(statsData.data);
+
+      // 履歴を取得
+      const historyResponse = await fetch('/api/v1/referral/history', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json();
+        setHistory(historyData.data);
       }
     } catch (err) {
       console.error('Failed to fetch referral stats:', err);
@@ -131,25 +163,25 @@ export default function ReferralPage() {
                 <Card className="p-4">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-600">
-                      {stats.successful_referrals}
+                      {stats.completed_referrals}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">成功</div>
+                    <div className="text-sm text-gray-600 mt-1">完了</div>
                   </div>
                 </Card>
                 <Card className="p-4">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-blue-600">
-                      {stats.total_clicks}
+                      {stats.pending_referrals}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">クリック数</div>
+                    <div className="text-sm text-gray-600 mt-1">保留中</div>
                   </div>
                 </Card>
                 <Card className="p-4">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-yellow-600">
-                      {stats.total_coins_earned}
+                      {stats.current_coins}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">獲得コイン</div>
+                    <div className="text-sm text-gray-600 mt-1">現在のコイン</div>
                   </div>
                 </Card>
               </div>
@@ -159,16 +191,16 @@ export default function ReferralPage() {
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
                   最近の紹介
                 </h2>
-                {stats.recent_referrals && stats.recent_referrals.length > 0 ? (
+                {history && history.referrals && history.referrals.length > 0 ? (
                   <div className="space-y-3">
-                    {stats.recent_referrals.map((referral) => (
+                    {history.referrals.slice(0, 10).map((referral) => (
                       <div
                         key={referral.id}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                       >
                         <div className="flex-1">
                           <div className="font-medium text-gray-900">
-                            {referral.referred_email}
+                            {referral.referred_email || `ユーザー ${referral.referred_user_id.substring(0, 8)}...`}
                           </div>
                           <div className="text-sm text-gray-500">
                             {new Date(referral.created_at).toLocaleDateString('ja-JP')}
@@ -184,9 +216,9 @@ export default function ReferralPage() {
                           >
                             {referral.status === 'completed' ? '完了' : '保留中'}
                           </span>
-                          {referral.coins_earned > 0 && (
+                          {referral.coins_awarded > 0 && (
                             <div className="text-yellow-600 font-semibold">
-                              +{referral.coins_earned} コイン
+                              +{referral.coins_awarded} コイン
                             </div>
                           )}
                         </div>

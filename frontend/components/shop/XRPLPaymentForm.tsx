@@ -59,7 +59,8 @@ export default function XRPLPaymentForm({
       const interval = setInterval(async () => {
         try {
           // バックエンドで支払い確認
-          const response = await fetch(`/api/v1/payments/xrpl/check/${orderId}`, {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+          const response = await fetch(`${apiUrl}/api/v1/payments/xrpl/check/${orderId}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('access_token')}`,
             },
@@ -100,7 +101,8 @@ export default function XRPLPaymentForm({
 
     try {
       // バックエンドで実際にXRPL決済を実行
-      const response = await fetch('/api/v1/payments/xrpl/execute', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/v1/payments/xrpl/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

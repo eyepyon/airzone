@@ -113,7 +113,8 @@ export class XamanWalletSDK {
   async connect(): Promise<XamanWalletState> {
     try {
       // バックエンドでXamanペイロードを作成
-      const response = await fetch('/api/v1/wallet/xaman/signin', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/v1/wallet/xaman/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -220,7 +221,8 @@ export class XamanWalletSDK {
    * バックエンドにアドレスを登録
    */
   private async registerAddress(address: string): Promise<void> {
-    await fetch('/api/v1/wallet/connect', {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    await fetch(`${apiUrl}/api/v1/wallet/connect`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -238,7 +240,8 @@ export class XamanWalletSDK {
    */
   async disconnect(): Promise<void> {
     try {
-      await fetch('/api/v1/wallet/disconnect', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      await fetch(`${apiUrl}/api/v1/wallet/disconnect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -310,7 +313,8 @@ export class XamanWalletSDK {
 
     try {
       // バックエンドでXamanペイロードを作成
-      const response = await fetch('/api/v1/wallet/xaman/sign', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/v1/wallet/xaman/sign`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

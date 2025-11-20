@@ -23,7 +23,8 @@ export default function ReferralCard() {
 
   const fetchReferralCode = async () => {
     try {
-      const response = await fetch('/api/v1/referral/code', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/v1/referral/code`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },

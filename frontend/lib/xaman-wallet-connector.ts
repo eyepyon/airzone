@@ -107,7 +107,8 @@ export class XamanWalletConnector {
   private async connectViaWalletConnect(): Promise<WalletConnection> {
     try {
       // バックエンドでWalletConnectセッションを作成
-      const response = await fetch('/api/v1/wallet/walletconnect/session', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/v1/wallet/walletconnect/session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -213,7 +214,8 @@ export class XamanWalletConnector {
     return new Promise((resolve, reject) => {
       const checkInterval = setInterval(async () => {
         try {
-          const response = await fetch('/api/v1/wallet/walletconnect/status', {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+          const response = await fetch(`${apiUrl}/api/v1/wallet/walletconnect/status`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
             },
@@ -253,7 +255,8 @@ export class XamanWalletConnector {
    */
   private async registerAddress(address: string): Promise<void> {
     try {
-      await fetch('/api/v1/wallet/connect', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      await fetch(`${apiUrl}/api/v1/wallet/connect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +286,8 @@ export class XamanWalletConnector {
    */
   async disconnect(): Promise<void> {
     try {
-      await fetch('/api/v1/wallet/disconnect', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      await fetch(`${apiUrl}/api/v1/wallet/disconnect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -28,7 +28,8 @@ export default function XamanWalletConnect({
 
     try {
       // バックエンドでサインリクエストを作成
-      const response = await fetch('/api/v1/wallet/xaman/signin', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/v1/wallet/xaman/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +128,8 @@ export default function XamanWalletConnect({
             const address = data.account;
 
             // バックエンドにアドレスを登録
-            await fetch('/api/v1/wallet/connect', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+            await fetch(`${apiUrl}/api/v1/wallet/connect`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

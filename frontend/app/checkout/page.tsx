@@ -77,7 +77,8 @@ export default function CheckoutPage() {
         const productIds = items.map((item) => item.product.id);
 
         // バックエンドAPIを呼び出してNFT保有を確認
-        const response = await fetch('/api/v1/orders/validate-nft-requirements', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/v1/orders/validate-nft-requirements`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -62,7 +62,8 @@ export default function ReferralPage() {
       }
 
       // 統計を取得
-      const statsResponse = await fetch('/api/v1/referral/stats', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const statsResponse = await fetch(`${apiUrl}/api/v1/referral/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -79,7 +80,7 @@ export default function ReferralPage() {
       setStats(statsData.data);
 
       // 履歴を取得
-      const historyResponse = await fetch('/api/v1/referral/history', {
+      const historyResponse = await fetch(`${apiUrl}/api/v1/referral/history`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

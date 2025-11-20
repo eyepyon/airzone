@@ -62,7 +62,8 @@ export default function StakingPage() {
       const token = localStorage.getItem('access_token');
       
       // キャンペーン一覧を取得
-      const campaignsRes = await fetch('/api/v1/escrow/campaigns', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const campaignsRes = await fetch(`${apiUrl}/api/v1/escrow/campaigns`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -77,7 +78,7 @@ export default function StakingPage() {
       }
 
       // 自分のステーク一覧を取得
-      const stakesRes = await fetch('/api/v1/escrow/my-stakes', {
+      const stakesRes = await fetch(`${apiUrl}/api/v1/escrow/my-stakes`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -108,7 +109,8 @@ export default function StakingPage() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/escrow/stake', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/v1/escrow/stake`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

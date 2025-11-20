@@ -35,7 +35,7 @@ export interface NFT {
 }
 
 export type ProductType = 'nft' | 'goods' | 'event_ticket';
-export type DeliveryMethod = 'pickup' | 'shipping' | 'digital';
+export type DeliveryMethod = 'venue_pickup' | 'home_delivery' | 'airzone_pickup';
 export type PurchaseRestriction = 'onsite_only' | 'onsite_and_referral' | 'nft_holders' | 'public';
 
 export interface Product {
@@ -45,8 +45,10 @@ export interface Product {
   price: number;
   stock_quantity: number;
   image_url: string | null;
+  category?: string; // goods, nft, ticket
   product_type?: ProductType; // Optional for backward compatibility
-  delivery_method?: DeliveryMethod | null; // Optional for backward compatibility
+  delivery_method?: string | null; // 後方互換性のため保持
+  delivery_options?: DeliveryMethod[]; // 利用可能な受け取り方法の配列
   purchase_restriction?: PurchaseRestriction; // Optional for backward compatibility
   required_nft_id?: string | null;
   is_active: boolean;

@@ -26,7 +26,8 @@ class ProductController extends Controller
             'name' => 'required|max:255',
             'description' => 'nullable',
             'category' => 'required|in:goods,nft,ticket',
-            'delivery_method' => 'required|in:venue_pickup,home_delivery',
+            'delivery_options' => 'required|array|min:1',
+            'delivery_options.*' => 'in:venue_pickup,home_delivery,airzone_pickup',
             'price' => 'required|integer|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'image_url' => 'nullable|url',
@@ -37,6 +38,8 @@ class ProductController extends Controller
         $validated['created_at'] = now();
         $validated['updated_at'] = now();
         $validated['is_active'] = $request->has('is_active');
+        $validated['delivery_options'] = json_encode($validated['delivery_options']);
+        $validated['delivery_method'] = $validated['delivery_options'][0] ?? 'venue_pickup'; // 後方互換性
 
         DB::table('products')->insert($validated);
         return redirect()->route('products.index')->with('success', '商品を作成しました');
@@ -55,7 +58,8 @@ class ProductController extends Controller
             'name' => 'required|max:255',
             'description' => 'nullable',
             'category' => 'required|in:goods,nft,ticket',
-            'delivery_method' => 'required|in:venue_pickup,home_delivery',
+            'delivery_options' => 'required|array|min:1',
+            'delivery_options.*' => 'in:venue_pickup,home_delivery,airzone_pickup',
             'price' => 'required|integer|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'image_url' => 'nullable|url',
@@ -64,6 +68,8 @@ class ProductController extends Controller
 
         $validated['updated_at'] = now();
         $validated['is_active'] = $request->has('is_active');
+        $validated['delivery_options'] = json_encode($validated['delivery_options']);
+        $validated['delivery_method'] = $validated['delivery_options'][0] ?? 'venue_pickup'; // 後方互換性
 
         DB::table('products')->where('id', $id)->update($validated);
         return redirect()->route('products.index')->with('success', '商品を更新しました');

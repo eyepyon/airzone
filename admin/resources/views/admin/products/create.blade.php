@@ -23,25 +23,42 @@
             <textarea name="description" rows="4" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">{{ old('description') }}</textarea>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">カテゴリー <span class="text-red-500">*</span></label>
-                <select name="category" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
-                    <option value="">選択してください</option>
-                    <option value="goods" {{ old('category') == 'goods' ? 'selected' : '' }}>グッズ</option>
-                    <option value="nft" {{ old('category') == 'nft' ? 'selected' : '' }}>NFT</option>
-                    <option value="ticket" {{ old('category') == 'ticket' ? 'selected' : '' }}>チケット</option>
-                </select>
-            </div>
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">カテゴリー <span class="text-red-500">*</span></label>
+            <select name="category" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                <option value="">選択してください</option>
+                <option value="goods" {{ old('category') == 'goods' ? 'selected' : '' }}>グッズ</option>
+                <option value="nft" {{ old('category') == 'nft' ? 'selected' : '' }}>NFT</option>
+                <option value="ticket" {{ old('category') == 'ticket' ? 'selected' : '' }}>チケット</option>
+            </select>
+        </div>
 
-            <div>
-                <label class="block text-gray-700 font-bold mb-2">受け取り方法 <span class="text-red-500">*</span></label>
-                <select name="delivery_method" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
-                    <option value="">選択してください</option>
-                    <option value="venue_pickup" {{ old('delivery_method') == 'venue_pickup' ? 'selected' : '' }}>会場内受取</option>
-                    <option value="home_delivery" {{ old('delivery_method') == 'home_delivery' ? 'selected' : '' }}>宅配便配送</option>
-                </select>
+        <div class="mb-4">
+            <label class="block text-gray-700 font-bold mb-2">受け取り方法 <span class="text-red-500">*</span></label>
+            <p class="text-sm text-gray-600 mb-2">ユーザーが選択できる受け取り方法をチェックしてください（複数選択可）</p>
+            <div class="space-y-2">
+                <label class="flex items-center">
+                    <input type="checkbox" name="delivery_options[]" value="venue_pickup"
+                           {{ in_array('venue_pickup', old('delivery_options', [])) ? 'checked' : '' }}
+                           class="mr-2">
+                    <span class="text-gray-700">会場内受取</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" name="delivery_options[]" value="home_delivery"
+                           {{ in_array('home_delivery', old('delivery_options', [])) ? 'checked' : '' }}
+                           class="mr-2">
+                    <span class="text-gray-700">宅配便配送</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" name="delivery_options[]" value="airzone_pickup"
+                           {{ in_array('airzone_pickup', old('delivery_options', [])) ? 'checked' : '' }}
+                           class="mr-2">
+                    <span class="text-gray-700">AirZOne受取</span>
+                </label>
             </div>
+            @error('delivery_options')
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-4">

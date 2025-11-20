@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
+import Layout from '@/components/layout/Layout';
 import { getProductById } from '../../../lib/api/products';
 import { useCartStore } from '../../../stores/cart-store';
 import { useAuthStore } from '../../../stores/auth-store';
@@ -69,16 +70,19 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loading size="lg" />
-      </div>
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Loading size="lg" />
+        </div>
+      </Layout>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md w-full p-8 text-center">
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Card className="max-w-md w-full p-8 text-center">
           <svg
             className="w-16 h-16 mx-auto text-red-500 mb-4"
             fill="none"
@@ -101,6 +105,7 @@ export default function ProductDetailPage() {
           <Button onClick={() => router.push('/shop')}>Back to Shop</Button>
         </Card>
       </div>
+      </Layout>
     );
   }
 
@@ -109,8 +114,9 @@ export default function ProductDetailPage() {
   const canPurchase = !isOutOfStock && !isLocked && product.is_active;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <Layout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button
           onClick={() => router.push('/shop')}
@@ -352,6 +358,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }

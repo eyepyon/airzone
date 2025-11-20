@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Layout from '@/components/layout/Layout';
 import { useAuthStore } from '@/stores/auth-store';
 import { getNFTById } from '@/lib/api/nfts';
 import { NFT } from '@/types';
@@ -77,9 +78,11 @@ export default function NFTDetailPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading size="lg" text="Loading NFT..." />
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading size="lg" text="Loading NFT..." />
+        </div>
+      </Layout>
     );
   }
 
@@ -89,7 +92,8 @@ export default function NFTDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="text-center py-8">
             <div className="text-red-600 mb-4">
@@ -117,12 +121,14 @@ export default function NFTDetailPage() {
           </CardContent>
         </Card>
       </div>
+      </Layout>
     );
   }
 
   if (!nft) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <Layout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="text-center py-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -137,6 +143,7 @@ export default function NFTDetailPage() {
           </CardContent>
         </Card>
       </div>
+      </Layout>
     );
   }
 
@@ -145,8 +152,9 @@ export default function NFTDetailPage() {
   const description = nft.metadata?.description || 'Airzone NFT';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <Layout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <div className="mb-6">
           <Button
@@ -344,6 +352,7 @@ export default function NFTDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }

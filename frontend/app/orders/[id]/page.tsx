@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Layout from '@/components/layout/Layout';
 import { Card, Loading, Button } from '@/components/ui';
 import { useAuthStore } from '@/stores';
 import { getOrderById } from '@/lib/api';
@@ -116,39 +117,44 @@ export default function OrderDetailPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading size="lg" />
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loading size="lg" />
+        </div>
+      </Layout>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto">
-            <Card className="text-center py-12 sm:py-16">
-              <div className="text-4xl sm:text-5xl mb-4">❌</div>
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-                注文が見つかりません
-              </h2>
-              <p className="text-sm sm:text-base text-gray-600 mb-6">
-                {error || '指定された注文が見つかりませんでした。'}
-              </p>
-              <Link href="/orders">
-                <Button variant="primary">注文履歴に戻る</Button>
-              </Link>
-            </Card>
+      <Layout>
+        <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto">
+              <Card className="text-center py-12 sm:py-16">
+                <div className="text-4xl sm:text-5xl mb-4">❌</div>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                  注文が見つかりません
+                </h2>
+                <p className="text-sm sm:text-base text-gray-600 mb-6">
+                  {error || '指定された注文が見つかりませんでした。'}
+                </p>
+                <Link href="/orders">
+                  <Button variant="primary">注文履歴に戻る</Button>
+                </Link>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+    <Layout>
+      <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto">
           {/* Back Button */}
           <div className="mb-4 sm:mb-6">
             <Link href="/orders">
@@ -345,6 +351,7 @@ export default function OrderDetailPage({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   );
 }

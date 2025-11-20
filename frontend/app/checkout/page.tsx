@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Layout from '@/components/layout/Layout';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
 import CheckoutForm from '@/components/shop/CheckoutForm';
@@ -168,15 +169,18 @@ export default function CheckoutPage() {
 
   if (!isAuthenticated || items.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loading size="lg" />
-      </div>
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen">
+          <Loading size="lg" />
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">チェックアウト</h1>
+    <Layout>
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8">チェックアウト</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order Summary */}
@@ -311,7 +315,7 @@ export default function CheckoutPage() {
                         />
                       </svg>
                       <span className="text-sm text-green-800 font-medium">
-                        NFT保有確認完了
+                        購入可能
                       </span>
                     </div>
                   </div>
@@ -392,5 +396,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </Layout>
   );
 }

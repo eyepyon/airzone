@@ -30,6 +30,13 @@ export default function OrdersPage() {
         setOrders(data.orders || []);
       } catch (err) {
         console.error('Failed to fetch orders:', err);
+        
+        // 401エラーの場合はログインページにリダイレクト
+        if (err instanceof Error && err.message.includes('401')) {
+          router.push('/login?redirect=/orders');
+          return;
+        }
+        
         const errorMessage = err instanceof Error ? err.message : '注文の取得に失敗しました';
         setError(errorMessage);
         setOrders([]);

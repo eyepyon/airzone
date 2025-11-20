@@ -35,6 +35,14 @@ export default function OrderDetailPage({
         const data = await getOrderById(params.id);
         setOrder(data);
       } catch (err) {
+        console.error('Failed to fetch order:', err);
+        
+        // 401エラーの場合はログインページにリダイレクト
+        if (err instanceof Error && err.message.includes('401')) {
+          router.push(`/login?redirect=/orders/${params.id}`);
+          return;
+        }
+        
         setError(err instanceof Error ? err.message : '注文の取得に失敗しました');
       } finally {
         setLoading(false);

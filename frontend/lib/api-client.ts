@@ -9,13 +9,14 @@ export class APIError extends Error {
     message: string,
     public details?: unknown
   ) {
-    super(message);
+    super(`[${status}] ${message}`);
     this.name = 'APIError';
   }
 }
 
 interface RequestOptions extends RequestInit {
   token?: string;
+  skipRefresh?: boolean;
 }
 
 export async function apiRequest<T>(
@@ -61,16 +62,19 @@ export async function apiRequest<T>(
 
     if (!response.ok) {
       // Handle 401 Unauthorized - token expired
-      if (response.status === 401 && authToken) {
+      if (response.status === 401 && authToken && !options.skipRefresh) {
         // Try to refresh token
         const refreshed = await refreshAccessToken();
         if (refreshed) {
-          // Retry the request with new token
-          return apiRequest<T>(endpoint, { ...options, token: getAuthToken()! });
+          // Retry the request with new token (only once)
+          return apiRequest<T>(endpoint, { ...options, token: getAuthToken()!, skipRefresh: true });
         } else {
-          // Refresh failed, clear tokens
+          // Refresh failed, clear tokens and redirect to login
           removeAuthToken();
           removeRefreshToken();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+          }
         }
       }
 

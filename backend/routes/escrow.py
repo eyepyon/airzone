@@ -27,7 +27,7 @@ def get_campaigns():
         }
     """
     try:
-        campaigns = g.db.execute(
+        result = g.db.execute(
             text("""
             SELECT * FROM escrow_campaigns 
             WHERE is_active = TRUE 
@@ -35,7 +35,8 @@ def get_campaigns():
             AND end_date >= NOW()
             ORDER BY created_at DESC
             """)
-        ).fetchall()
+        )
+        campaigns = result.mappings().all()
         
         return jsonify({
             'status': 'success',
@@ -113,10 +114,11 @@ def create_stake():
             }), 400
         
         # キャンペーン情報を取得
-        campaign = g.db.execute(
+        result = g.db.execute(
             text("SELECT * FROM escrow_campaigns WHERE id = :id AND is_active = TRUE"),
             {'id': campaign_id}
-        ).fetchone()
+        )
+        campaign = result.mappings().fetchone()
         
         if not campaign:
             return jsonify({

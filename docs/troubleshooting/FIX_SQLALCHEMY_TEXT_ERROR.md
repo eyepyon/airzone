@@ -300,6 +300,70 @@ result = db.execute("SELECT * FROM users")  # エラー
 result = db.execute(f"SELECT * FROM users WHERE email = '{email}'")  # 危険
 ```
 
+## 追加修正: mappings() の使用
+
+### 問題
+
+`text()` を使用した後、さらに別のエラーが発生しました：
+
+```
+tuple indices must be integers or slices, not str
+```
+
+### 原因
+
+SQLAlchemyの `text()` を使用した場合、結果はデフォルトでタプルとして返されます。
+ディクショナリとしてアクセスするには、結果を `mappings()` でラップする必要があります。
+
+### 修正方法
+
+**修正前:**
+```python
+campaigns = g.db.execute(
+    text("SELECT * FROM escrow_campaigns WHERE is_active = TRUE")
+).fetchall()
+
+# エラー: c['id'] はタプルには使えない
+for c in campaigns:
+    print(c['id'])
+```
+
+**修正後:**
+```python
+result = g.db.execute(
+    text("SELECT * FROM escrow_campaigns WHERE is_active = TRUE")
+)
+campaigns = result.mappings().all()  # mappings()を使用
+
+# 正常動作: ディクショナリとしてアクセス可能
+for c in campaigns:
+    print(c['id'])
+```
+
+### パターン別の修正
+
+#### パターン1: fetchall()
+
+```python
+# 修正前
+campaigns = db.execute(text("SELECT * FROM table")).fetchall()
+
+# 修正後
+result = db.execute(text("SELECT * FROM table"))
+campaigns = result.mappings().all()
+```
+
+#### パターン2: fetchone()
+
+```python
+# 修正前
+campaign = db.execute(text("SELECT * FROM table WHERE id = :id"), {'id': id}).fetchone()
+
+# 修正後
+result = db.execute(text("SELECT * FROM table WHERE id = :id"), {'id': id})
+campaign = result.mappings().fetchone()
+```
+
 ## 修正日時
 
 2024年11月20日
@@ -307,5 +371,6 @@ result = db.execute(f"SELECT * FROM users WHERE email = '{email}'")  # 危険
 ## 関連ドキュメント
 
 - [SQLAlchemy 2.0 Migration Guide](https://docs.sqlalchemy.org/en/20/changelog/migration_20.html)
+- [SQLAlchemy Result Objects](https://docs.sqlalchemy.org/en/20/core/connections.html#sqlalchemy.engine.Result.mappings)
 - [401エラー無限ループの修正](./FIX_401_INFINITE_LOOP.md)
 - [APIドメイン問題の修正](./FIX_API_DOMAIN_ISSUE.md)

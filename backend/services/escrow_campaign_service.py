@@ -127,14 +127,15 @@ class EscrowCampaignService:
             # 完了可能なEscrowを取得
             now = datetime.utcnow()
             
-            escrows = self.db_session.execute(
+            result = self.db_session.execute(
                 text("""
                 SELECT * FROM escrow_stakes 
                 WHERE status = 'active' 
                 AND finish_after <= :now
                 """),
                 {'now': now}
-            ).fetchall()
+            )
+            escrows = result.mappings().all()
             
             completed_count = 0
             errors = []
@@ -188,16 +189,17 @@ class EscrowCampaignService:
             List[Dict]: Escrow一覧
         """
         try:
-            escrows = self.db_session.execute(
-                """
+            result = self.db_session.execute(
+                text("""
                 SELECT es.*, ec.name as campaign_name, ec.nft_reward_name
                 FROM escrow_stakes es
                 LEFT JOIN escrow_campaigns ec ON es.campaign_id = ec.id
                 WHERE es.user_id = :user_id
                 ORDER BY es.created_at DESC
-                """,
+                """),
                 {'user_id': user_id}
-            ).fetchall()
+            )
+            escrows = result.mappings().all()
             
             return [
                 {
@@ -230,10 +232,11 @@ class EscrowCampaignService:
         """
         try:
             # キャンペーン情報を取得
-            campaign = self.db_session.execute(
+            result = self.db_session.execute(
                 text("SELECT * FROM escrow_campaigns WHERE id = :id"),
                 {'id': campaign_id}
-            ).fetchone()
+            )
+            campaign = result.mappings().fetchone()
             
             if not campaign:
                 raise ValueError(f"Campaign not found: {campaign_id}")

@@ -69,25 +69,13 @@ export default function ReferralPage() {
       });
 
       if (!statsResponse.ok) {
-        const contentType = statsResponse.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await statsResponse.json();
-          throw new Error(errorData.error || '統計の取得に失敗しました');
-        } else {
-          const errorText = await statsResponse.text();
-          console.error('Non-JSON response:', errorText);
-          throw new Error(`統計の取得に失敗しました (${statsResponse.status})`);
-        }
-      }
-
-      const contentType = statsResponse.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const responseText = await statsResponse.text();
-        console.error('Non-JSON response:', responseText);
-        throw new Error('サーバーから不正なレスポンスが返されました');
+        const errorText = await statsResponse.text();
+        console.error('Stats API error:', statsResponse.status, errorText);
+        throw new Error(`統計の取得に失敗しました (${statsResponse.status})`);
       }
 
       const statsData = await statsResponse.json();
+      console.log('Stats API response:', statsData);
       setStats(statsData.data);
 
       // 履歴を取得
@@ -104,6 +92,14 @@ export default function ReferralPage() {
     } catch (err) {
       console.error('Failed to fetch referral stats:', err);
       setError(err instanceof Error ? err.message : '統計の取得に失敗しました');
+      // エラーが発生してもデフォルト値を設定
+      setStats({
+        total_referrals: 0,
+        completed_referrals: 0,
+        pending_referrals: 0,
+        total_coins_earned: 0,
+        current_coins: 0,
+      });
     } finally {
       setLoading(false);
     }

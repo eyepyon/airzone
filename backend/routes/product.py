@@ -221,9 +221,7 @@ def get_product_details(product_id: str):
         
         return jsonify({
             'status': 'success',
-            'data': {
-                'product': product
-            }
+            'data': product
         }), 200
         
     except Exception as e:

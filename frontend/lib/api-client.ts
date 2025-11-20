@@ -1,7 +1,6 @@
 // API client for making requests to the backend
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'https://api.airz.one';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export class APIError extends Error {
   constructor(

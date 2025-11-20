@@ -5,6 +5,7 @@ from typing import Dict, Optional, List
 import logging
 import uuid
 from datetime import datetime, timedelta
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from repositories.user_repository import UserRepository
 from clients.xrpl_client import XRPLClient
@@ -127,11 +128,11 @@ class EscrowCampaignService:
             now = datetime.utcnow()
             
             escrows = self.db_session.execute(
-                """
+                text("""
                 SELECT * FROM escrow_stakes 
                 WHERE status = 'active' 
                 AND finish_after <= :now
-                """,
+                """),
                 {'now': now}
             ).fetchall()
             
@@ -230,7 +231,7 @@ class EscrowCampaignService:
         try:
             # キャンペーン情報を取得
             campaign = self.db_session.execute(
-                "SELECT * FROM escrow_campaigns WHERE id = :id",
+                text("SELECT * FROM escrow_campaigns WHERE id = :id"),
                 {'id': campaign_id}
             ).fetchone()
             

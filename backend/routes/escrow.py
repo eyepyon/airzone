@@ -2,6 +2,7 @@
 Escrow Blueprint for XRP staking campaigns.
 """
 from flask import Blueprint, request, jsonify, g, current_app
+from sqlalchemy import text
 from middleware.auth import jwt_required, get_current_user
 from services.escrow_campaign_service import EscrowCampaignService
 from clients.xrpl_client import XRPLClient
@@ -27,13 +28,13 @@ def get_campaigns():
     """
     try:
         campaigns = g.db.execute(
-            """
+            text("""
             SELECT * FROM escrow_campaigns 
             WHERE is_active = TRUE 
             AND start_date <= NOW() 
             AND end_date >= NOW()
             ORDER BY created_at DESC
-            """
+            """)
         ).fetchall()
         
         return jsonify({
@@ -113,7 +114,7 @@ def create_stake():
         
         # キャンペーン情報を取得
         campaign = g.db.execute(
-            "SELECT * FROM escrow_campaigns WHERE id = :id AND is_active = TRUE",
+            text("SELECT * FROM escrow_campaigns WHERE id = :id AND is_active = TRUE"),
             {'id': campaign_id}
         ).fetchone()
         
@@ -150,7 +151,7 @@ def create_stake():
         
         # 参加者数を更新
         g.db.execute(
-            "UPDATE escrow_campaigns SET current_participants = current_participants + 1 WHERE id = :id",
+            text("UPDATE escrow_campaigns SET current_participants = current_participants + 1 WHERE id = :id"),
             {'id': campaign_id}
         )
         g.db.commit()

@@ -53,11 +53,16 @@ export default function OrderDetailPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, isAuthenticated]);
 
-  // Auto-mint NFT after successful payment
+  // Auto-mint NFT after successful payment - NFTカテゴリの商品のみ
   useEffect(() => {
     const paymentSuccess = searchParams.get('payment') === 'success';
     
-    if (paymentSuccess && order && order.status === 'completed' && wallet && !nftMinting && !nftMinted) {
+    // 注文にNFTカテゴリの商品が含まれているかチェック
+    const hasNFTProduct = order?.items?.some(
+      item => item.product?.category === 'nft' || item.product?.product_type === 'nft'
+    );
+    
+    if (paymentSuccess && order && order.status === 'completed' && wallet && hasNFTProduct && !nftMinting && !nftMinted) {
       const autoMintNFT = async () => {
         try {
           setNftMinting(true);

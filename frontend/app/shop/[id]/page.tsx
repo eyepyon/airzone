@@ -332,8 +332,8 @@ export default function ProductDetailPage() {
                 </p>
               )}
 
-              {/* NFT Auto-Mint Info */}
-              {canPurchase && user && (
+              {/* NFT Auto-Mint Info - NFTカテゴリの商品のみ表示 */}
+              {canPurchase && user && (product.category === 'nft' || product.product_type === 'nft') && (
                 <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-start">
                     <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">

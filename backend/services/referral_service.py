@@ -51,7 +51,7 @@ class ReferralService:
                 code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=self.REFERRAL_CODE_LENGTH))
                 
                 # 既存チェック
-                existing = self.db_session.query(self.user_repo.model).filter_by(referral_code=code).first()
+                existing = self.db_session.query(self.user_repo.model_class).filter_by(referral_code=code).first()
                 if not existing:
                     break
             
@@ -103,7 +103,7 @@ class ReferralService:
                 raise ValueError("User already has a referrer")
             
             # 紹介者を検索
-            referrer = self.db_session.query(self.user_repo.model).filter_by(referral_code=referral_code).first()
+            referrer = self.db_session.query(self.user_repo.model_class).filter_by(referral_code=referral_code).first()
             if not referrer:
                 raise ValueError(f"Invalid referral code: {referral_code}")
             

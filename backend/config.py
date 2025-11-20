@@ -7,7 +7,10 @@ load_dotenv()
 
 
 class Config:
-    """Base configuration class"""
+    """
+    Base configuration class for Airzone application.
+    Loads configuration from environment variables with secure defaults.
+    """
     
     # Flask Configuration
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')

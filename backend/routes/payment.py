@@ -5,12 +5,11 @@ Provides endpoints for Stripe Payment Intent creation, webhook handling, and pay
 Requirements: 5.5, 5.6, 8.2, 8.6, 8.7
 """
 import logging
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from middleware.security import validate_json_request, InputValidator
 from services.payment_service import PaymentService
 from clients.stripe_client import StripeClient
-from config import config
 from exceptions import (
     ValidationError,
     ResourceNotFoundError,
@@ -90,8 +89,8 @@ def create_payment_intent():
         
         # Create payment intent using service
         stripe_client = StripeClient(
-            api_key=config['development'].STRIPE_SECRET_KEY,
-            webhook_secret=config['development'].STRIPE_WEBHOOK_SECRET
+            api_key=current_app.config['STRIPE_SECRET_KEY'],
+            webhook_secret=current_app.config['STRIPE_WEBHOOK_SECRET']
         )
         payment_service = PaymentService(g.db, stripe_client)
         
@@ -175,8 +174,8 @@ def handle_stripe_webhook():
         
         # Process webhook using service
         stripe_client = StripeClient(
-            api_key=config['development'].STRIPE_SECRET_KEY,
-            webhook_secret=config['development'].STRIPE_WEBHOOK_SECRET
+            api_key=current_app.config['STRIPE_SECRET_KEY'],
+            webhook_secret=current_app.config['STRIPE_WEBHOOK_SECRET']
         )
         payment_service = PaymentService(g.db, stripe_client)
         
@@ -239,8 +238,8 @@ def get_payment(payment_id: str):
         
         # Get payment using service
         stripe_client = StripeClient(
-            api_key=config['development'].STRIPE_SECRET_KEY,
-            webhook_secret=config['development'].STRIPE_WEBHOOK_SECRET
+            api_key=current_app.config['STRIPE_SECRET_KEY'],
+            webhook_secret=current_app.config['STRIPE_WEBHOOK_SECRET']
         )
         payment_service = PaymentService(g.db, stripe_client)
         

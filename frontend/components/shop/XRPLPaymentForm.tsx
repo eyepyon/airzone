@@ -59,26 +59,19 @@ export default function XRPLPaymentForm({
       const interval = setInterval(async () => {
         try {
           // バックエンドで支払い確認
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-          const response = await fetch(`${apiUrl}/api/v1/payments/xrpl/check/${orderId}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-            },
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data.data.status === 'completed') {
-              clearInterval(interval);
-              setPollingInterval(null);
-              setStatus('completed');
-              if (onSuccess) {
-                onSuccess(orderId);
-              }
-              setTimeout(() => {
-                router.push(`/orders/${orderId}?payment=success`);
-              }, 2000);
+          const { checkXRPLPaymentStatus } = await import('@/lib/api/payments');
+          const data = await checkXRPLPaymentStatus(orderId);
+          
+          if (data.status === 'completed') {
+            clearInterval(interval);
+            setPollingInterval(null);
+            setStatus('completed');
+            if (onSuccess) {
+              onSuccess(orderId);
             }
+            setTimeout(() => {
+              router.push(`/orders/${orderId}?payment=success`);
+            }, 2000);
           }
         } catch (error) {
           console.error('Failed to check payment status:', error);
@@ -101,24 +94,9 @@ export default function XRPLPaymentForm({
 
     try {
       // バックエンドで実際にXRPL決済を実行
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/v1/payments/xrpl/execute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || '決済の実行に失敗しました');
-      }
-
-      const data = await response.json();
+      const { executeXRPLPayment } = await import('@/lib/api/payments');
+      const data = await executeXRPLPayment(orderId);
+      
       setStatus('completed');
 
       // 成功後の処理
@@ -127,7 +105,7 @@ export default function XRPLPaymentForm({
       }
 
       setTimeout(() => {
-        router.push(`/orders/${orderId}?payment=success&tx=${data.data.transaction_hash}`);
+        router.push(`/orders/${orderId}?payment=success&tx=${data.transaction_hash}`);
       }, 2000);
 
     } catch (err) {

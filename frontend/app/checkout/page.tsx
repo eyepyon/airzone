@@ -77,30 +77,14 @@ export default function CheckoutPage() {
         const productIds = items.map((item) => item.product.id);
 
         // バックエンドAPIを呼び出してNFT保有を確認
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-        const response = await fetch(`${apiUrl}/api/v1/orders/validate-nft-requirements`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            product_ids: productIds,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'NFT確認に失敗しました');
-        }
-
-        const data = await response.json();
+        const { validateNFTRequirements } = await import('@/lib/api/orders');
+        const data = await validateNFTRequirements(productIds);
         
-        if (data.data.valid) {
+        if (data.valid) {
           setNftCheckPassed(true);
         } else {
           setError(
-            data.data.message || 
+            data.message || 
             'カート内の一部の商品に必要なNFTを保有していません。NFTを取得してから再度お試しください。'
           );
           setNftCheckPassed(false);

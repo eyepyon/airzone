@@ -5,12 +5,11 @@ Provides endpoints for XRPL payment creation, verification, and status checking.
 Requirements: 5.5, 8.2, 8.6, 8.7
 """
 import logging
-from flask import Blueprint, request, jsonify, g
+from flask import Blueprint, request, jsonify, g, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from middleware.security import validate_json_request, InputValidator
 from services.xrpl_payment_service import XRPLPaymentService
 from clients.xrpl_client import XRPLClient
-from config import config
 from exceptions import (
     ValidationError,
     ResourceNotFoundError,
@@ -54,7 +53,7 @@ def create_xrpl_payment():
         data = request.sanitized_data
         order_id = data.get('order_id')
         amount_xrp = float(data.get('amount_xrp'))
-        destination = data.get('destination', config['development'].XRPL_SPONSOR_ADDRESS)
+        destination = data.get('destination', current_app.config['XRPL_SPONSOR_ADDRESS'])
         
         # Validate order ID format
         try:
@@ -87,8 +86,8 @@ def create_xrpl_payment():
         
         # Create XRPL payment using service
         xrpl_client = XRPLClient(
-            network=config['development'].XRPL_NETWORK,
-            sponsor_seed=config['development'].XRPL_SPONSOR_SEED
+            network=current_app.config['XRPL_NETWORK'],
+            sponsor_seed=current_app.config['XRPL_SPONSOR_SEED']
         )
         xrpl_payment_service = XRPLPaymentService(g.db, xrpl_client)
         
@@ -176,8 +175,8 @@ def execute_xrpl_payment():
         
         # Execute payment using service
         xrpl_client = XRPLClient(
-            network=config['development'].XRPL_NETWORK,
-            sponsor_seed=config['development'].XRPL_SPONSOR_SEED
+            network=current_app.config['XRPL_NETWORK'],
+            sponsor_seed=current_app.config['XRPL_SPONSOR_SEED']
         )
         xrpl_payment_service = XRPLPaymentService(g.db, xrpl_client)
         
@@ -254,8 +253,8 @@ def check_xrpl_payment(order_id: str):
         
         # Check payment status using service
         xrpl_client = XRPLClient(
-            network=config['development'].XRPL_NETWORK,
-            sponsor_seed=config['development'].XRPL_SPONSOR_SEED
+            network=current_app.config['XRPL_NETWORK'],
+            sponsor_seed=current_app.config['XRPL_SPONSOR_SEED']
         )
         xrpl_payment_service = XRPLPaymentService(g.db, xrpl_client)
         
@@ -310,8 +309,8 @@ def verify_xrpl_transaction(transaction_hash: str):
         
         # Verify transaction using service
         xrpl_client = XRPLClient(
-            network=config['development'].XRPL_NETWORK,
-            sponsor_seed=config['development'].XRPL_SPONSOR_SEED
+            network=current_app.config['XRPL_NETWORK'],
+            sponsor_seed=current_app.config['XRPL_SPONSOR_SEED']
         )
         xrpl_payment_service = XRPLPaymentService(g.db, xrpl_client)
         

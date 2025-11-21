@@ -85,3 +85,56 @@ export async function pollPaymentStatus(
   // Return last known status if max attempts reached
   return getPaymentById(paymentId);
 }
+
+/**
+ * XRPL Payment API functions
+ */
+
+/**
+ * Execute XRPL payment for an order
+ * @param orderId - Order ID
+ * @returns Transaction details
+ */
+export async function executeXRPLPayment(orderId: string): Promise<{
+  transaction_hash: string;
+  status: string;
+}> {
+  return apiRequest<{ transaction_hash: string; status: string }>(
+    '/api/v1/payments/xrpl/execute',
+    {
+      method: 'POST',
+      body: JSON.stringify({ order_id: orderId }),
+    }
+  );
+}
+
+/**
+ * Check XRPL payment status for an order
+ * @param orderId - Order ID
+ * @returns Payment status
+ */
+export async function checkXRPLPaymentStatus(orderId: string): Promise<{
+  status: string;
+  transaction_hash?: string;
+}> {
+  return apiRequest<{ status: string; transaction_hash?: string }>(
+    `/api/v1/payments/xrpl/check/${orderId}`,
+    {
+      method: 'GET',
+    }
+  );
+}
+
+/**
+ * Verify XRPL transaction
+ * @param transactionHash - Transaction hash
+ * @returns Transaction details
+ */
+export async function verifyXRPLTransaction(transactionHash: string): Promise<Record<string, unknown>> {
+  return apiRequest<Record<string, unknown>>(
+    `/api/v1/payments/xrpl/verify/${transactionHash}`,
+    {
+      method: 'GET',
+    }
+  );
+}

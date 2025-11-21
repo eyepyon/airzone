@@ -5,4 +5,5 @@ export * from './nfts';
 export * from './products';
 export * from './orders';
 export * from './payments';
+export * from './wallet';
 export * from './wifi';

@@ -3,7 +3,8 @@
  * XRPLネットワークとの通信（バックエンド経由）
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.airz.one';
+import { getWalletBalance as apiGetWalletBalance } from './api/wallet';
+import { executeXRPLPayment, verifyXRPLTransaction } from './api/payments';
 
 /**
  * XRPLアドレスの検証
@@ -20,18 +21,7 @@ export function validateXRPLAddress(address: string): boolean {
  */
 export async function getWalletBalance(address: string): Promise<number> {
   try {
-    const response = await fetch(`${API_URL}/api/v1/wallet/balance?address=${address}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('残高の取得に失敗しました');
-    }
-
-    const data = await response.json();
-    return data.data.balance_xrp || 0;
+    return await apiGetWalletBalance(address);
   } catch (error) {
     console.error('Failed to get wallet balance:', error);
     return 0;
@@ -49,25 +39,9 @@ export async function sendXRPPayment(
   ledgerIndex: number;
 }> {
   try {
-    const response = await fetch(`${API_URL}/api/v1/payments/xrpl/execute`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-      },
-      body: JSON.stringify({
-        order_id: orderId,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'XRP決済に失敗しました');
-    }
-
-    const data = await response.json();
+    const data = await executeXRPLPayment(orderId);
     return {
-      hash: data.data.transaction_hash,
+      hash: data.transaction_hash,
       validated: true,
       ledgerIndex: 0,
     };
@@ -82,18 +56,7 @@ export async function sendXRPPayment(
  */
 export async function getTransactionDetails(txHash: string): Promise<Record<string, unknown>> {
   try {
-    const response = await fetch(`${API_URL}/api/v1/payments/xrpl/verify/${txHash}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('トランザクション詳細の取得に失敗しました');
-    }
-
-    const data = await response.json();
-    return data.data;
+    return await verifyXRPLTransaction(txHash);
   } catch (error) {
     console.error('Failed to get transaction details:', error);
     throw error;
@@ -101,13 +64,38 @@ export async function getTransactionDetails(txHash: string): Promise<Record<stri
 }
 
 /**
- * XRP/JPYレートを取得（仮実装）
- * 実際にはAPIから取得すべき
+ * XRP/JPYレートを取得（CoinGecko API使用）
  */
 export async function getXRPJPYRate(): Promise<number> {
-  // TODO: 実際の為替レートAPIから取得
-  // 例: CoinGecko API, Binance API など
-  return 150; // 1 XRP = 150 JPY（仮）
+  try {
+    // CoinGecko API（無料、認証不要）
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=ripple&vs_currencies=jpy',
+      {
+        headers: {
+          'Accept': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch XRP rate');
+    }
+
+    const data = await response.json();
+    const rate = data?.ripple?.jpy;
+
+    if (!rate || typeof rate !== 'number') {
+      throw new Error('Invalid rate data');
+    }
+
+    return rate;
+  } catch (error) {
+    console.error('Failed to fetch XRP/JPY rate from CoinGecko:', error);
+    // フォールバック: 固定レート（エラー時のみ）
+    console.warn('Using fallback rate: 150 JPY');
+    return 150;
+  }
 }
 
 /**

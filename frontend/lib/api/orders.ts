@@ -73,3 +73,21 @@ export async function getPendingOrders(params?: QueryParams): Promise<OrderListR
 export async function getCompletedOrders(params?: QueryParams): Promise<OrderListResponse> {
   return getOrdersByStatus('completed', params);
 }
+
+/**
+ * Validate NFT requirements for products
+ * @param productIds - Array of product IDs to validate
+ * @returns Validation result
+ */
+export async function validateNFTRequirements(productIds: string[]): Promise<{
+  valid: boolean;
+  message?: string;
+}> {
+  return apiRequest<{ valid: boolean; message?: string }>(
+    '/api/v1/orders/validate-nft-requirements',
+    {
+      method: 'POST',
+      body: JSON.stringify({ product_ids: productIds }),
+    }
+  );
+}
